@@ -1,0 +1,40 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hf_home/
+.torch/
+backend/.hf_home/
+backend/.torch/
+backend/venv/
+backend/.venv/
+backend/data/threads.json
+
+# Node / Vite
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+frontend/node_modules/.tmp/
+
+# Large local model artifacts
+backend/models/
+
+# Local assistant/project memory
+.antigravity/
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.sw?

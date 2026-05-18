@@ -1,0 +1,130 @@
+{
+  "Lesson": "Force",
+  "Teacher": "Newton",
+  "Section-1": {
+    "Text description": "Introduction to Force. Force is a push or a pull that can change the motion, speed, direction, or shape of an object. When you push a door, pull a bag, kick a ball, or lift a book, you are using force. A force can make a still object start moving, make a moving object stop, make an object move faster or slower, or change the direction of motion. In physics, force is measured in newtons, written as N. Force is one of the most important ideas in physics because it helps us understand how objects move and interact with each other."
+  },
+  "Section-2": {
+    "Image description": "A clear educational image showing different examples of force. Show a child pushing a box, another child pulling a wagon, a football being kicked, and a hand lifting a book. Add arrows to show the direction of each force. Use simple labels such as push, pull, kick, lift, and direction of force. The image should be colorful, classroom-friendly, and easy for students to understand."
+  },
+  "Section-3": {
+    "HTML description": "Animation of push and pull forces. Create a simple educational HTML animation where a child pushes a box and the box moves forward. Then show another child pulling a wagon with a rope. Add moving arrows to show the direction of the forces. Include labels such as push force, pull force, object moves, and direction. The animation should be colorful, friendly, and suitable for young learners."
+  },
+  "Section-4": {
+    "Text description": "Effects of Force. A force can have different effects on an object. It can start motion, stop motion, speed up an object, slow down an object, change the direction of motion, or change the shape of an object. For example, when you kick a ball, the ball starts moving. When a goalkeeper catches the ball, the ball stops. When you squeeze a sponge, its shape changes. These examples show that force can affect both motion and shape."
+  },
+  "Section-5": {
+    "Image description": "An educational image showing the effects of force. Show one object starting to move after being pushed, one moving ball being stopped by hands, one toy car changing direction, and one sponge being squeezed. Add simple labels such as start motion, stop motion, change direction, and change shape. Use arrows to show where the force is applied."
+  },
+  "Section-6": {
+    "Text description": "Direction of Force. Force has both size and direction. This means force is a vector quantity. If two people push the same box in the same direction, their forces combine and the box moves more easily. If two people push the box in opposite directions, the stronger force decides the direction of motion. Arrows are often used in physics diagrams to show the direction and strength of a force. A longer arrow usually means a stronger force."
+  },
+  "Section-7": {
+    "HTML description": "Animation showing force direction using arrows. Show a box in the center of the screen. First, show one arrow pushing the box to the right and the box moving right. Then show two arrows pushing in the same direction and the box moving faster. Finally, show two arrows in opposite directions, with the larger arrow winning and the box moving toward the stronger force. Use labels such as stronger force, weaker force, same direction, and opposite direction."
+  },
+  "Section-8": {
+    "Text description": "Balanced Forces. Balanced forces happen when two or more forces acting on an object are equal in size and opposite in direction. When forces are balanced, the object does not change its motion. If the object is still, it stays still. If the object is already moving at a constant speed, it keeps moving at that same speed. For example, a book resting on a table has balanced forces: gravity pulls it downward, and the table pushes it upward with an equal force."
+  },
+  "Section-9": {
+    "Image description": "A simple educational image showing balanced forces on a book resting on a table. Show one arrow pointing downward labeled gravity and one arrow pointing upward labeled support force or normal force. Both arrows should be the same size to show that the forces are balanced. Add a label saying no change in motion."
+  },
+  "Section-10": {
+    "Text description": "Unbalanced Forces. Unbalanced forces happen when the forces acting on an object are not equal. When forces are unbalanced, the object changes its motion. It may start moving, stop moving, speed up, slow down, or change direction. For example, if one person pushes a box harder than another person pushing from the opposite side, the box moves in the direction of the stronger force."
+  },
+  "Section-11": {
+    "HTML description": "Animation of balanced and unbalanced forces. Show a box with two equal arrows pushing from opposite sides. The box should stay still, and a label should say balanced forces. Then show one arrow becoming larger than the other. The box should move toward the weaker side because the stronger force wins. Add a label saying unbalanced forces cause motion change."
+  },
+  "Section-12": {
+    "Text description": "Net Force. Net force is the total force acting on an object after all forces are combined. If two forces act in the same direction, we add them. If two forces act in opposite directions, we subtract the smaller force from the larger force. For example, if one person pushes a box with 10 N to the right and another pushes with 6 N to the left, the net force is 4 N to the right. The object moves in the direction of the net force."
+  },
+  "Section-13": {
+    "Image description": "An educational diagram showing net force. Show a box with a 10 N arrow pushing to the right and a 6 N arrow pushing to the left. Then show the result as a 4 N net force arrow to the right. Add labels such as force to the right, force to the left, subtract opposite forces, and net force."
+  },
+  "Section-14": {
+    "Text description": "Newton's First Law of Motion. Newton's First Law says that an object at rest stays at rest, and an object in motion keeps moving at the same speed and direction unless an unbalanced force acts on it. This idea is also called inertia. Inertia means that objects resist changes in their motion. For example, a football will not move until someone kicks it. A moving bicycle slows down because friction and air resistance act on it."
+  },
+  "Section-15": {
+    "HTML description": "Animation explaining Newton's First Law. Show a ball resting on the ground. The ball stays still until a foot kicks it. Then the ball moves forward. Add a label saying an object at rest stays at rest until a force acts on it. Then show the ball slowing down because of friction, with a small backward arrow labeled friction."
+  },
+  "Section-16": {
+    "Text description": "Newton's Second Law of Motion. Newton's Second Law explains how force, mass, and acceleration are connected. The law is written as F = m × a. This means force equals mass times acceleration. If you apply more force to an object, it accelerates more. If an object has more mass, it is harder to accelerate. For example, pushing an empty shopping cart is easier than pushing a full shopping cart because the full cart has more mass."
+  },
+  "Section-17": {
+    "Image description": "An educational image comparing an empty shopping cart and a full shopping cart. Show a person pushing both carts with arrows. The empty cart should move faster with the same push, while the full cart moves slower because it has more mass. Add labels such as same force, less mass, more mass, faster acceleration, and slower acceleration."
+  },
+  "Section-18": {
+    "Text description": "Newton's Third Law of Motion. Newton's Third Law says that for every action, there is an equal and opposite reaction. This means forces always come in pairs. When you push on something, it pushes back on you with an equal force in the opposite direction. For example, when you jump, your feet push down on the ground, and the ground pushes you upward. This upward reaction force helps you leave the ground."
+  },
+  "Section-19": {
+    "HTML description": "Animation explaining Newton's Third Law. Show a child jumping. Add a downward arrow from the feet to the ground labeled action force. Add an upward arrow from the ground to the child labeled reaction force. Then show the child moving upward. Include the text for every action, there is an equal and opposite reaction."
+  },
+  "Section-20": {
+    "Text description": "Gravity. Gravity is a force that pulls objects toward each other. On Earth, gravity pulls objects toward the center of the Earth. This is why objects fall when we drop them. Gravity also keeps us on the ground and keeps the Moon moving around Earth. The force of gravity gives objects weight. Mass is the amount of matter in an object, while weight is the force of gravity acting on that mass."
+  },
+  "Section-21": {
+    "Image description": "A classroom-friendly image showing gravity. Show an apple falling from a tree toward the ground, a person standing on Earth, and the Moon orbiting Earth. Use arrows pointing toward Earth to show gravity. Add labels such as gravity pulls downward, weight, Earth, Moon, and falling object."
+  },
+  "Section-22": {
+    "Text description": "Friction. Friction is a force that opposes motion between two surfaces that touch. Friction can slow objects down or stop them. For example, when a ball rolls on the ground, friction between the ball and the ground slows it down. Friction is useful because it helps us walk, hold objects, and stop vehicles using brakes. However, friction can also waste energy as heat and cause surfaces to wear out."
+  },
+  "Section-23": {
+    "HTML description": "Animation of friction slowing down motion. Show a ball rolling across the ground. Add a forward arrow showing motion and a backward arrow labeled friction. The ball should gradually slow down and stop. Then show a person walking, with friction between shoes and ground helping the person move without slipping. Add simple labels explaining that friction opposes motion but also helps walking."
+  },
+  "Section-24": {
+    "Text description": "Normal Force. The normal force is a support force from a surface. It acts perpendicular to the surface. For example, when a book rests on a table, gravity pulls the book downward, but the table pushes upward on the book. This upward push is called the normal force. If the book is not moving up or down, the normal force balances the force of gravity."
+  },
+  "Section-25": {
+    "Image description": "An educational diagram showing a book on a table. Show a downward arrow labeled gravity or weight and an upward arrow labeled normal force. The arrows should be equal in size. Add a label explaining that the table supports the book."
+  },
+  "Section-26": {
+    "Text description": "Tension Force. Tension is a pulling force that travels through a rope, string, cable, or chain. For example, when you pull a bucket upward with a rope, the rope has tension. Tension always pulls along the length of the rope. It is important in many real-life situations, such as elevators, cranes, bridges, and swings."
+  },
+  "Section-27": {
+    "Image description": "A clear educational image showing a bucket being pulled upward by a rope. Add an upward arrow along the rope labeled tension and a downward arrow on the bucket labeled gravity. Show that the rope pulls the bucket upward. The image should be simple and student-friendly."
+  },
+  "Section-28": {
+    "Text description": "Applied Force. An applied force is a force that a person or object directly applies to another object. Pushing a desk, pulling a suitcase, kicking a football, and lifting a chair are all examples of applied force. Applied forces are easy to see because they usually involve direct contact. The effect of the applied force depends on its size, direction, and the mass of the object."
+  },
+  "Section-29": {
+    "HTML description": "Interactive animation of applied force. Show different objects such as a box, ball, and suitcase. Let the user click buttons labeled push, pull, kick, and lift. When each button is clicked, the object should move in the correct direction. Add arrows to show the applied force and short labels explaining what happens."
+  },
+  "Section-30": {
+    "Text description": "Air Resistance. Air resistance is a force caused by air pushing against a moving object. It acts in the opposite direction to motion. For example, when a parachute opens, air resistance increases and slows the person down. Air resistance also affects cars, airplanes, falling leaves, and thrown balls. Objects with larger surface area usually experience more air resistance."
+  },
+  "Section-31": {
+    "Image description": "An educational image showing a parachute slowing a falling person. Show gravity pulling downward and air resistance pushing upward. The parachute should be open and large. Add labels such as gravity, air resistance, falling motion, and parachute increases air resistance."
+  },
+  "Section-32": {
+    "Text description": "Spring Force. Spring force happens when a spring is stretched or compressed. A stretched spring pulls back, and a compressed spring pushes back. The more a spring is stretched or compressed, the stronger the spring force becomes. Spring force is used in toys, pens, trampolines, mattresses, car suspension systems, and many machines."
+  },
+  "Section-33": {
+    "HTML description": "Animation of spring force. Show a spring attached to a wall and a block. First, stretch the spring and show it pulling the block back. Then compress the spring and show it pushing the block forward. Add arrows labeled spring force. Include a simple explanation that springs resist stretching and compression."
+  },
+  "Section-34": {
+    "Text description": "Contact and Non-contact Forces. Contact forces need physical touch between objects. Examples include friction, tension, normal force, and applied force. Non-contact forces can act without touching. Examples include gravity, magnetic force, and electric force. For example, a magnet can pull a metal paperclip without touching it, and Earth pulls objects downward using gravity without direct contact."
+  },
+  "Section-35": {
+    "Image description": "A comparison image showing contact forces and non-contact forces. On one side, show a hand pushing a box and a rope pulling a bucket. On the other side, show a magnet attracting paperclips and Earth pulling an apple downward with gravity. Add labels such as contact force, non-contact force, push, pull, magnetism, and gravity."
+  },
+  "Section-36": {
+    "Text description": "Force Diagrams. A force diagram is a simple drawing that shows all the forces acting on an object. The object is usually drawn as a box or dot, and arrows show the direction and size of each force. Force diagrams help students understand balanced forces, unbalanced forces, and net force. For example, a book on a table has two main arrows: gravity downward and normal force upward."
+  },
+  "Section-37": {
+    "HTML description": "Interactive force diagram builder. Show an object in the center of the screen. Let the user add force arrows such as gravity, normal force, friction, applied force, and tension. When arrows are added, show whether the forces are balanced or unbalanced. If unbalanced, show the direction of the net force."
+  },
+  "Section-38": {
+    "Text description": "Force in Daily Life. Force is everywhere in daily life. We use force when we open doors, write with a pencil, ride a bicycle, carry a bag, play football, climb stairs, or drive a car. Machines also use forces to work. Elevators use tension forces, cars use friction to stop, airplanes use lift, and cranes use pulling forces to lift heavy objects. Understanding force helps us understand movement, safety, sports, transport, and machines."
+  },
+  "Section-39": {
+    "Image description": "A colorful educational image showing force in daily life. Include a person opening a door, a child riding a bicycle, a football being kicked, a car braking, and a crane lifting a heavy object. Add arrows showing the direction of force in each example. Use simple labels such as push, pull, friction, lift, and motion."
+  },
+  "Section-40": {
+    "Text description": "Summary of Force. Force is a push or pull that can change the motion or shape of an object. Force has size and direction and is measured in newtons. Balanced forces do not change motion, while unbalanced forces cause motion to change. Net force is the total force acting on an object. Newton's laws explain how forces affect motion. Common forces include gravity, friction, normal force, tension, applied force, air resistance, and spring force. Forces are part of almost everything we do in daily life."
+  },
+  "Section-41": {
+    "Text description": "Practice Questions. What is force? What unit is used to measure force? What is the difference between balanced and unbalanced forces? What is net force? Give one example of a push and one example of a pull. What does Newton's First Law say? What does Newton's Second Law formula F = m × a mean? What does Newton's Third Law say? What is friction? What is gravity? Give one example of force in daily life."
+  },
+  "Section-42": {
+    "Text description": "Lesson Conclusion. Force helps us understand why objects move, stop, speed up, slow down, change direction, or change shape. Every push and pull in the world is connected to force. By learning about force, students can better understand sports, vehicles, machines, falling objects, walking, jumping, and many other real-life situations. The most important idea is that forces affect motion, and the motion of an object depends on the size and direction of the forces acting on it."
+  }
+}

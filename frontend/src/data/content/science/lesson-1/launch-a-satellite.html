@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Launch a Satellite</title>
+  <style>
+    :root {
+      --bg: #030712;
+      --panel: rgba(255, 255, 255, 0.92);
+      --text: #0f172a;
+      --muted: #64748b;
+      --blue: #38bdf8;
+      --green: #22c55e;
+      --red: #ef4444;
+      --orange: #fb923c;
+      --purple: #818cf8;
+      --shadow: 0 24px 80px rgba(2, 8, 23, 0.28);
+      --path-color: #22c55e;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .lesson-shell {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 620px;
+      overflow: hidden;
+      padding: clamp(14px, 2vw, 26px);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(56, 189, 248, 0.20), transparent 28%),
+        radial-gradient(circle at 82% 12%, rgba(129, 140, 248, 0.18), transparent 26%),
+        radial-gradient(circle at 52% 112%, rgba(34, 197, 94, 0.10), transparent 36%),
+        linear-gradient(135deg, #020617 0%, #08111f 48%, #030712 100%);
+    }
+
+    .stars {
+      position: absolute;
+      inset: 0;
+      opacity: 0.34;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.92) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.45) 1px, transparent 1px);
+      background-size: 64px 64px, 110px 110px;
+      background-position: 12px 18px, 42px 58px;
+      pointer-events: none;
+    }
+
+    .grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(430px, 1.18fr) minmax(320px, 0.82fr);
+      gap: clamp(14px, 1.6vw, 22px);
+      height: 100%;
+      max-width: 1340px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .space-panel {
+      position: relative;
+      min-height: 0;
+      background:
+        radial-gradient(circle at 38% 55%, rgba(56,189,248,0.12), transparent 34%),
+        rgba(15, 23, 42, 0.56);
+    }
+
+    .space-header {
+      position: absolute;
+      z-index: 8;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .title-card,
+    .speed-card {
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(15, 23, 42, 0.74);
+      color: white;
+      padding: 14px 16px;
+      box-shadow: 0 16px 50px rgba(2, 8, 23, 0.24);
+      backdrop-filter: blur(12px);
+    }
+
+    .title-card {
+      max-width: 430px;
+    }
+
+    .eyebrow {
+      color: #93c5fd;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .title {
+      margin: 5px 0 0;
+      font-size: clamp(24px, 2.8vw, 38px);
+      line-height: 0.96;
+      letter-spacing: -0.055em;
+    }
+
+    .speed-card {
+      min-width: 185px;
+      text-align: right;
+    }
+
+    .speed-label {
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .speed-readout {
+      margin-top: 3px;
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -0.045em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .space-stage {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .earth-display {
+      position: absolute;
+      left: 32%;
+      top: 56%;
+      width: min(390px, 42vw);
+      height: min(390px, 42vw);
+      min-width: 250px;
+      min-height: 250px;
+      border-radius: 999px;
+      transform: translate(-50%, -50%);
+      background:
+        radial-gradient(circle at 35% 26%, rgba(255,255,255,0.96), transparent 8%),
+        radial-gradient(circle at 38% 38%, #86efac 0 8%, transparent 9%),
+        radial-gradient(circle at 62% 48%, #16a34a 0 9%, transparent 10%),
+        radial-gradient(circle at 44% 68%, #15803d 0 10%, transparent 11%),
+        radial-gradient(circle at 70% 74%, rgba(15,23,42,0.50), transparent 33%),
+        linear-gradient(135deg, #38bdf8, #2563eb 58%, #082f49);
+      box-shadow:
+        0 0 50px rgba(56,189,248,0.75),
+        0 0 110px rgba(56,189,248,0.22),
+        inset -30px -36px 70px rgba(2,8,23,0.45);
+      z-index: 3;
+    }
+
+    .earth-display::after {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: inherit;
+      border: 2px solid rgba(125, 211, 252, 0.42);
+    }
+
+    .earth-center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      transform: translate(-50%, -50%);
+      background: white;
+      box-shadow: 0 0 18px rgba(255,255,255,0.8);
+    }
+
+    .earth-center-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-8px, 18px);
+      color: white;
+      font-size: 12px;
+      font-weight: 950;
+      line-height: 1.08;
+      text-shadow: 0 2px 14px rgba(0,0,0,0.8);
+      white-space: nowrap;
+    }
+
+    .launch-platform {
+      position: absolute;
+      left: 32%;
+      top: 32%;
+      width: 86px;
+      height: 54px;
+      transform: translate(-50%, -50%) rotate(-24deg);
+      z-index: 7;
+    }
+
+    .platform-body {
+      position: absolute;
+      left: 9px;
+      bottom: 0;
+      width: 68px;
+      height: 18px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #f8fafc, #94a3b8);
+      border: 2px solid rgba(255,255,255,0.85);
+      box-shadow: 0 10px 22px rgba(2,8,23,0.28);
+    }
+
+    .platform-tower {
+      position: absolute;
+      left: 38px;
+      bottom: 14px;
+      width: 12px;
+      height: 42px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #e2e8f0, #64748b);
+      border: 1px solid rgba(255,255,255,0.75);
+    }
+
+    .orbit-svg {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .path-preview {
+      fill: none;
+      stroke: var(--path-color);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 14px var(--path-color));
+      opacity: 0.94;
+      transition: stroke 220ms ease, opacity 220ms ease;
+    }
+
+    .path-preview.ghost {
+      stroke: rgba(255,255,255,0.18);
+      stroke-width: 2;
+      filter: none;
+      stroke-dasharray: 7 9;
+      opacity: 1;
+    }
+
+    .gravity-arrow {
+      position: absolute;
+      z-index: 6;
+      width: 2px;
+      height: 76px;
+      transform-origin: 50% 100%;
+      opacity: 0.92;
+      pointer-events: none;
+    }
+
+    .gravity-arrow::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 2px;
+      height: calc(100% - 11px);
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(250,204,21,0.98), rgba(250,204,21,0.18));
+      box-shadow: 0 0 13px rgba(250,204,21,0.55);
+    }
+
+    .gravity-arrow::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 0;
+      height: 0;
+      transform: translateX(-50%);
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 13px solid #facc15;
+      filter: drop-shadow(0 0 8px rgba(250,204,21,0.65));
+    }
+
+    .gravity-arrow.a1 { left: 56%; top: 26%; transform: rotate(34deg); }
+    .gravity-arrow.a2 { left: 63%; top: 50%; transform: rotate(92deg); }
+    .gravity-arrow.a3 { left: 49%; top: 69%; transform: rotate(154deg); }
+
+    .satellite-display {
+      position: absolute;
+      left: 32%;
+      top: 32%;
+      width: 58px;
+      height: 32px;
+      transform: translate(-50%, -50%) rotate(0deg);
+      z-index: 9;
+      will-change: left, top, transform;
+      transition: filter 180ms ease;
+      filter: drop-shadow(0 0 16px rgba(255,255,255,0.28));
+    }
+
+    .satellite-body {
+      position: absolute;
+      left: 17px;
+      top: 6px;
+      width: 28px;
+      height: 20px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #94a3b8);
+      border: 2px solid rgba(255,255,255,0.78);
+    }
+
+    .satellite-nose {
+      position: absolute;
+      right: 4px;
+      top: 10px;
+      width: 14px;
+      height: 12px;
+      border-radius: 0 999px 999px 0;
+      background: #e2e8f0;
+    }
+
+    .satellite-wing {
+      position: absolute;
+      width: 19px;
+      height: 7px;
+      border-radius: 5px;
+      background: #60a5fa;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    .satellite-wing.top {
+      left: 6px;
+      top: 0;
+      transform: rotate(-22deg);
+    }
+
+    .satellite-wing.bottom {
+      left: 6px;
+      bottom: 0;
+      transform: rotate(22deg);
+    }
+
+    .satellite-flame {
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 18px;
+      height: 12px;
+      border-radius: 999px 0 0 999px;
+      background: linear-gradient(90deg, transparent, #f97316, #facc15);
+      opacity: 0;
+      filter: blur(0.2px) drop-shadow(0 0 10px rgba(249,115,22,0.72));
+      transition: opacity 160ms ease;
+    }
+
+    .satellite-display.flying .satellite-flame {
+      opacity: 1;
+    }
+
+    .path-labels {
+      position: absolute;
+      right: 22px;
+      top: 24%;
+      display: grid;
+      gap: 13px;
+      z-index: 8;
+      width: min(285px, 34vw);
+    }
+
+    .path-label {
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(15, 23, 42, 0.74);
+      color: white;
+      padding: 13px 14px;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      opacity: 0.54;
+      transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease;
+    }
+
+    .path-label.active {
+      opacity: 1;
+      transform: translateX(-4px);
+      border-color: var(--path-color);
+      box-shadow: 0 0 24px rgba(255,255,255,0.10);
+    }
+
+    .number {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 950;
+      background: var(--path-color);
+    }
+
+    .path-label strong {
+      display: block;
+      font-size: 15px;
+      line-height: 1.12;
+    }
+
+    .path-label span {
+      display: block;
+      margin-top: 3px;
+      color: #dbeafe;
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1.22;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: clamp(16px, 2vw, 24px);
+      overflow-y: auto;
+    }
+
+    .controls-title {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(26px, 3vw, 40px);
+      line-height: 0.96;
+      letter-spacing: -0.055em;
+    }
+
+    .controls-subtitle {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      font-weight: 650;
+    }
+
+    .slider-card {
+      border-radius: 22px;
+      border: 1px solid #e2e8f0;
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      padding: 15px;
+    }
+
+    .slider-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 11px;
+    }
+
+    .slider-label {
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .speed-value {
+      color: #334155;
+      font-size: 14px;
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .speed-slider {
+      width: 100%;
+      cursor: pointer;
+      accent-color: #4f46e5;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .result-preview {
+      border-radius: 24px;
+      background: #0f172a;
+      color: white;
+      padding: 16px;
+    }
+
+    .result-small {
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .result-big {
+      margin-top: 5px;
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -0.055em;
+    }
+
+    .result-text {
+      margin: 10px 0 0;
+      color: #dbeafe;
+      font-size: 13px;
+      line-height: 1.42;
+      font-weight: 650;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 0.8fr 0.8fr;
+      gap: 10px;
+    }
+
+    .btn {
+      cursor: pointer;
+      border: 0;
+      border-radius: 18px;
+      padding: 14px 12px;
+      font-weight: 950;
+      transition: transform 160ms ease, background 160ms ease, opacity 160ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .launch-button {
+      background: #4f46e5;
+      color: white;
+      box-shadow: 0 16px 34px rgba(79, 70, 229, 0.24);
+    }
+
+    .launch-button:hover {
+      background: #4338ca;
+    }
+
+    .pause-button {
+      background: #0f172a;
+      color: white;
+    }
+
+    .pause-button:hover {
+      background: #1e293b;
+    }
+
+    .reset-button {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .reset-button:hover {
+      background: #cbd5e1;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      transform: none;
+    }
+
+    .result-message {
+      min-height: 86px;
+      border-radius: 22px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      color: #312e81;
+      padding: 14px 15px;
+      font-size: 14px;
+      line-height: 1.42;
+      font-weight: 800;
+    }
+
+    .orbit-explanation-card {
+      border-radius: 24px;
+      background: #0f172a;
+      color: white;
+      padding: 16px;
+    }
+
+    .orbit-explanation-card h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+
+    .rule-row {
+      display: grid;
+      gap: 9px;
+    }
+
+    .rule {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      color: #dbeafe;
+      font-size: 13px;
+      line-height: 1.38;
+      font-weight: 650;
+    }
+
+    .dot {
+      flex: 0 0 auto;
+      width: 9px;
+      height: 9px;
+      margin-top: 5px;
+      border-radius: 999px;
+      background: #818cf8;
+      box-shadow: 0 0 16px #818cf8;
+    }
+
+    .flash {
+      animation: flash 540ms ease;
+    }
+
+    @keyframes flash {
+      0% { transform: scale(1); }
+      42% { transform: scale(1.026); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 1000px) {
+      html,
+      body {
+        overflow: auto;
+      }
+
+      .lesson-shell {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .space-panel {
+        min-height: 680px;
+      }
+
+      .controls-panel {
+        overflow: visible;
+      }
+    }
+
+    @media (max-width: 660px) {
+      .lesson-shell {
+        padding: 10px;
+      }
+
+      .space-panel {
+        min-height: 650px;
+      }
+
+      .space-header {
+        flex-direction: column;
+      }
+
+      .title-card,
+      .speed-card {
+        width: 100%;
+        max-width: none;
+        text-align: left;
+      }
+
+      .earth-display {
+        left: 34%;
+        top: 57%;
+        min-width: 215px;
+        min-height: 215px;
+      }
+
+      .launch-platform {
+        left: 34%;
+        top: 36%;
+        transform: translate(-50%, -50%) rotate(-22deg) scale(0.82);
+      }
+
+      .path-labels {
+        top: auto;
+        bottom: 18px;
+        left: 14px;
+        right: 14px;
+        width: auto;
+        gap: 7px;
+      }
+
+      .path-label {
+        grid-template-columns: 28px 1fr;
+        padding: 9px 10px;
+      }
+
+      .number {
+        width: 28px;
+        height: 28px;
+      }
+
+      .action-row {
+        grid-template-columns: 1fr;
+      }
+
+      .gravity-arrow.a1 { left: 61%; top: 29%; }
+      .gravity-arrow.a2 { left: 67%; top: 48%; }
+      .gravity-arrow.a3 { left: 52%; top: 69%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="lesson-shell">
+    <div class="stars" aria-hidden="true"></div>
+
+    <section class="grid">
+      <section class="panel space-panel" aria-label="Satellite launch simulator">
+        <div class="space-header">
+          <div class="title-card">
+            <div class="eyebrow">Orbit Simulator</div>
+            <h1 class="title">Launch a satellite</h1>
+          </div>
+
+          <div id="speed-value-card" class="speed-card">
+            <div class="speed-label">Sideways speed</div>
+            <div id="speed-value" data-id="speed-value" class="speed-readout">50</div>
+          </div>
+        </div>
+
+        <div id="space-stage" class="space-stage">
+          <svg class="orbit-svg" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true">
+            <path id="fall-path" class="path-preview ghost" d="M 345 245 C 475 175, 690 165, 715 290 C 730 365, 610 410, 435 390" />
+            <path id="orbit-path" class="path-preview ghost" d="M 345 245 C 605 115, 875 275, 760 470 C 645 665, 325 575, 295 380 C 268 200, 510 120, 720 245" />
+            <path id="escape-path" class="path-preview ghost" d="M 345 245 C 490 310, 615 420, 735 455 C 850 488, 920 430, 975 350" />
+            <path id="active-path" data-id="path-preview" class="path-preview" d="M 345 245 C 605 115, 875 275, 760 470 C 645 665, 325 575, 295 380 C 268 200, 510 120, 720 245" />
+          </svg>
+
+          <div id="earth-display" data-id="earth-display" class="earth-display" aria-label="Earth">
+            <div class="earth-center"></div>
+            <div class="earth-center-label">Earth's center</div>
+          </div>
+
+          <div id="launch-platform" data-id="launch-platform" class="launch-platform" aria-label="Launch platform">
+            <div class="platform-tower"></div>
+            <div class="platform-body"></div>
+          </div>
+
+          <div id="gravity-arrow" data-id="gravity-arrow" class="gravity-arrow a1" aria-label="Gravity arrow"></div>
+          <div class="gravity-arrow a2" aria-hidden="true"></div>
+          <div class="gravity-arrow a3" aria-hidden="true"></div>
+
+          <div id="satellite-display" data-id="satellite-display" class="satellite-display" aria-label="Satellite">
+            <div class="satellite-flame"></div>
+            <div class="satellite-wing top"></div>
+            <div class="satellite-wing bottom"></div>
+            <div class="satellite-body"></div>
+            <div class="satellite-nose"></div>
+          </div>
+
+          <div class="path-labels" aria-label="Path labels">
+            <div id="label-fall" class="path-label">
+              <div class="number">1</div>
+              <div>
+                <strong>too slow: falls back</strong>
+                <span>low sideways speed</span>
+              </div>
+            </div>
+
+            <div id="label-orbit" class="path-label active">
+              <div class="number">2</div>
+              <div>
+                <strong>orbital speed: keeps falling around Earth</strong>
+                <span>balanced sideways speed</span>
+              </div>
+            </div>
+
+            <div id="label-escape" class="path-label">
+              <div class="number">3</div>
+              <div>
+                <strong>escape speed: leaves Earth</strong>
+                <span>very high sideways speed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel controls-panel">
+        <div>
+          <h2 class="controls-title">Control sideways speed</h2>
+          <p class="controls-subtitle">
+            Gravity always pulls the satellite toward Earth. Sideways speed decides whether it crashes, orbits, or escapes.
+          </p>
+        </div>
+
+        <div class="slider-card">
+          <div class="slider-head">
+            <label class="slider-label" for="speed-slider">Launch speed</label>
+            <span id="speed-value-small" class="speed-value">50</span>
+          </div>
+          <input id="speed-slider" data-id="speed-slider" class="speed-slider" type="range" min="0" max="100" value="50" step="1" />
+          <div class="range-labels">
+            <span>too slow</span>
+            <span>orbit</span>
+            <span>escape</span>
+          </div>
+        </div>
+
+        <div class="result-preview">
+          <div class="result-small">Path preview</div>
+          <div id="result-big" class="result-big">Orbit</div>
+          <p id="result-text" class="result-text">
+            This speed lets the satellite keep falling around Earth instead of hitting it.
+          </p>
+        </div>
+
+        <div class="action-row">
+          <button id="launch-button" data-id="launch-button" class="btn launch-button" type="button">
+            Launch
+          </button>
+          <button id="pause-button" data-id="pause-button" class="btn pause-button" type="button" disabled>
+            Pause
+          </button>
+          <button id="reset-button" data-id="reset-button" class="btn reset-button" type="button">
+            Reset
+          </button>
+        </div>
+
+        <div id="result-message" data-id="result-message" class="result-message">
+          Choose a speed, then launch. Medium speed creates orbit because the satellite keeps falling around Earth.
+        </div>
+
+        <div id="orbit-explanation-card" data-id="orbit-explanation-card" class="orbit-explanation-card">
+          <h3>Key idea</h3>
+          <div class="rule-row">
+            <div class="rule">
+              <span class="dot"></span>
+              <span><strong>Gravity</strong> pulls the satellite inward toward Earth's center.</span>
+            </div>
+            <div class="rule">
+              <span class="dot"></span>
+              <span><strong>Sideways speed</strong> makes the satellite keep missing the ground.</span>
+            </div>
+            <div class="rule">
+              <span class="dot"></span>
+              <span>An orbit is not floating without gravity. It is <strong>continuous falling around Earth</strong>.</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const idsToMap = [
+      "earth-display",
+      "satellite-display",
+      "launch-platform",
+      "speed-slider",
+      "speed-value",
+      "path-preview",
+      "gravity-arrow",
+      "launch-button",
+      "pause-button",
+      "reset-button",
+      "result-message",
+      "orbit-explanation-card"
+    ];
+
+    const speedSlider = document.getElementById("speed-slider");
+    const speedValue = document.getElementById("speed-value");
+    const speedValueSmall = document.getElementById("speed-value-small");
+
+    const activePath = document.getElementById("active-path");
+    const fallPath = document.getElementById("fall-path");
+    const orbitPath = document.getElementById("orbit-path");
+    const escapePath = document.getElementById("escape-path");
+
+    const satellite = document.getElementById("satellite-display");
+    const launchButton = document.getElementById("launch-button");
+    const pauseButton = document.getElementById("pause-button");
+    const resetButton = document.getElementById("reset-button");
+
+    const resultBig = document.getElementById("result-big");
+    const resultText = document.getElementById("result-text");
+    const resultMessage = document.getElementById("result-message");
+
+    const labelFall = document.getElementById("label-fall");
+    const labelOrbit = document.getElementById("label-orbit");
+    const labelEscape = document.getElementById("label-escape");
+
+    let mode = "orbit";
+    let running = false;
+    let paused = false;
+    let animationId = null;
+    let startTime = 0;
+    let pausedAt = 0;
+    let completedModes = new Set();
+
+    const paths = {
+      fall: {
+        color: "#ef4444",
+        svgPath: "M 345 245 C 475 175, 690 165, 715 290 C 730 365, 610 410, 435 390",
+        duration: 3600,
+        label: "Falls back",
+        text: "Too little sideways speed. Gravity curves the satellite down until it falls back to Earth.",
+        result: "too slow: falls back"
+      },
+      orbit: {
+        color: "#22c55e",
+        svgPath: "M 345 245 C 605 115, 875 275, 760 470 C 645 665, 325 575, 295 380 C 268 200, 510 120, 720 245",
+        duration: 6800,
+        label: "Orbit",
+        text: "This speed lets the satellite keep falling around Earth instead of hitting it.",
+        result: "orbital speed: keeps falling around Earth"
+      },
+      escape: {
+        color: "#38bdf8",
+        svgPath: "M 345 245 C 490 310, 615 420, 735 455 C 850 488, 920 430, 975 350",
+        duration: 4300,
+        label: "Escapes",
+        text: "Very high sideways speed. The satellite still feels gravity, but it moves fast enough to leave Earth.",
+        result: "escape speed: leaves Earth"
+      }
+    };
+
+    function getModeFromSpeed(speed) {
+      if (speed < 38) return "fall";
+      if (speed <= 72) return "orbit";
+      return "escape";
+    }
+
+    function setModeFromSlider() {
+      const speed = Number(speedSlider.value);
+      speedValue.textContent = speed;
+      speedValueSmall.textContent = speed;
+
+      mode = getModeFromSpeed(speed);
+      const info = paths[mode];
+
+      activePath.setAttribute("d", info.svgPath);
+      activePath.style.stroke = info.color;
+      document.documentElement.style.setProperty("--path-color", info.color);
+
+      resultBig.textContent = info.label;
+      resultText.textContent = info.text;
+
+      labelFall.classList.toggle("active", mode === "fall");
+      labelOrbit.classList.toggle("active", mode === "orbit");
+      labelEscape.classList.toggle("active", mode === "escape");
+
+      updateSatelliteAtStart();
+      sendComponentMap();
+    }
+
+    function svgPointToScreen(point) {
+      const svg = activePath.ownerSVGElement;
+      const rect = svg.getBoundingClientRect();
+      return {
+        x: (point.x / 1000) * rect.width + rect.left,
+        y: (point.y / 700) * rect.height + rect.top
+      };
+    }
+
+    function placeSatelliteAtPath(progress) {
+      const length = activePath.getTotalLength();
+      const p = activePath.getPointAtLength(length * progress);
+      const p2 = activePath.getPointAtLength(Math.min(length, length * progress + 4));
+      const screenPoint = svgPointToScreen(p);
+      const screenPoint2 = svgPointToScreen(p2);
+
+      const angle = Math.atan2(screenPoint2.y - screenPoint.y, screenPoint2.x - screenPoint.x) * 180 / Math.PI;
+
+      satellite.style.left = `${screenPoint.x}px`;
+      satellite.style.top = `${screenPoint.y}px`;
+      satellite.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+    }
+
+    function updateSatelliteAtStart() {
+      if (running) return;
+      placeSatelliteAtPath(0);
+    }
+
+    function startLaunch() {
+      if (running && paused) {
+        resumeLaunch();
+        return;
+      }
+
+      if (running) return;
+
+      setModeFromSlider();
+
+      running = true;
+      paused = false;
+      pausedAt = 0;
+      startTime = performance.now();
+
+      speedSlider.disabled = true;
+      launchButton.disabled = true;
+      pauseButton.disabled = false;
+      pauseButton.textContent = "Pause";
+      satellite.classList.add("flying");
+
+      resultMessage.textContent = "Launching. Notice how gravity arrows keep pointing toward Earth's center during the whole motion.";
+
+      animationId = requestAnimationFrame(animate);
+      sendComponentMap();
+    }
+
+    function animate(now) {
+      if (!running || paused) return;
+
+      const info = paths[mode];
+      const elapsed = now - startTime;
+      let progress = elapsed / info.duration;
+
+      if (mode === "orbit") {
+        progress = progress % 1;
+        placeSatelliteAtPath(progress);
+
+        if (elapsed >= info.duration * 1.25 && !completedModes.has("orbit")) {
+          completedModes.add("orbit");
+          resultMessage.textContent = "Orbit result: the satellite keeps falling around Earth. It does not float without gravity.";
+          sendQuizResult(true, "At orbital speed, the satellite keeps falling around Earth because gravity pulls inward while sideways speed keeps it moving forward.");
+        }
+
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
+
+      progress = Math.min(progress, 1);
+      placeSatelliteAtPath(progress);
+
+      if (progress >= 1) {
+        finishLaunch();
+        return;
+      }
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    function pauseLaunch() {
+      if (!running) return;
+
+      if (!paused) {
+        paused = true;
+        pausedAt = performance.now();
+        cancelAnimationFrame(animationId);
+        animationId = null;
+        pauseButton.textContent = "Resume";
+        launchButton.disabled = true;
+        resultMessage.textContent = "Paused. Gravity would still pull the satellite toward Earth's center.";
+      } else {
+        resumeLaunch();
+      }
+
+      sendComponentMap();
+    }
+
+    function resumeLaunch() {
+      if (!running || !paused) return;
+
+      paused = false;
+      startTime += performance.now() - pausedAt;
+      pauseButton.textContent = "Pause";
+      resultMessage.textContent = "Resumed. Watch the path continue while gravity pulls inward.";
+      animationId = requestAnimationFrame(animate);
+      sendComponentMap();
+    }
+
+    function finishLaunch() {
+      running = false;
+      paused = false;
+      cancelAnimationFrame(animationId);
+      animationId = null;
+
+      speedSlider.disabled = false;
+      launchButton.disabled = false;
+      pauseButton.disabled = true;
+      pauseButton.textContent = "Pause";
+      satellite.classList.remove("flying");
+
+      completedModes.add(mode);
+
+      if (mode === "fall") {
+        resultMessage.textContent = "Result: too slow. The satellite falls back because gravity pulls it down before it can keep missing Earth.";
+        sendQuizResult(true, "Low sideways speed is not enough for orbit, so gravity pulls the satellite back to Earth.");
+      } else if (mode === "escape") {
+        resultMessage.textContent = "Result: escape speed. The satellite still feels gravity, but its sideways speed is high enough to leave Earth.";
+        sendQuizResult(true, "Very high sideways speed can let the satellite escape Earth's gravity well.");
+      }
+
+      if (completedModes.has("fall") && completedModes.has("orbit") && completedModes.has("escape")) {
+        sendQuizFinished();
+      }
+
+      resultMessage.classList.remove("flash");
+      void resultMessage.offsetWidth;
+      resultMessage.classList.add("flash");
+      sendComponentMap();
+    }
+
+    function reset() {
+      cancelAnimationFrame(animationId);
+      running = false;
+      paused = false;
+      animationId = null;
+      pausedAt = 0;
+
+      speedSlider.disabled = false;
+      launchButton.disabled = false;
+      pauseButton.disabled = true;
+      pauseButton.textContent = "Pause";
+      satellite.classList.remove("flying");
+
+      speedSlider.value = 50;
+      setModeFromSlider();
+
+      resultMessage.textContent = "Reset complete. Medium speed creates orbit because the satellite keeps falling around Earth.";
+      sendComponentMap();
+    }
+
+    function sendQuizResult(isCorrect, explanation) {
+      window.parent.postMessage({
+        type: "QUIZ_RESULT",
+        isCorrect,
+        question: "How does sideways speed change a satellite path?",
+        explanation
+      }, "*");
+    }
+
+    function sendQuizFinished() {
+      window.parent.postMessage({
+        type: "QUIZ_FINISHED",
+        score: 3,
+        total: 3,
+        percent: 100
+      }, "*");
+    }
+
+    function sendComponentMap() {
+      const centersById = {};
+
+      idsToMap.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        const rect = el.getBoundingClientRect();
+        centersById[id] = {
+          id,
+          x: Math.round(rect.left + rect.width / 2),
+          y: Math.round(rect.top + rect.height / 2),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          label: el.getAttribute("aria-label") || el.textContent.trim().replace(/\s+/g, " ").slice(0, 90)
+        };
+      });
+
+      window.parent.postMessage({
+        type: "COMPONENTS_MAPPED",
+        centersById
+      }, "*");
+    }
+
+    speedSlider.addEventListener("input", () => {
+      if (!running) setModeFromSlider();
+    });
+
+    launchButton.addEventListener("click", startLaunch);
+    pauseButton.addEventListener("click", pauseLaunch);
+    resetButton.addEventListener("click", reset);
+
+    window.addEventListener("resize", () => {
+      window.requestAnimationFrame(() => {
+        if (!running) updateSatelliteAtStart();
+        sendComponentMap();
+      });
+    });
+
+    window.addEventListener("load", () => {
+      setModeFromSlider();
+      setTimeout(sendComponentMap, 120);
+    });
+
+    // Compatible with LessonPage iframe teacher tools.
+    window.addEventListener("message", (event) => {
+      const data = event.data;
+      if (!data || (data.type !== "SHOW_COMPONENT" && data.type !== "CLICK_COMPONENT")) return;
+
+      if (data.type === "CLICK_COMPONENT" && data.id) {
+        const el = document.getElementById(data.id);
+        if (el && typeof el.click === "function") {
+          setTimeout(() => el.click(), 120);
+        }
+      }
+
+      if (data.type === "SHOW_COMPONENT") {
+        sendComponentMap();
+      }
+    });
+  </script>
+</body>
+</html>

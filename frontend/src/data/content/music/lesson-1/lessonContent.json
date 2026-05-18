@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Notes and Rests",
+  "teacherName": "Dr. Einstein",
+  "subject": "Music",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Notes and Rests.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Notes and Rests",
+      "text": "Welcome to Notes and Rests. In this lesson, you will learn about The basics of rhythm."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Notes and Rests",
+      "imageDescription": "An educational diagram showing concepts of Notes and Rests.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Notes and Rests",
+      "htmlDescription": "Interactive exercise where students practice Notes and Rests.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

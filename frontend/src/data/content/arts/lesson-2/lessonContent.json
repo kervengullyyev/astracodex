@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Color Theory",
+  "teacherName": "Dr. Einstein",
+  "subject": "Arts",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Color Theory.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Color Theory",
+      "text": "Welcome to Color Theory. In this lesson, you will learn about Mixing colors."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Color Theory",
+      "imageDescription": "An educational diagram showing concepts of Color Theory.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Color Theory",
+      "htmlDescription": "Interactive exercise where students practice Color Theory.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

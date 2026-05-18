@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Creative Writing",
+  "teacherName": "Dr. Einstein",
+  "subject": "English",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Creative Writing.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Creative Writing",
+      "text": "Welcome to Creative Writing. In this lesson, you will learn about Write your own story."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Creative Writing",
+      "imageDescription": "An educational diagram showing concepts of Creative Writing.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Creative Writing",
+      "htmlDescription": "Interactive exercise where students practice Creative Writing.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

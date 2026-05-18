@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Seasonal Cycles Simulation</title>
+  <style>
+    :root {
+      --bg: #F7F8FB;
+      --panel: rgba(255, 255, 255, 0.86);
+      --panel-strong: rgba(255, 255, 255, 0.94);
+      --text: #1F2F49;
+      --muted: #667792;
+      --line: rgba(198, 210, 230, 0.85);
+      --accent: #6A8DFF;
+      --accent-2: #8B7CFF;
+      --accent-soft: #EEF3FF;
+      --shadow: 0 24px 60px rgba(44, 69, 120, 0.10), 0 8px 22px rgba(44, 69, 120, 0.07);
+      --shadow-soft: 0 10px 28px rgba(44, 69, 120, 0.08);
+      --highlight: 0 0 0 4px rgba(106, 141, 255, 0.16), 0 0 0 2px rgba(106, 141, 255, 0.5);
+      --radius: 24px;
+      --duration: 220ms;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #FFE1C4;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      background: #FFE1C4;
+    }
+
+    #seasonal-cycles-simulation {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(340px, 1.18fr) minmax(320px, 0.82fr);
+      gap: 18px;
+      padding: 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: var(--radius);
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.02));
+      opacity: 0.9;
+    }
+
+    #stage-panel {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      padding: 18px;
+      gap: 12px;
+    }
+
+    #controls {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 14px;
+      padding: 18px;
+      overflow-y: auto;
+    }
+
+    #title-group {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    #lesson-title {
+      margin: 0;
+      font-size: clamp(24px, 2.1vw, 31px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      font-weight: 750;
+    }
+
+    #lesson-subtitle {
+      margin: 7px 0 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 60ch;
+    }
+
+    #canvas-stage {
+      position: relative;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(212, 223, 242, 0.9);
+      background: radial-gradient(circle at 50% 50%, #0d1527 0%, #030712 100%);
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #hud {
+      pointer-events: none;
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .hud-card {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 10px 14px;
+      box-shadow: 0 10px 30px rgba(3, 7, 18, 0.4);
+    }
+
+    .hud-card.right-align {
+      text-align: right;
+    }
+
+    .hud-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-bottom: 2px;
+      font-weight: 700;
+    }
+
+    #season-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .hud-intensity-flex {
+      display: flex;
+      gap: 16px;
+    }
+
+    .hud-intensity-flex span {
+      display: block;
+    }
+
+    .hud-intensity-title {
+      font-size: 9px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .hud-intensity-value {
+      font-size: 15px;
+      font-weight: 800;
+      font-family: ui-monospace, monospace;
+    }
+
+    .hud-intensity-n {
+      color: #fb923c;
+    }
+
+    .hud-intensity-s {
+      color: #60a5fa;
+    }
+
+    #state-indicator {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      display: inline-block;
+    }
+
+    .status-paused {
+      background: rgba(100, 116, 139, 0.12);
+      color: #64748b;
+      border: 1px solid rgba(100, 116, 139, 0.2);
+    }
+
+    .status-running {
+      background: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+
+    .status-completed {
+      background: rgba(22, 163, 74, 0.1);
+      color: #16a34a;
+      border: 1px solid rgba(22, 163, 74, 0.2);
+    }
+
+    .card {
+      background: var(--panel-strong);
+      border: 1px solid rgba(213, 225, 243, 0.92);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      z-index: 1;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.02));
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 760;
+      color: var(--text);
+      margin: 0 0 12px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .slider-group {
+      margin-bottom: 16px;
+    }
+
+    .slider-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .slider-header label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .label-value {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent);
+      font-family: ui-monospace, monospace;
+    }
+
+    .custom-slider {
+      width: 100%;
+      appearance: none;
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #DDE7FF 0%, #C7D8FF 48%, #E4DFFF 100%);
+      outline: none;
+      cursor: pointer;
+      box-shadow: inset 0 2px 4px rgba(40, 60, 100, 0.08), 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .custom-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 4px solid white;
+      background: linear-gradient(180deg, var(--accent), #7DA2FF);
+      box-shadow: 0 10px 22px rgba(106, 141, 255, 0.34), 0 2px 6px rgba(106, 141, 255, 0.2);
+      transition: transform 120ms ease;
+    }
+
+    .custom-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    .custom-slider::-moz-range-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 4px solid white;
+      background: linear-gradient(180deg, var(--accent), #7DA2FF);
+      box-shadow: 0 10px 22px rgba(106, 141, 255, 0.34), 0 2px 6px rgba(106, 141, 255, 0.2);
+      transition: transform 120ms ease;
+    }
+
+    .custom-slider::-moz-range-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    .slider-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+      padding: 0 2px;
+    }
+
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(213, 225, 243, 0.95);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 999px;
+      padding: 8px 10px;
+      box-shadow: 0 4px 10px rgba(72, 99, 145, 0.04);
+      transition: all var(--duration) ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .preset-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(72, 99, 145, 0.08);
+      border-color: #C7D8FF;
+      color: var(--accent);
+      background: linear-gradient(180deg, #F2F6FF, #EAF1FF);
+    }
+
+    #explanation-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.62;
+      position: relative;
+      z-index: 1;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      transition: all 150ms ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, var(--accent), #5B7CFA);
+      color: white;
+      box-shadow: 0 8px 20px rgba(106, 141, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(106, 141, 255, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-danger {
+      background: linear-gradient(180deg, #ef4444, #dc2626);
+      color: white;
+      box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(180deg, #10b981, #059669);
+      color: white;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--text);
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-1px);
+      box-shadow: inset 0 0 0 1px #CCD7EA, 0 6px 12px rgba(37, 54, 86, 0.06);
+    }
+
+    .highlight-target {
+      position: relative;
+      z-index: 1001;
+      box-shadow: var(--highlight) !important;
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: inherit;
+      transition: box-shadow var(--duration) ease, outline var(--duration) ease;
+    }
+
+    @media (max-width: 940px) {
+      #seasonal-cycles-simulation {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(360px, 1fr) minmax(300px, auto);
+        height: 100vh;
+        overflow-y: auto;
+      }
+
+      #controls {
+        grid-template-rows: repeat(4, auto);
+        overflow-y: visible;
+      }
+
+      .presets-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const katexOptions = {
+        delimiters: [
+          { left: '\\[', right: '\\]', display: true },
+          { left: '\\(', right: '\\)', display: false },
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false }
+        ],
+        throwOnError: false,
+        strict: false,
+        trust: true
+      };
+
+      let renderTimeout;
+      function safeRender() {
+        if (renderTimeout) clearTimeout(renderTimeout);
+        renderTimeout = setTimeout(() => {
+          renderMathInElement(document.body, katexOptions);
+        }, 100);
+      }
+
+      renderMathInElement(document.body, katexOptions);
+
+      const observer = new MutationObserver((mutations) => {
+        let shouldRender = false;
+        mutations.forEach((mutation) => {
+          if (mutation.target &&
+            mutation.target.className &&
+            typeof mutation.target.className === 'string' &&
+            mutation.target.className.includes('katex')) {
+            return;
+          }
+          shouldRender = true;
+        });
+
+        if (shouldRender) {
+          safeRender();
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
+
+      setInterval(() => {
+        const text = document.body.innerText;
+        if (text.includes('\\(') || text.includes('$$')) {
+          safeRender();
+        }
+      }, 2000);
+    });
+  </script>
+</head>
+
+<body>
+
+  <script type="application/json" id="widget-config">
+{
+  "type": "simulation",
+  "concept": "seasonal_cycles",
+  "description": "Explore how Earth's axial tilt and orbital position create the four seasons.",
+  "variables": [
+    { "name": "orbit_pos", "label": "Orbit Position", "min": 0, "max": 360, "default": 0, "unit": "°" },
+    { "name": "axis_tilt", "label": "Axial Tilt", "min": 0, "max": 45, "default": 23.5, "unit": "°" }
+  ],
+  "presets": [
+    { "name": "Summer (Northern)", "variables": { "orbit_pos": 90, "axis_tilt": 23.5 } },
+    { "name": "Winter (Northern)", "variables": { "orbit_pos": 270, "axis_tilt": 23.5 } },
+    { "name": "No Tilt (No Seasons)", "variables": { "orbit_pos": 0, "axis_tilt": 0 } }
+  ]
+}
+</script>
+
+  <main id="seasonal-cycles-simulation">
+    <!-- Left Panel: Stage & Canvas -->
+    <section id="stage-panel" class="panel">
+      <div id="title-group">
+        <div id="title-copy">
+          <h1 id="lesson-title">Seasonal Cycles</h1>
+          <p id="lesson-subtitle">Observe how Earth's tilt relative to the Sun changes light intensity throughout the year.</p>
+        </div>
+      </div>
+
+      <div id="canvas-stage">
+        <canvas id="simCanvas"></canvas>
+
+        <!-- HUD Overlay -->
+        <div id="hud">
+          <div class="hud-card">
+            <div class="hud-label">Current Season (NH)</div>
+            <div id="season-name">Spring Equinox</div>
+          </div>
+
+          <div class="hud-card right-align">
+            <div class="hud-label">Solar Intensity</div>
+            <div class="hud-intensity-flex">
+              <div>
+                <span class="hud-intensity-title">North</span>
+                <span id="intensity-n" class="hud-intensity-value hud-intensity-n">100%</span>
+              </div>
+              <div>
+                <span class="hud-intensity-title">South</span>
+                <span id="intensity-s" class="hud-intensity-value hud-intensity-s">100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- State Indicator -->
+        <div id="state-indicator">
+          <span class="status-badge status-paused" id="status-text">Paused</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Panel: Side Controls -->
+    <aside id="controls" class="panel">
+      <!-- Adjustments Card -->
+      <section id="controls-card" class="card">
+        <h3 class="card-title">Adjust Orbit & Tilt</h3>
+
+        <!-- Orbit Position -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="orbit_pos-slider" id="orbit-label">Orbital Progress</label>
+            <span id="orbit_pos-display" class="label-value">0°</span>
+          </div>
+          <input type="range" id="orbit_pos-slider" data-var="orbit_pos" min="0" max="360" value="0" step="1"
+            class="custom-slider">
+          <div class="slider-ticks">
+            <span>Spring</span>
+            <span>Summer</span>
+            <span>Autumn</span>
+            <span>Winter</span>
+          </div>
+        </div>
+
+        <!-- Axis Tilt -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="axis_tilt-slider" id="tilt-label">Axial Tilt</label>
+            <span id="axis_tilt-display" class="label-value">23.5°</span>
+          </div>
+          <input type="range" id="axis_tilt-slider" data-var="axis_tilt" min="0" max="45" value="23.5" step="0.5"
+            class="custom-slider">
+        </div>
+
+        <!-- Animation Speed -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="speed-slider" id="speed-label">Sim Speed</label>
+          </div>
+          <input type="range" id="speed-slider" min="0.1" max="2" value="0.5" step="0.1" class="custom-slider">
+        </div>
+      </section>
+
+      <!-- Presets Card -->
+      <section id="presets-card" class="card">
+        <h3 class="card-title">Quick Presets</h3>
+        <div class="presets-grid">
+          <button onclick="applyPreset(90, 23.5)" class="preset-btn">June Solstice</button>
+          <button onclick="applyPreset(270, 23.5)" class="preset-btn">December Solstice</button>
+          <button onclick="applyPreset(0, 23.5)" class="preset-btn">March Equinox</button>
+        </div>
+      </section>
+
+      <!-- Educational Explanation Card -->
+      <section id="explanation-card" class="card" aria-labelledby="explanation-title">
+        <h3 id="explanation-title" class="card-title">Why the seasons change</h3>
+        <p id="explanation-text">
+          Earth's orbit is nearly circular, but its axis is tilted by <strong>23.5°</strong>. As Earth travels around the Sun, this tilt remains fixed in space. This means different hemispheres lean toward the Sun at different times, changing solar energy and creating seasons.
+        </p>
+      </section>
+
+      <!-- Playback Buttons -->
+      <div class="action-buttons">
+        <button id="main-btn" onclick="toggleSimulation()" class="btn btn-primary">
+          Start Simulation
+        </button>
+        <button id="reset-btn" onclick="resetSimulation()" class="btn btn-secondary">
+          Reset
+        </button>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Simulation State
+    let state = {
+      running: false,
+      paused: true,
+      ended: false,
+      orbit_pos: 0,
+      axis_tilt: 23.5,
+      speed: 0.5,
+      earthRotation: 0,
+      lastTime: 0
+    };
+
+    // UI Elements
+    const mainBtn = document.getElementById('main-btn');
+    const statusText = document.getElementById('status-text');
+    const orbitSlider = document.getElementById('orbit_pos-slider');
+    const tiltSlider = document.getElementById('axis_tilt-slider');
+    const speedSlider = document.getElementById('speed-slider');
+    const orbitDisplay = document.getElementById('orbit_pos-display');
+    const tiltDisplay = document.getElementById('axis_tilt-display');
+    const seasonDisplay = document.getElementById('season-name');
+
+    const componentIds = [
+      "widget-config",
+      "controls",
+      "orbit_pos-display",
+      "orbit_pos-slider",
+      "tilt-label",
+      "axis_tilt-display",
+      "axis_tilt-slider",
+      "speed-slider",
+      "main-btn",
+      "reset-btn",
+      "simCanvas",
+      "hud",
+      "season-name",
+      "intensity-n",
+      "intensity-s",
+      "state-indicator",
+      "status-text"
+    ];
+
+    function getElementByIdOrDataId(id) {
+      if (!id) return null;
+      return document.getElementById(id) || document.querySelector(`[data-id="${CSS.escape(id)}"]`);
+    }
+
+    function highlightElement(target) {
+      const el = typeof target === 'string' ? getElementByIdOrDataId(target) : target;
+      if (!el) return;
+      el.classList.add('highlight-target');
+      clearTimeout(el.__highlightTimer);
+      el.__highlightTimer = setTimeout(() => {
+        el.classList.remove('highlight-target');
+      }, 1200);
+    }
+
+    function sendComponentsMapped() {
+      const components = componentIds
+        .map(id => {
+          const el = getElementByIdOrDataId(id);
+          if (!el) return null;
+          const rect = el.getBoundingClientRect();
+          return {
+            id,
+            dataId: el.getAttribute('data-id') || id,
+            center: {
+              x: rect.left + rect.width / 2,
+              y: rect.top + rect.height / 2
+            },
+            rect: {
+              left: rect.left,
+              top: rect.top,
+              width: rect.width,
+              height: rect.height
+            }
+          };
+        })
+        .filter(Boolean);
+
+      window.parent.postMessage({
+        type: 'COMPONENTS_MAPPED',
+        components
+      }, '*');
+    }
+
+    function init() {
+      resize();
+      window.addEventListener('resize', resize);
+
+      // Input Listeners
+      orbitSlider.addEventListener('input', (e) => {
+        state.orbit_pos = parseFloat(e.target.value);
+        updateDisplays();
+      });
+
+      tiltSlider.addEventListener('input', (e) => {
+        state.axis_tilt = parseFloat(e.target.value);
+        updateDisplays();
+      });
+
+      speedSlider.addEventListener('input', (e) => {
+        state.speed = parseFloat(e.target.value);
+      });
+
+      // Keyboard Shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          toggleSimulation();
+        }
+        if (e.code === 'KeyR') {
+          resetSimulation();
+        }
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    function resize() {
+      canvas.width = canvas.clientWidth * window.devicePixelRatio;
+      canvas.height = canvas.clientHeight * window.devicePixelRatio;
+    }
+
+    function toggleSimulation() {
+      if (state.ended) {
+        resetSimulation();
+        state.running = true;
+        state.paused = false;
+      } else {
+        state.running = !state.running;
+        state.paused = !state.running;
+      }
+      updateButtonUI();
+    }
+
+    function resetSimulation() {
+      state.running = false;
+      state.paused = true;
+      state.ended = false;
+      state.orbit_pos = 0;
+      state.earthRotation = 0;
+
+      orbitSlider.value = 0;
+      updateDisplays();
+      updateButtonUI();
+    }
+
+    function updateButtonUI() {
+      if (state.ended) {
+        mainBtn.innerText = "Restart Simulation";
+        mainBtn.className = "btn btn-success";
+        statusText.innerText = "Completed";
+        statusText.className = "status-badge status-completed";
+      } else if (state.running) {
+        mainBtn.innerText = "Pause Simulation";
+        mainBtn.className = "btn btn-danger";
+        statusText.innerText = "Running";
+        statusText.className = "status-badge status-running";
+      } else {
+        mainBtn.innerText = "Start Simulation";
+        mainBtn.className = "btn btn-primary";
+        statusText.innerText = "Paused";
+        statusText.className = "status-badge status-paused";
+      }
+    }
+
+    function updateDisplays() {
+      orbitDisplay.innerText = Math.round(state.orbit_pos) + '°';
+      tiltDisplay.innerText = state.axis_tilt.toFixed(1) + '°';
+
+      // Determine Season
+      const angle = state.orbit_pos;
+      let season = "";
+      if (angle >= 0 && angle < 45) season = "Spring Equinox";
+      else if (angle >= 45 && angle < 135) season = "Summer Solstice (NH)";
+      else if (angle >= 135 && angle < 225) season = "Autumn Equinox";
+      else if (angle >= 225 && angle < 315) season = "Winter Solstice (NH)";
+      else season = "Spring Equinox";
+      seasonDisplay.innerText = season;
+
+      // Calculate Light Intensity (simplistic sine relation)
+      const radTilt = state.axis_tilt * Math.PI / 180;
+      const radOrbit = (state.orbit_pos - 90) * Math.PI / 180;
+
+      const northIntensity = 100 * (1 + Math.sin(radTilt) * Math.cos(radOrbit));
+      const southIntensity = 100 * (1 - Math.sin(radTilt) * Math.cos(radOrbit));
+
+      document.getElementById('intensity-n').innerText = Math.round(northIntensity) + '%';
+      document.getElementById('intensity-s').innerText = Math.round(southIntensity) + '%';
+    }
+
+    function applyPreset(pos, tilt) {
+      state.orbit_pos = pos;
+      state.axis_tilt = tilt;
+      orbitSlider.value = pos;
+      tiltSlider.value = tilt;
+      updateDisplays();
+      state.running = false;
+      state.paused = true;
+      updateButtonUI();
+    }
+
+    function drawStarfield() {
+      ctx.fillStyle = '#ffffff';
+      const seed = 42;
+      for (let i = 0; i < 100; i++) {
+        let x = (Math.sin(i * seed) * 0.5 + 0.5) * canvas.width;
+        let y = (Math.cos(i * seed * 1.2) * 0.5 + 0.5) * canvas.height;
+        let size = (Math.sin(i) * 0.5 + 0.5) * 1.5;
+        ctx.globalAlpha = 0.3 + Math.random() * 0.5;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function animate(time) {
+      const deltaTime = time - (state.lastTime || time);
+      state.lastTime = time;
+
+      if (state.running && !state.paused) {
+        state.orbit_pos = (state.orbit_pos + state.speed * 0.5) % 360;
+        state.earthRotation += state.speed * 2;
+        orbitSlider.value = state.orbit_pos;
+        updateDisplays();
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawStarfield();
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const orbitRadiusX = Math.min(canvas.width, canvas.height) * 0.35;
+      const orbitRadiusY = orbitRadiusX * 0.6; // Elliptical perspective
+
+      // Draw Orbit Path
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, orbitRadiusX, orbitRadiusY, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Orbit labels
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('March', centerX + orbitRadiusX, centerY);
+      ctx.fillText('Sept', centerX - orbitRadiusX, centerY);
+      ctx.fillText('June', centerX, centerY - orbitRadiusY - 10);
+      ctx.fillText('Dec', centerX, centerY + orbitRadiusY + 20);
+
+      // Sun
+      const sunGlow = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, 40);
+      sunGlow.addColorStop(0, '#fff7ed');
+      sunGlow.addColorStop(0.2, '#fbbf24');
+      sunGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = sunGlow;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Calculate Earth Position
+      const visualAngle = (state.orbit_pos) * Math.PI / 180;
+      const earthX = centerX + Math.cos(visualAngle) * orbitRadiusX;
+      const earthY = centerY - Math.sin(visualAngle) * orbitRadiusY;
+
+      // Draw Light Rays from Sun to Earth
+      if (state.running || true) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.1)';
+        ctx.lineWidth = 2;
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(earthX, earthY);
+        ctx.stroke();
+      }
+
+      // Earth Detail View
+      const earthSize = 25;
+
+      // Shadow/Night side
+      ctx.save();
+      ctx.translate(earthX, earthY);
+
+      // Earth axial tilt drawing
+      const tiltRad = state.axis_tilt * Math.PI / 180;
+
+      // Draw Axis
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      const axisLen = 40;
+      ctx.moveTo(Math.sin(tiltRad) * axisLen, -Math.cos(tiltRad) * axisLen);
+      ctx.lineTo(-Math.sin(tiltRad) * axisLen, Math.cos(tiltRad) * axisLen);
+      ctx.stroke();
+
+      // Earth Body
+      const angleToSun = Math.atan2(centerY - earthY, centerX - earthX);
+
+      // Atmosphere Glow
+      const atmos = ctx.createRadialGradient(0, 0, earthSize, 0, 0, earthSize + 5);
+      atmos.addColorStop(0, 'rgba(56, 189, 248, 0.2)');
+      atmos.addColorStop(1, 'transparent');
+      ctx.fillStyle = atmos;
+      ctx.beginPath();
+      ctx.arc(0, 0, earthSize + 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Base Earth
+      ctx.fillStyle = '#1d4ed8'; // Ocean
+      ctx.beginPath();
+      ctx.arc(0, 0, earthSize, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rotation - land masses
+      ctx.save();
+      ctx.rotate(tiltRad);
+      ctx.clip(); // Keep continents inside Earth
+      ctx.fillStyle = '#15803d'; // Land
+
+      const rotOffset = (state.earthRotation % 100) / 100 * earthSize * 4;
+      for (let i = -2; i < 2; i++) {
+        ctx.fillRect(-earthSize * 2 + i * earthSize * 2 + rotOffset, -10, 15, 12);
+        ctx.fillRect(-earthSize * 1.5 + i * earthSize * 2 + rotOffset, 5, 10, 8);
+      }
+      ctx.restore();
+
+      // Night Shadow
+      ctx.rotate(angleToSun + Math.PI / 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.beginPath();
+      ctx.arc(0, 0, earthSize, 0, Math.PI, false);
+      ctx.fill();
+
+      // Equatorial Line
+      ctx.restore();
+      ctx.save();
+      ctx.translate(earthX, earthY);
+      ctx.rotate(tiltRad);
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.beginPath();
+      ctx.moveTo(-earthSize, 0);
+      ctx.lineTo(earthSize, 0);
+      ctx.stroke();
+      ctx.restore();
+
+      requestAnimationFrame(animate);
+    }
+
+    // postMessage Listener for Teacher Actions
+    window.addEventListener('message', function (event) {
+      const data = event.data || {};
+      const { type, target, state: newState, content } = data;
+
+      switch (type) {
+        case 'SET_WIDGET_STATE':
+          if (newState) {
+            if (newState.orbit_pos !== undefined) {
+              state.orbit_pos = Number(newState.orbit_pos);
+              orbitSlider.value = state.orbit_pos;
+            }
+            if (newState.axis_tilt !== undefined) {
+              state.axis_tilt = Number(newState.axis_tilt);
+              tiltSlider.value = state.axis_tilt;
+            }
+            if (newState.speed !== undefined) {
+              state.speed = Number(newState.speed);
+              speedSlider.value = state.speed;
+            }
+            updateDisplays();
+            sendComponentsMapped();
+          }
+          break;
+
+        case 'SHOW_COMPONENT': {
+          const targetId = data.id || data.dataId || data.componentId || target;
+          const el = getElementByIdOrDataId(targetId);
+          if (el) {
+            highlightElement(el);
+            if (typeof el.scrollIntoView === 'function') {
+              el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            }
+          }
+          break;
+        }
+
+        case 'CLICK_COMPONENT': {
+          const targetId = data.id || data.dataId || data.componentId || target;
+          const el = getElementByIdOrDataId(targetId);
+          if (el) {
+            highlightElement(el);
+            setTimeout(() => {
+              if (typeof el.click === 'function') el.click();
+            }, 180);
+          }
+          break;
+        }
+
+        case 'HIGHLIGHT_ELEMENT': {
+          const targetId = data.id || data.dataId || data.componentId || target;
+          const el = getElementByIdOrDataId(targetId) || document.querySelector(targetId) || document.getElementById(targetId + '-slider');
+          if (el) highlightElement(el);
+          break;
+        }
+
+        case 'ANNOTATE_ELEMENT': {
+          const targetId = data.id || data.dataId || data.componentId || target;
+          const annEl = getElementByIdOrDataId(targetId) || document.querySelector(targetId) || document.getElementById(targetId + '-slider');
+          if (annEl && content) {
+            const rect = annEl.getBoundingClientRect();
+            const tip = document.createElement('div');
+            tip.style.cssText = `position:fixed; top:${Math.max(8, rect.top - 40)}px; left:${rect.left}px; background:#8b5cf6; color:white; padding:5px 10px; border-radius:5px; z-index:1000; font-size:12px;`;
+            tip.textContent = content;
+            document.body.appendChild(tip);
+            setTimeout(() => tip.remove(), 4000);
+          }
+          break;
+        }
+      }
+    });
+
+    window.addEventListener('resize', sendComponentsMapped);
+    window.addEventListener('load', sendComponentsMapped);
+
+    [orbitSlider, tiltSlider, speedSlider].forEach(input => {
+      input.addEventListener('change', sendComponentsMapped);
+    });
+
+    [mainBtn, document.getElementById('reset-btn')].forEach(button => {
+      if (button) button.addEventListener('click', () => setTimeout(sendComponentsMapped, 0));
+    });
+
+    // Start everything
+    init();
+    updateDisplays();
+  </script>
+</body>
+
+</html>

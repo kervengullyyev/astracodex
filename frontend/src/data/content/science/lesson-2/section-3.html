@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solar System Orbit Explorer</title>
+  <style>
+    :root {
+      --bg: #F7F8FB;
+      --ink: #162033;
+      --muted: #667285;
+      --line: #DEE5F1;
+      --card: rgba(255, 255, 255, 0.78);
+      --panel: rgba(255, 255, 255, 0.92);
+      --accent: #5B7CFA;
+      --accent-soft: #EEF3FF;
+      --shadow: 0 14px 34px rgba(38, 49, 79, 0.10);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 12px 20px;
+      background: #FFE1C4;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    header {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.70);
+      box-shadow: 0 8px 24px rgba(47, 60, 92, 0.07);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(18px, 2.2vw, 28px);
+      line-height: 1.05;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: clamp(12px, 1.3vw, 15px);
+      line-height: 1.25;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 9px 14px;
+      background: #fff;
+      color: #1e2c46;
+      box-shadow: inset 0 0 0 1px var(--line);
+      font-size: 13px;
+      font-weight: 500;
+      transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: inset 0 0 0 1px #CCD7EA, 0 6px 16px rgba(37, 54, 86, 0.08);
+    }
+
+    button.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: none;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: inset 0 0 0 1px var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    .speed-control input {
+      width: min(145px, 16vw);
+      accent-color: var(--accent);
+    }
+
+    main {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1.52fr) minmax(300px, 0.96fr);
+      gap: 12px;
+    }
+
+    .orbit-card,
+    .side-card {
+      min-height: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .orbit-card {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.66));
+    }
+
+    .orbit-toolbar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .orbit-stage {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      padding: 4px 8px 8px;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .orbit-ring {
+      fill: none;
+      stroke: rgba(103, 118, 146, 0.34);
+      stroke-width: 1.25;
+      stroke-dasharray: 4 6;
+    }
+
+    .orbit-ring.selected-ring {
+      stroke: rgba(91, 124, 250, 0.75);
+      stroke-width: 2.2;
+      stroke-dasharray: 6 6;
+    }
+
+    .planet {
+      cursor: pointer;
+      transition: filter 150ms ease;
+    }
+
+    .planet:hover,
+    .planet.selected {
+      filter: drop-shadow(0 0 10px rgba(91, 124, 250, 0.70));
+    }
+
+    .planet-label,
+    .sun-label {
+      font-size: 12px;
+      fill: #293651;
+      font-weight: 500;
+      paint-order: stroke;
+      stroke: rgba(247, 248, 251, 0.96);
+      stroke-width: 4px;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .sun-label {
+      fill: #463a24;
+    }
+
+    .hint-pill {
+      position: absolute;
+      left: 14px;
+      bottom: 12px;
+      max-width: 56%;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.84);
+      padding: 8px 12px;
+      font-size: 12.5px;
+      color: var(--muted);
+      box-shadow: 0 6px 18px rgba(32, 46, 74, 0.08);
+      font-weight: 400;
+    }
+
+    .side-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.68);
+    }
+
+    .fact-card,
+    .distance-panel {
+      background: var(--panel);
+      border-radius: 16px;
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    .fact-card {
+      flex-shrink: 0;
+      padding: 13px;
+    }
+
+    .fact-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .planet-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: clamp(17px, 2vw, 24px);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .planet-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      box-shadow: inset -4px -5px 10px rgba(0, 0, 0, 0.18);
+      flex-shrink: 0;
+    }
+
+    .planet-type {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #365BC9;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .fact-text {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: clamp(13px, 1.3vw, 15px);
+      line-height: 1.42;
+      font-weight: 400;
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      min-width: 0;
+      border-radius: 13px;
+      background: #F8FAFF;
+      padding: 9px;
+      border: 1px solid #E3E9F5;
+    }
+
+    .stat-label {
+      color: #6A7486;
+      font-size: 11px;
+      font-weight: 400;
+      margin-bottom: 3px;
+    }
+
+    .stat-value {
+      font-size: clamp(12px, 1.25vw, 15px);
+      font-weight: 500;
+      color: #172033;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .distance-panel {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      flex-shrink: 0;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 11px 12px 7px;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: clamp(15px, 1.6vw, 19px);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .panel-head small {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    .bars {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 5px;
+      padding: 3px 12px 12px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 74px minmax(0, 1fr) 46px;
+      align-items: center;
+      gap: 8px;
+      font-size: clamp(11px, 1.05vw, 13px);
+      color: #2D3B55;
+      font-weight: 400;
+      min-height: 0;
+      border-radius: 10px;
+      padding: 2px 4px;
+      cursor: pointer;
+    }
+
+    .bar-row.active {
+      background: var(--accent-soft);
+      color: #2E47C3;
+    }
+
+    .bar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #EEF2F9;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      display: block;
+      height: 100%;
+      min-width: 5px;
+      width: var(--w);
+      border-radius: inherit;
+      opacity: 0.9;
+      background: var(--planet-color);
+    }
+
+    .au {
+      color: var(--muted);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 10px 12px;
+      }
+
+      header {
+        grid-template-columns: 1fr;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      main {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1.2fr) minmax(220px, 0.8fr);
+        gap: 10px;
+      }
+
+      .side-card {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+        gap: 10px;
+        padding: 10px;
+      }
+
+      .fact-card,
+      .distance-panel {
+        min-height: 0;
+      }
+
+      .hint-pill {
+        max-width: 75%;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-height: 590px) {
+      body {
+        padding: 8px 14px;
+      }
+
+      .app {
+        gap: 8px;
+      }
+
+      header {
+        padding: 8px 11px;
+      }
+
+      .subtitle,
+      .orbit-toolbar {
+        display: none;
+      }
+
+      .fact-text {
+        margin-top: 7px;
+        line-height: 1.28;
+      }
+
+      .mini-stats {
+        margin-top: 8px;
+        gap: 6px;
+      }
+
+      .stat {
+        padding: 6px 7px;
+      }
+
+      .panel-head {
+        padding: 8px 10px 4px;
+      }
+
+      .bars {
+        gap: 3px;
+        padding: 2px 10px 9px;
+      }
+
+      .bar-track {
+        height: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Solar System Orbit Explorer</h1>
+        <div class="subtitle">Watch planets orbit the Sun, then choose planets from the menu to explore distance, size,
+          and speed.</div>
+      </div>
+      <div class="controls" aria-label="Orbit controls">
+        <button id="playPause" data-id="playPause" class="active" type="button">Pause orbits</button>
+        <button id="distanceView" data-id="distanceView" type="button">Distance guide</button>
+        <label class="speed-control" for="speed">Orbit speed
+          <input id="speed" data-id="speed" type="range" min="0.2" max="2.5" step="0.1" value="1" />
+        </label>
+      </div>
+    </header>
+
+    <main>
+      <section class="orbit-card" aria-label="Animated top-down Solar System orbit layout">
+        <div class="orbit-toolbar">
+          <span>Top-down model: orbit sizes are simplified for learning.</span>
+          <div class="legend">
+            <span><i class="dot" style="background:#FFBF4D"></i>Sun</span>
+            <span><i class="dot" style="background:#6AA7FF"></i>Rocky planets</span>
+            <span><i class="dot" style="background:#D9A36F"></i>Gas giants</span>
+          </div>
+        </div>
+        <div class="orbit-stage">
+          <svg id="solarSvg" data-id="solarSvg" viewBox="0 0 700 560" role="img"
+            aria-label="Planets moving around the Sun">
+            <defs>
+              <radialGradient id="sunGrad" cx="35%" cy="35%" r="70%">
+                <stop offset="0%" stop-color="#FFF7A7" />
+                <stop offset="55%" stop-color="#FFBF4D" />
+                <stop offset="100%" stop-color="#FF8D3F" />
+              </radialGradient>
+              <radialGradient id="earthGrad" cx="34%" cy="32%" r="70%">
+                <stop offset="0%" stop-color="#B9E5FF" />
+                <stop offset="60%" stop-color="#4F9CFF" />
+                <stop offset="100%" stop-color="#2C6FC8" />
+              </radialGradient>
+            </defs>
+
+            <g id="distanceGuide" data-id="distanceGuide" opacity="0">
+              <line x1="350" y1="280" x2="664" y2="280" stroke="#9FB3D9" stroke-width="2" stroke-dasharray="5 7" />
+              <text x="515" y="266" text-anchor="middle" fill="#69758A" font-size="14" font-weight="400">farther planets
+                travel on wider paths</text>
+            </g>
+
+            <g id="orbitRings" data-id="orbitRings">
+              <ellipse id="orbit-mercury" data-id="orbit-mercury" class="orbit-ring" cx="350" cy="280" rx="58"
+                ry="35.96"></ellipse>
+              <ellipse id="orbit-venus" data-id="orbit-venus" class="orbit-ring" cx="350" cy="280" rx="86" ry="53.32">
+              </ellipse>
+              <ellipse id="orbit-earth" data-id="orbit-earth" class="orbit-ring" cx="350" cy="280" rx="116" ry="71.92">
+              </ellipse>
+              <ellipse id="orbit-mars" data-id="orbit-mars" class="orbit-ring" cx="350" cy="280" rx="148" ry="91.76">
+              </ellipse>
+              <ellipse id="orbit-jupiter" data-id="orbit-jupiter" class="orbit-ring" cx="350" cy="280" rx="205"
+                ry="127.10"></ellipse>
+              <ellipse id="orbit-saturn" data-id="orbit-saturn" class="orbit-ring" cx="350" cy="280" rx="252"
+                ry="156.24"></ellipse>
+              <ellipse id="orbit-uranus" data-id="orbit-uranus" class="orbit-ring" cx="350" cy="280" rx="292"
+                ry="181.04"></ellipse>
+              <ellipse id="orbit-neptune" data-id="orbit-neptune" class="orbit-ring" cx="350" cy="280" rx="326"
+                ry="202.12"></ellipse>
+            </g>
+
+            <g id="sun" data-id="sun" class="sun-glow" tabindex="0" role="button" aria-label="Sun">
+              <circle cx="350" cy="280" r="32" fill="url(#sunGrad)" />
+              <text x="350" y="330" text-anchor="middle" class="sun-label">Sun</text>
+            </g>
+
+            <g id="planets-in-orbit" data-id="planets-in-orbit">
+              <g id="planet-in-orbit-mercury" data-id="planet-in-orbit-mercury" data-planet-id="mercury" class="planet"
+                tabindex="0" role="button" aria-label="Mercury in orbit" transform="translate(386.05 307.17)">
+                <circle r="4.5" fill="#9FA6AD" stroke="rgba(255,255,255,.75)" stroke-width="1.3"></circle>
+                <text x="0" y="22.5" text-anchor="middle" class="planet-label">Mercury</text>
+              </g>
+              <g id="planet-in-orbit-venus" data-id="planet-in-orbit-venus" data-planet-id="venus" class="planet"
+                tabindex="0" role="button" aria-label="Venus in orbit" transform="translate(367.74 332.43)">
+                <circle r="7" fill="#E7B36D" stroke="rgba(255,255,255,.75)" stroke-width="1.3"></circle>
+                <text x="0" y="25" text-anchor="middle" class="planet-label">Venus</text>
+              </g>
+              <g id="planet-in-orbit-earth" data-id="planet-in-orbit-earth" data-planet-id="earth" class="planet"
+                tabindex="0" role="button" aria-label="Earth in orbit" transform="translate(292.33 329.16)">
+                <circle r="7.5" fill="url(#earthGrad)" stroke="rgba(255,255,255,.75)" stroke-width="1.3"></circle>
+                <text x="0" y="25.5" text-anchor="middle" class="planet-label">Earth</text>
+              </g>
+              <g id="planet-in-orbit-mars" data-id="planet-in-orbit-mars" data-planet-id="mars" class="planet"
+                tabindex="0" role="button" aria-label="Mars in orbit" transform="translate(205.84 291.55)">
+                <circle r="5.5" fill="#D66B4D" stroke="rgba(255,255,255,.75)" stroke-width="1.3"></circle>
+                <text x="0" y="23.5" text-anchor="middle" class="planet-label">Mars</text>
+              </g>
+              <g id="planet-in-orbit-jupiter" data-id="planet-in-orbit-jupiter" data-planet-id="jupiter" class="planet"
+                tabindex="0" role="button" aria-label="Jupiter in orbit" transform="translate(166.95 219.55)">
+                <circle r="16" fill="#D5A16B" stroke="rgba(255,255,255,.75)" stroke-width="1.3"></circle>
+                <text x="0" y="34" text-anchor="middle" class="planet-label">Jupiter</text>
+              </g>
+              <g id="planet-in-orbit-saturn" data-id="planet-in-orbit-saturn" data-planet-id="saturn" class="planet"
+                tabindex="0" role="button" aria-label="Saturn in orbit" transform="translate(214.89 151.97)">
+                <ellipse cx="0" cy="0" rx="23.1" ry="7.28" fill="none" stroke="#C6A85F" stroke-width="2.2"
+                  opacity="0.9"></ellipse>
+                <circle r="14" fill="#E3C47A" stroke="rgba(255,255,255,.75)" stroke-width="1.3"></circle>
+                <text x="0" y="32" text-anchor="middle" class="planet-label">Saturn</text>
+              </g>
+              <g id="planet-in-orbit-uranus" data-id="planet-in-orbit-uranus" data-planet-id="uranus" class="planet"
+                tabindex="0" role="button" aria-label="Uranus in orbit" transform="translate(356.55 98.96)">
+                <circle r="11" fill="#86D5DD" stroke="rgba(255,255,255,.75)" stroke-width="1.3"></circle>
+                <text x="0" y="29" text-anchor="middle" class="planet-label">Uranus</text>
+              </g>
+              <g id="planet-in-orbit-neptune" data-id="planet-in-orbit-neptune" data-planet-id="neptune" class="planet"
+                tabindex="0" role="button" aria-label="Neptune in orbit" transform="translate(571.20 145.41)">
+                <circle r="11" fill="#6178DB" stroke="rgba(255,255,255,.75)" stroke-width="1.3"></circle>
+                <text x="0" y="29" text-anchor="middle" class="planet-label">Neptune</text>
+              </g>
+            </g>
+          </svg>
+          <div class="hint-pill">Students can click planets in orbit or use the planet menu to open each fact card.
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-card" aria-label="Planet information and distance comparison">
+        <section class="fact-card">
+          <div class="fact-top">
+            <div class="planet-name"><span id="swatch" data-id="swatch" class="planet-swatch"></span><span
+                id="planetName" data-id="planetName">Earth</span></div>
+            <span id="planetType" data-id="planetType" class="planet-type">Rocky planet</span>
+          </div>
+          <p id="planetFact" data-id="planetFact" class="fact-text">Earth is the planet we live on. It has liquid water,
+            a protective atmosphere, and one Moon.</p>
+          <div class="mini-stats">
+            <div class="stat">
+              <div class="stat-label">Distance</div>
+              <div id="distanceStat" data-id="distanceStat" class="stat-value">1 AU</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Size</div>
+              <div id="sizeStat" data-id="sizeStat" class="stat-value">1× Earth</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Orbit</div>
+              <div id="orbitStat" data-id="orbitStat" class="stat-value">365 days</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="distance-panel">
+          <div class="panel-head">
+            <h2>Planets</h2><small>click to explore</small>
+          </div>
+          <div id="planets" data-id="planets" class="bars" aria-label="Clickable planet menu">
+            <div id="planet-mercury" data-id="planet-mercury" data-planet-id="mercury" class="bar-row">
+              <span>Mercury</span><span class="bar-track"><span class="bar-fill"
+                  style="--planet-color:#9FA6AD;--w:5%"></span></span><span class="au">0.39</span></div>
+            <div id="planet-venus" data-id="planet-venus" data-planet-id="venus" class="bar-row"><span>Venus</span><span
+                class="bar-track"><span class="bar-fill" style="--planet-color:#E7B36D;--w:5%"></span></span><span
+                class="au">0.72</span></div>
+            <div id="planet-earth" data-id="planet-earth" data-planet-id="earth" class="bar-row"><span>Earth</span><span
+                class="bar-track"><span class="bar-fill" style="--planet-color:#4F9CFF;--w:5%"></span></span><span
+                class="au">1</span></div>
+            <div id="planet-mars" data-id="planet-mars" data-planet-id="mars" class="bar-row"><span>Mars</span><span
+                class="bar-track"><span class="bar-fill" style="--planet-color:#D66B4D;--w:5.05%"></span></span><span
+                class="au">1.52</span></div>
+            <div id="planet-jupiter" data-id="planet-jupiter" data-planet-id="jupiter" class="bar-row">
+              <span>Jupiter</span><span class="bar-track"><span class="bar-fill"
+                  style="--planet-color:#D5A16B;--w:17.28%"></span></span><span class="au">5.2</span></div>
+            <div id="planet-saturn" data-id="planet-saturn" data-planet-id="saturn" class="bar-row">
+              <span>Saturn</span><span class="bar-track"><span class="bar-fill"
+                  style="--planet-color:#E3C47A;--w:31.83%"></span></span><span class="au">9.58</span></div>
+            <div id="planet-uranus" data-id="planet-uranus" data-planet-id="uranus" class="bar-row">
+              <span>Uranus</span><span class="bar-track"><span class="bar-fill"
+                  style="--planet-color:#86D5DD;--w:63.79%"></span></span><span class="au">19.2</span></div>
+            <div id="planet-neptune" data-id="planet-neptune" data-planet-id="neptune" class="bar-row">
+              <span>Neptune</span><span class="bar-track"><span class="bar-fill"
+                  style="--planet-color:#6178DB;--w:100%"></span></span><span class="au">30.1</span></div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const planets = [
+      { id: 'mercury', name: 'Mercury', type: 'Rocky planet', color: '#9FA6AD', orbitX: 58, orbitY: 35.96, sizeText: '0.38× Earth', au: 0.39, orbitDays: '88 days', speed: 1.42, fact: 'Mercury is the closest planet to the Sun. It moves very quickly because its orbit is small.' },
+      { id: 'venus', name: 'Venus', type: 'Rocky planet', color: '#E7B36D', orbitX: 86, orbitY: 53.32, sizeText: '0.95× Earth', au: 0.72, orbitDays: '225 days', speed: 1.10, fact: 'Venus is close in size to Earth, but its thick atmosphere traps a lot of heat.' },
+      { id: 'earth', name: 'Earth', type: 'Rocky planet', color: '#4F9CFF', orbitX: 116, orbitY: 71.92, sizeText: '1× Earth', au: 1, orbitDays: '365 days', speed: 0.92, fact: 'Earth is the planet we live on. It has liquid water, a protective atmosphere, and one Moon.' },
+      { id: 'mars', name: 'Mars', type: 'Rocky planet', color: '#D66B4D', orbitX: 148, orbitY: 91.76, sizeText: '0.53× Earth', au: 1.52, orbitDays: '687 days', speed: 0.72, fact: 'Mars is called the Red Planet because iron-rich dust gives its surface a rusty color.' },
+      { id: 'jupiter', name: 'Jupiter', type: 'Gas giant', color: '#D5A16B', orbitX: 205, orbitY: 127.10, sizeText: '11.2× Earth', au: 5.2, orbitDays: '11.9 years', speed: 0.43, fact: 'Jupiter is the largest planet. Its strong gravity shapes many objects in the Solar System.' },
+      { id: 'saturn', name: 'Saturn', type: 'Gas giant', color: '#E3C47A', orbitX: 252, orbitY: 156.24, sizeText: '9.4× Earth', au: 9.58, orbitDays: '29.5 years', speed: 0.33, fact: 'Saturn is famous for its bright rings, made mostly of ice and rock particles.' },
+      { id: 'uranus', name: 'Uranus', type: 'Ice giant', color: '#86D5DD', orbitX: 292, orbitY: 181.04, sizeText: '4× Earth', au: 19.2, orbitDays: '84 years', speed: 0.25, fact: 'Uranus is an ice giant that rotates on its side compared with most other planets.' },
+      { id: 'neptune', name: 'Neptune', type: 'Ice giant', color: '#6178DB', orbitX: 326, orbitY: 202.12, sizeText: '3.9× Earth', au: 30.1, orbitDays: '165 years', speed: 0.19, fact: 'Neptune is the farthest major planet from the Sun and has powerful winds.' }
+    ];
+
+    const center = { x: 350, y: 280 };
+    const playPause = document.getElementById('playPause');
+    const distanceView = document.getElementById('distanceView');
+    const speedInput = document.getElementById('speed');
+    const distanceGuide = document.getElementById('distanceGuide');
+    const orbitRings = document.getElementById('orbitRings');
+
+    let isPlaying = true;
+    let elapsed = 0;
+    let lastTime = performance.now();
+    let speed = Number(speedInput.value);
+    let selected = 'earth';
+
+    function selectPlanet(id) {
+      selected = id;
+      const planet = planets.find(p => p.id === id);
+      if (!planet) return;
+
+      document.getElementById('planetName').textContent = planet.name;
+      document.getElementById('planetType').textContent = planet.type;
+      document.getElementById('planetFact').textContent = planet.fact;
+      document.getElementById('distanceStat').textContent = `${planet.au} AU`;
+      document.getElementById('sizeStat').textContent = planet.sizeText;
+      document.getElementById('orbitStat').textContent = planet.orbitDays;
+      document.getElementById('swatch').style.background = planet.id === 'earth'
+        ? 'linear-gradient(135deg,#A9E8FF,#4F9CFF 55%,#2F75C9)'
+        : planet.color;
+
+      document.querySelectorAll('.planet').forEach(el => {
+        el.classList.toggle('selected', el.getAttribute('data-planet-id') === id);
+      });
+      document.querySelectorAll('.orbit-ring').forEach(el => {
+        el.classList.toggle('selected-ring', el.id === `orbit-${id}`);
+      });
+      document.querySelectorAll('.bar-row').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('data-planet-id') === id);
+      });
+    }
+
+    function bindInteractions() {
+      planets.forEach(planet => {
+        const menuEl = document.getElementById(`planet-${planet.id}`);
+        const planetEl = document.getElementById(`planet-in-orbit-${planet.id}`);
+
+        if (menuEl) {
+          menuEl.addEventListener('click', () => selectPlanet(planet.id));
+          menuEl.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              selectPlanet(planet.id);
+            }
+          });
+          menuEl.setAttribute('tabindex', '0');
+          menuEl.setAttribute('role', 'button');
+          menuEl.setAttribute('aria-label', `Select ${planet.name} from planet menu`);
+        }
+
+        if (planetEl) {
+          planetEl.addEventListener('click', () => selectPlanet(planet.id));
+          planetEl.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              selectPlanet(planet.id);
+            }
+          });
+        }
+      });
+    }
+
+    function animate(timestamp) {
+      const delta = Math.min(44, timestamp - lastTime);
+      lastTime = timestamp;
+      if (isPlaying) elapsed += delta * 0.001 * speed;
+
+      planets.forEach((planet, index) => {
+        const angle = elapsed * planet.speed + index * 0.82 + 0.75;
+        const x = center.x + Math.cos(angle) * planet.orbitX;
+        const y = center.y + Math.sin(angle) * planet.orbitY;
+        const group = document.getElementById(`planet-in-orbit-${planet.id}`);
+        if (group) group.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)})`);
+      });
+      requestAnimationFrame(animate);
+    }
+
+    playPause.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      playPause.textContent = isPlaying ? 'Pause orbits' : 'Play orbits';
+      playPause.classList.toggle('active', isPlaying);
+    });
+
+    speedInput.addEventListener('input', () => {
+      speed = Number(speedInput.value);
+    });
+
+    distanceView.addEventListener('click', () => {
+      const active = !distanceView.classList.contains('active');
+      distanceView.classList.toggle('active', active);
+      distanceGuide.style.opacity = active ? '1' : '0';
+      orbitRings.style.opacity = active ? '0.84' : '1';
+    });
+
+    bindInteractions();
+    selectPlanet('earth');
+    requestAnimationFrame(animate);
+  </script>
+</body>
+
+</html>

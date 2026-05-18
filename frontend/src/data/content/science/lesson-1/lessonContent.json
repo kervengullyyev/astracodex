@@ -1,0 +1,749 @@
+{
+  "lessonTitle": "Gravity",
+  "teacherName": "Dr. Newton",
+  "subject": "Physics",
+  "level": "Beginner",
+  "lessonGoal": "Teach students what gravity is, how it depends on mass and distance, why objects fall, how orbits work, and how gravity affects everyday life.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Gravity",
+      "text": "Gravity is the invisible force that pulls objects toward each other. It keeps your feet on the ground, makes objects fall, holds the Moon near Earth, and keeps planets moving around the Sun. In this lesson, you will learn gravity step by step using simple examples."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "text",
+      "title": "What Gravity Does",
+      "text": "Gravity pulls objects with mass toward other objects with mass. Earth has a lot of mass, so it pulls nearby objects strongly. That is why a dropped ball falls toward the ground instead of floating away."
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "image",
+      "title": "Gravity Around Earth",
+      "imageDescription": "A clean beginner-friendly physics illustration showing Earth in the center with a soft glowing gravitational field around it. An apple, a person, a satellite, and the Moon are placed around Earth, each with clear curved or straight arrows pointing toward Earth to show that gravity pulls objects toward Earth's center. The style should be modern, minimal, high contrast, educational, and easy to understand. Use dark space background, bright Earth, simple labels, and avoid clutter.",
+      "imageSource": "gravity-around-earth.png",
+      "components": [
+        {
+          "id": "earth",
+          "label": "Earth",
+          "x": 730,
+          "y": 485
+        },
+        {
+          "id": "gravitational-field",
+          "label": "Gravitational Field",
+          "x": 730,
+          "y": 210
+        },
+        {
+          "id": "apple",
+          "label": "Apple",
+          "x": 340,
+          "y": 610
+        },
+        {
+          "id": "person",
+          "label": "Person",
+          "x": 610,
+          "y": 805
+        },
+        {
+          "id": "satellite",
+          "label": "Satellite",
+          "x": 1075,
+          "y": 305
+        },
+        {
+          "id": "moon",
+          "label": "Moon",
+          "x": 1195,
+          "y": 675
+        },
+        {
+          "id": "gravity-arrows",
+          "label": "Gravity pulls toward Earth's center",
+          "x": 722,
+          "y": 920
+        }
+      ]
+    },
+    {
+      "id": "section-4",
+      "order": 4,
+      "type": "text",
+      "title": "Mass and Gravity",
+      "text": "Mass is the amount of matter in an object. Objects with more mass create stronger gravity. Earth pulls you much more strongly than a small rock because Earth has far more mass."
+    },
+    {
+      "id": "section-5",
+      "order": 5,
+      "type": "text",
+      "title": "Mass and Weight Are Different",
+      "text": "Mass stays the same wherever you go, but weight can change. Weight is the force of gravity pulling on your mass. On the Moon, your mass is the same, but your weight is smaller because the Moon's gravity is weaker than Earth's."
+    },
+    {
+      "id": "section-6",
+      "order": 6,
+      "type": "interactive",
+      "title": "Compare Your Weight on Different Worlds",
+      "htmlDescription": "Students explore the difference between mass and weight. The interactive shows one student with a fixed mass, then lets students choose Earth, Moon, Mars, or Jupiter. The mass display should stay unchanged while the weight display changes. The visual should include a scale, a planet selector, and a simple explanation panel that says: mass is how much matter you have; weight is gravity pulling on that mass. The goal is for students to discover that the same object weighs different amounts in different gravitational fields.",
+      "htmlSource": "compare-weight-on-worlds.html",
+      "components": [
+        {
+          "id": "student-character",
+          "name": "Student Character",
+          "interactionType": "show"
+        },
+        {
+          "id": "planet-background",
+          "name": "Planet Background",
+          "interactionType": "show"
+        },
+        {
+          "id": "mass-display",
+          "name": "Mass Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "weight-display",
+          "name": "Weight Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "scale-platform",
+          "name": "Scale Platform",
+          "interactionType": "show"
+        },
+        {
+          "id": "earth-button",
+          "name": "Earth Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "moon-button",
+          "name": "Moon Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "mars-button",
+          "name": "Mars Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "jupiter-button",
+          "name": "Jupiter Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "gravity-strength-meter",
+          "name": "Gravity Strength Meter",
+          "interactionType": "show"
+        },
+        {
+          "id": "explanation-panel",
+          "name": "Explanation Panel",
+          "interactionType": "show"
+        },
+        {
+          "id": "feedback-message",
+          "name": "Feedback Message",
+          "interactionType": "show"
+        },
+        {
+          "id": "reset-button",
+          "name": "Reset Button",
+          "interactionType": "clickable"
+        }
+      ]
+    },
+    {
+      "id": "section-7",
+      "order": 7,
+      "type": "image",
+      "title": "Mass Stays the Same, Weight Changes",
+      "imageDescription": "A clear comparison image with the same astronaut standing on three different worlds: Earth, Moon, and Jupiter. The astronaut's mass label is identical in all three panels, for example 'Mass: 50 kg'. The weight label changes in each panel to show that stronger gravity means more weight and weaker gravity means less weight. Earth should look familiar, the Moon should look gray and rocky, and Jupiter should be shown as a large gas giant background. The image should feel like a polished science textbook graphic with simple arrows and readable labels.",
+      "imageSource": "mass-vs-weight.png",
+      "components": [
+        {
+          "id": "earth-panel",
+          "label": "Earth",
+          "x": 250,
+          "y": 160
+        },
+        {
+          "id": "moon-panel",
+          "label": "Moon",
+          "x": 730,
+          "y": 160
+        },
+        {
+          "id": "jupiter-panel",
+          "label": "Jupiter",
+          "x": 1210,
+          "y": 160
+        },
+        {
+          "id": "same-mass-label",
+          "label": "Same mass everywhere",
+          "x": 730,
+          "y": 875
+        },
+        {
+          "id": "different-weight-label",
+          "label": "Different weight because gravity changes",
+          "x": 730,
+          "y": 955
+        }
+      ]
+    },
+    {
+      "id": "section-8",
+      "order": 8,
+      "type": "text",
+      "title": "Gravity Depends on Distance",
+      "text": "Gravity gets weaker when objects are farther apart. If you move far away from a planet, the planet still pulls on you, but the pull becomes weaker. This is why distance is very important in gravity."
+    },
+    {
+      "id": "section-9",
+      "order": 9,
+      "type": "image",
+      "title": "Mass, Distance, and Gravitational Force",
+      "imageDescription": "A simple visual explanation of universal gravitation. Show two spherical objects in space: Object A on the left and Object B on the right. Between them, draw arrows pointing toward each other to show mutual attraction. Add a distance line between their centers labeled 'distance'. Add labels showing that larger mass creates stronger gravitational pull, and greater distance creates weaker gravitational pull. Include a small mini-panel showing 'closer = stronger' and 'farther = weaker'. Use a dark background, glowing arrows, and clean educational labels.",
+      "imageSource": "mass-distance-gravity-force.png",
+      "components": [
+        {
+          "id": "object-a",
+          "label": "Object A",
+          "x": 330,
+          "y": 500
+        },
+        {
+          "id": "object-b",
+          "label": "Object B",
+          "x": 1125,
+          "y": 500
+        },
+        {
+          "id": "attraction-arrow-left",
+          "label": "Pull",
+          "x": 560,
+          "y": 420
+        },
+        {
+          "id": "attraction-arrow-right",
+          "label": "Pull",
+          "x": 900,
+          "y": 420
+        },
+        {
+          "id": "distance-line",
+          "label": "Distance between centers",
+          "x": 730,
+          "y": 630
+        },
+        {
+          "id": "mass-rule",
+          "label": "More mass = stronger gravity",
+          "x": 405,
+          "y": 825
+        },
+        {
+          "id": "distance-rule",
+          "label": "More distance = weaker gravity",
+          "x": 1040,
+          "y": 825
+        }
+      ]
+    },
+    {
+      "id": "section-10",
+      "order": 10,
+      "type": "interactive",
+      "title": "Build a Gravity Force",
+      "htmlDescription": "Students use sliders to change the mass of two objects and the distance between them. The interactive should show two objects in space with arrows between them. When mass increases, the arrows become thicker and brighter. When distance increases, the arrows become thinner and dimmer. A force meter should update in real time using a simple beginner-friendly scale such as weak, medium, strong, very strong. The purpose is to help students understand that gravity becomes stronger with more mass and weaker with more distance.",
+      "htmlSource": "gravity-force-simulator.html",
+      "components": [
+        {
+          "id": "object-a-display",
+          "name": "Object A Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "object-b-display",
+          "name": "Object B Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "gravity-arrows",
+          "name": "Gravity Arrows",
+          "interactionType": "show"
+        },
+        {
+          "id": "mass-a-slider",
+          "name": "Mass A Slider",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "mass-b-slider",
+          "name": "Mass B Slider",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "distance-slider",
+          "name": "Distance Slider",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "mass-a-value",
+          "name": "Mass A Value",
+          "interactionType": "show"
+        },
+        {
+          "id": "mass-b-value",
+          "name": "Mass B Value",
+          "interactionType": "show"
+        },
+        {
+          "id": "distance-value",
+          "name": "Distance Value",
+          "interactionType": "show"
+        },
+        {
+          "id": "force-meter",
+          "name": "Force Meter",
+          "interactionType": "show"
+        },
+        {
+          "id": "rule-card",
+          "name": "Rule Card",
+          "interactionType": "show"
+        },
+        {
+          "id": "challenge-card",
+          "name": "Challenge Card",
+          "interactionType": "show"
+        },
+        {
+          "id": "check-answer-button",
+          "name": "Check Answer Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "reset-button",
+          "name": "Reset Button",
+          "interactionType": "clickable"
+        }
+      ]
+    },
+    {
+      "id": "section-11",
+      "order": 11,
+      "type": "text",
+      "title": "Why Objects Fall",
+      "text": "When you drop an object, Earth's gravity pulls it downward. Near Earth's surface, objects speed up as they fall. This speeding up is called acceleration due to gravity."
+    },
+    {
+      "id": "section-12",
+      "order": 12,
+      "type": "text",
+      "title": "Do Heavy Objects Fall Faster?",
+      "text": "Without air resistance, all objects fall with the same acceleration near Earth. A feather and a metal ball would fall together in a vacuum. In normal air, the feather falls slowly because air pushes against it more."
+    },
+    {
+      "id": "section-13",
+      "order": 13,
+      "type": "interactive",
+      "title": "Drop Objects in Air and Vacuum",
+      "htmlDescription": "Students compare falling objects in two environments: normal air and vacuum. The interactive shows a feather and a metal ball released from the same height. In air mode, the ball reaches the ground first because air resistance slows the feather. In vacuum mode, both objects land at the same time. The animation should be simple, smooth, and visually clear, with a timer, height markers, and a toggle between Air and Vacuum. The goal is to separate the effect of gravity from the effect of air resistance.",
+      "htmlSource": "drop-objects-air-vacuum.html",
+      "components": [
+        {
+          "id": "drop-chamber",
+          "name": "Drop Chamber",
+          "interactionType": "show"
+        },
+        {
+          "id": "feather-object",
+          "name": "Feather Object",
+          "interactionType": "show"
+        },
+        {
+          "id": "metal-ball-object",
+          "name": "Metal Ball Object",
+          "interactionType": "show"
+        },
+        {
+          "id": "height-markers",
+          "name": "Height Markers",
+          "interactionType": "show"
+        },
+        {
+          "id": "air-mode-button",
+          "name": "Air Mode Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "vacuum-mode-button",
+          "name": "Vacuum Mode Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-button",
+          "name": "Drop Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "timer-display",
+          "name": "Timer Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "result-message",
+          "name": "Result Message",
+          "interactionType": "show"
+        },
+        {
+          "id": "physics-explanation",
+          "name": "Physics Explanation",
+          "interactionType": "show"
+        },
+        {
+          "id": "reset-button",
+          "name": "Reset Button",
+          "interactionType": "clickable"
+        }
+      ]
+    },
+    {
+      "id": "section-14",
+      "order": 14,
+      "type": "text",
+      "title": "Orbits Are Falling Sideways",
+      "text": "An orbit happens when an object moves forward fast enough while gravity pulls it downward. Instead of falling straight to the ground, it keeps falling around the planet. This is how the Moon stays near Earth and how satellites stay in space."
+    },
+    {
+      "id": "section-15",
+      "order": 15,
+      "type": "image",
+      "title": "How an Orbit Works",
+      "imageDescription": "A beautiful but simple space diagram showing Earth with three possible paths for a launched spacecraft. Path 1 has low sideways speed and curves down into Earth. Path 2 has the correct sideways speed and forms a stable orbit around Earth. Path 3 has very high speed and escapes away from Earth. Gravity arrows point toward Earth's center along the paths. Include labels: 'too slow: falls back', 'orbital speed: keeps falling around Earth', and 'escape speed: leaves Earth'. The image should be minimal, dark, crisp, and suitable for a modern educational website.",
+      "imageSource": "how-orbit-works.png",
+      "components": [
+        {
+          "id": "earth",
+          "label": "Earth",
+          "x": 730,
+          "y": 540
+        },
+        {
+          "id": "low-speed-path",
+          "label": "Too slow: falls back",
+          "x": 360,
+          "y": 690
+        },
+        {
+          "id": "orbit-path",
+          "label": "Orbital speed: falls around Earth",
+          "x": 735,
+          "y": 190
+        },
+        {
+          "id": "escape-path",
+          "label": "Escape speed: leaves Earth",
+          "x": 1105,
+          "y": 270
+        },
+        {
+          "id": "spacecraft",
+          "label": "Spacecraft",
+          "x": 965,
+          "y": 395
+        },
+        {
+          "id": "gravity-arrows",
+          "label": "Gravity pulls inward",
+          "x": 730,
+          "y": 895
+        }
+      ]
+    },
+    {
+      "id": "section-16",
+      "order": 16,
+      "type": "interactive",
+      "title": "Launch a Satellite",
+      "htmlDescription": "Students control the sideways launch speed of a satellite near Earth. With low speed, the satellite falls back to Earth. With medium speed, it enters orbit and keeps moving around Earth. With very high speed, it escapes into space. The interactive should include a speed slider, a launch button, a path preview, and feedback explaining the result. The visual should make orbit feel like continuous falling around Earth, not floating without gravity.",
+      "htmlSource": "launch-a-satellite.html",
+      "components": [
+        {
+          "id": "earth-display",
+          "name": "Earth Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "satellite-display",
+          "name": "Satellite Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "launch-platform",
+          "name": "Launch Platform",
+          "interactionType": "show"
+        },
+        {
+          "id": "speed-slider",
+          "name": "Speed Slider",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "speed-value",
+          "name": "Speed Value",
+          "interactionType": "show"
+        },
+        {
+          "id": "path-preview",
+          "name": "Path Preview",
+          "interactionType": "show"
+        },
+        {
+          "id": "gravity-arrow",
+          "name": "Gravity Arrow",
+          "interactionType": "show"
+        },
+        {
+          "id": "launch-button",
+          "name": "Launch Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "pause-button",
+          "name": "Pause Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "reset-button",
+          "name": "Reset Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "result-message",
+          "name": "Result Message",
+          "interactionType": "show"
+        },
+        {
+          "id": "orbit-explanation-card",
+          "name": "Orbit Explanation Card",
+          "interactionType": "show"
+        }
+      ]
+    },
+    {
+      "id": "section-17",
+      "order": 17,
+      "type": "text",
+      "title": "Gravity in Space",
+      "text": "There is gravity in space. Astronauts look weightless because they and their spacecraft are falling around Earth together. They are not outside gravity; they are in orbit."
+    },
+    {
+      "id": "section-18",
+      "order": 18,
+      "type": "image",
+      "title": "Weightlessness in Orbit",
+      "imageDescription": "A modern educational illustration of astronauts inside a spacecraft orbiting Earth. Show Earth below, the spacecraft following a curved orbital path, and both the spacecraft and astronaut falling around Earth together. Use arrows labeled 'spacecraft falls around Earth' and 'astronaut falls with spacecraft'. Add a small note: 'Weightless does not mean no gravity.' The image should clearly correct the misconception that space has no gravity. Use a clean space background, bright readable labels, and friendly beginner-level design.",
+      "imageSource": "weightlessness-in-orbit.png",
+      "components": [
+        {
+          "id": "earth",
+          "label": "Earth",
+          "x": 730,
+          "y": 760
+        },
+        {
+          "id": "spacecraft",
+          "label": "Spacecraft",
+          "x": 720,
+          "y": 330
+        },
+        {
+          "id": "astronaut",
+          "label": "Astronaut",
+          "x": 730,
+          "y": 335
+        },
+        {
+          "id": "orbit-path",
+          "label": "Orbit path",
+          "x": 730,
+          "y": 475
+        },
+        {
+          "id": "falling-together-arrow",
+          "label": "Falling around Earth together",
+          "x": 1030,
+          "y": 430
+        },
+        {
+          "id": "misconception-note",
+          "label": "Weightless does not mean no gravity",
+          "x": 730,
+          "y": 110
+        }
+      ]
+    },
+    {
+      "id": "section-19",
+      "order": 19,
+      "type": "text",
+      "title": "Gravity and Tides",
+      "text": "Gravity also affects the oceans. The Moon's gravity pulls on Earth's water and helps create tides. The Sun also affects tides, but the Moon has a strong effect because it is much closer to Earth."
+    },
+    {
+      "id": "section-20",
+      "order": 20,
+      "type": "image",
+      "title": "How the Moon Helps Create Tides",
+      "imageDescription": "A simple Earth-and-Moon diagram explaining tides. Show Earth with ocean bulges on the side facing the Moon and the opposite side. The Moon should be on the right, with gravity arrows pulling toward it. Include labels for 'high tide' at the bulges and 'low tide' at the sides between the bulges. The image should be visually calm, beginner-friendly, and not overly detailed. Use blue oceans, a dark space background, and clear labels.",
+      "imageSource": "moon-gravity-tides.png",
+      "components": [
+        {
+          "id": "earth",
+          "label": "Earth",
+          "x": 620,
+          "y": 510
+        },
+        {
+          "id": "moon",
+          "label": "Moon",
+          "x": 1160,
+          "y": 510
+        },
+        {
+          "id": "near-side-high-tide",
+          "label": "High tide",
+          "x": 810,
+          "y": 510
+        },
+        {
+          "id": "far-side-high-tide",
+          "label": "High tide",
+          "x": 430,
+          "y": 510
+        },
+        {
+          "id": "low-tide-top",
+          "label": "Low tide",
+          "x": 620,
+          "y": 265
+        },
+        {
+          "id": "low-tide-bottom",
+          "label": "Low tide",
+          "x": 620,
+          "y": 755
+        },
+        {
+          "id": "moon-gravity-arrows",
+          "label": "Moon's gravity pulls ocean water",
+          "x": 915,
+          "y": 330
+        }
+      ]
+    },
+    {
+      "id": "section-21",
+      "order": 21,
+      "type": "interactive",
+      "title": "Gravity Concept Check",
+      "htmlDescription": "Students answer short beginner-level questions about gravity. Each question should focus on one core idea: gravity pulls masses together, more mass means stronger gravity, greater distance means weaker gravity, mass and weight are different, objects can fall at the same rate without air resistance, and orbit is falling around a planet. The interaction should show one question at a time with multiple-choice buttons, immediate feedback, a score display, and a final summary card explaining which concepts were mastered and which need review.",
+      "htmlSource": "gravity-concept-check.html",
+      "components": [
+        {
+          "id": "question-card",
+          "name": "Question Card",
+          "interactionType": "show"
+        },
+        {
+          "id": "question-number",
+          "name": "Question Number",
+          "interactionType": "show"
+        },
+        {
+          "id": "question-text",
+          "name": "Question Text",
+          "interactionType": "show"
+        },
+        {
+          "id": "answer-options",
+          "name": "Answer Options",
+          "interactionType": "show"
+        },
+        {
+          "id": "answer-button-a",
+          "name": "Answer Button A",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "answer-button-b",
+          "name": "Answer Button B",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "answer-button-c",
+          "name": "Answer Button C",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "answer-button-d",
+          "name": "Answer Button D",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "feedback-message",
+          "name": "Feedback Message",
+          "interactionType": "show"
+        },
+        {
+          "id": "explanation-box",
+          "name": "Explanation Box",
+          "interactionType": "show"
+        },
+        {
+          "id": "score-display",
+          "name": "Score Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "progress-bar",
+          "name": "Progress Bar",
+          "interactionType": "show"
+        },
+        {
+          "id": "next-question-button",
+          "name": "Next Question Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "final-summary-card",
+          "name": "Final Summary Card",
+          "interactionType": "show"
+        },
+        {
+          "id": "restart-button",
+          "name": "Restart Button",
+          "interactionType": "clickable"
+        }
+      ]
+    },
+    {
+      "id": "section-22",
+      "order": 22,
+      "type": "text",
+      "title": "Final Summary",
+      "text": "Gravity is a force of attraction between objects with mass. More mass makes gravity stronger, and more distance makes it weaker. Gravity makes objects fall, gives objects weight, keeps planets and moons in orbit, helps create tides, and is still present in space."
+    }
+  ]
+}

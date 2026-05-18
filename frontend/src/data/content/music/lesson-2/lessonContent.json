@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Scales",
+  "teacherName": "Dr. Einstein",
+  "subject": "Music",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Scales.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Scales",
+      "text": "Welcome to Scales. In this lesson, you will learn about Major and minor scales."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Scales",
+      "imageDescription": "An educational diagram showing concepts of Scales.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Scales",
+      "htmlDescription": "Interactive exercise where students practice Scales.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

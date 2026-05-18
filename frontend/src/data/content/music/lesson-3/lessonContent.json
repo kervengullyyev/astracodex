@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Reading Sheet Music",
+  "teacherName": "Dr. Einstein",
+  "subject": "Music",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Reading Sheet Music.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Reading Sheet Music",
+      "text": "Welcome to Reading Sheet Music. In this lesson, you will learn about Treble and bass clef."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Reading Sheet Music",
+      "imageDescription": "An educational diagram showing concepts of Reading Sheet Music.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Reading Sheet Music",
+      "htmlDescription": "Interactive exercise where students practice Reading Sheet Music.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

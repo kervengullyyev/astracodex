@@ -1,0 +1,704 @@
+{
+  "lessonTitle": "Real Numbers",
+  "teacherName": "Dr. Einstein",
+  "subject": "Mathematics",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Real Numbers.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Real Numbers",
+      "text": "Real numbers are all numbers that can be placed on a number line. In this lesson, you will learn the main categories of real numbers and how they are related."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "text",
+      "title": "Understanding Number Categories",
+      "text": "Numbers are grouped into categories, also called sets. Some categories are smaller groups inside larger ones, so we study them one by one to understand the full real number system."
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "image",
+      "title": "The Real Number System",
+      "imageDescription": "A simple diagram showing the main categories of numbers within the real number system: natural numbers, whole numbers, integers, rational numbers, irrational numbers, and real numbers.",
+      "imageSource": "real-number-system-overview.png",
+      "components": [
+        {
+          "id": "natural-numbers",
+          "label": "Natural Numbers",
+          "x": 485,
+          "y": 686
+        },
+        {
+          "id": "whole-numbers",
+          "label": "Whole Numbers",
+          "x": 469,
+          "y": 536
+        },
+        {
+          "id": "integers",
+          "label": "Integers",
+          "x": 464,
+          "y": 408
+        },
+        {
+          "id": "rational-numbers",
+          "label": "Rational Numbers",
+          "x": 475,
+          "y": 262
+        },
+        {
+          "id": "irrational-numbers",
+          "label": "Irrational Numbers",
+          "x": 1168,
+          "y": 278
+        },
+        {
+          "id": "real-numbers",
+          "label": "Real Numbers",
+          "x": 726,
+          "y": 181
+        }
+      ]
+    },
+    {
+      "id": "section-4",
+      "order": 4,
+      "type": "text",
+      "title": "Natural Numbers",
+      "text": "Natural numbers are the counting numbers: 1, 2, 3, 4, and so on. They are used when we count objects."
+    },
+    {
+      "id": "section-5",
+      "order": 5,
+      "type": "interactive",
+      "title": "Identify Natural Numbers",
+      "htmlDescription": "Students decide whether a shown number is a natural number.",
+      "htmlSource": "identify-natural-numbers.html",
+      "components": [
+        {
+          "id": "question-card",
+          "name": "Question Card",
+          "interactionType": "show"
+        },
+        {
+          "id": "question-number",
+          "name": "Question Number",
+          "interactionType": "show"
+        },
+        {
+          "id": "number-display",
+          "name": "Number Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "question-text",
+          "name": "Question Text",
+          "interactionType": "show"
+        },
+        {
+          "id": "answer-options",
+          "name": "Answer Options",
+          "interactionType": "show"
+        },
+        {
+          "id": "yes-button",
+          "name": "Yes Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "no-button",
+          "name": "No Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "rule-box",
+          "name": "Rule Box",
+          "interactionType": "show"
+        },
+        {
+          "id": "examples-panel",
+          "name": "Examples Panel",
+          "interactionType": "show"
+        },
+        {
+          "id": "natural-examples",
+          "name": "Natural Examples",
+          "interactionType": "show"
+        },
+        {
+          "id": "not-natural-examples",
+          "name": "Not Natural Examples",
+          "interactionType": "show"
+        },
+        {
+          "id": "feedback-message",
+          "name": "Feedback Message",
+          "interactionType": "show"
+        },
+        {
+          "id": "score-display",
+          "name": "Score Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "next-question-button",
+          "name": "Next Question Button",
+          "interactionType": "clickable"
+        }
+      ]
+    },
+    {
+      "id": "section-6",
+      "order": 6,
+      "type": "text",
+      "title": "Whole Numbers",
+      "text": "Whole numbers include all natural numbers and also zero. So the set of whole numbers is 0, 1, 2, 3, 4, and so on."
+    },
+    {
+      "id": "section-7",
+      "order": 7,
+      "type": "image",
+      "title": "From Natural Numbers to Whole Numbers",
+      "imageDescription": "A diagram showing that whole numbers contain all natural numbers plus zero.",
+      "imageSource": "natural-to-whole-numbers.png",
+      "components": [
+        {
+          "id": "zero",
+          "label": "0",
+          "x": 1057,
+          "y": 624
+        },
+        {
+          "id": "natural-set",
+          "label": "Natural Numbers",
+          "x": 536,
+          "y": 427
+        },
+        {
+          "id": "whole-set",
+          "label": "Whole Numbers",
+          "x": 728,
+          "y": 227
+        }
+      ]
+    },
+    {
+      "id": "section-8",
+      "order": 8,
+      "type": "text",
+      "title": "Integers",
+      "text": "Integers include whole numbers and their negative opposites. Examples are -3, -2, -1, 0, 1, 2, and 3."
+    },
+    {
+      "id": "section-9",
+      "order": 9,
+      "type": "interactive",
+      "title": "Place Integers on the Number Line",
+      "htmlDescription": "Students place positive and negative integers in the correct position on a number line.",
+      "htmlSource": "place-integers-number-line.html",
+      "components": [
+        {
+          "id": "number-line",
+          "name": "Number Line",
+          "interactionType": "show"
+        },
+        {
+          "id": "zero-marker",
+          "name": "Zero Marker",
+          "interactionType": "show"
+        },
+        {
+          "id": "hint-row",
+          "name": "Hint Row",
+          "interactionType": "show"
+        },
+        {
+          "id": "number-cards",
+          "name": "Number Cards",
+          "interactionType": "show"
+        },
+        {
+          "id": "number-card-plus-5",
+          "name": "Number Card +5",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-minus-2",
+          "name": "Number Card -2",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-zero",
+          "name": "Number Card 0",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-minus-4",
+          "name": "Number Card -4",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-plus-2",
+          "name": "Number Card +2",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-points",
+          "name": "Drop Points",
+          "interactionType": "show"
+        },
+        {
+          "id": "drop-point-minus-5",
+          "name": "Drop Point -5",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-point-minus-4",
+          "name": "Drop Point -4",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-point-minus-3",
+          "name": "Drop Point -3",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-point-minus-2",
+          "name": "Drop Point -2",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-point-minus-1",
+          "name": "Drop Point -1",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-point-zero",
+          "name": "Drop Point 0",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-point-plus-1",
+          "name": "Drop Point +1",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-point-plus-2",
+          "name": "Drop Point +2",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-point-plus-3",
+          "name": "Drop Point +3",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-point-plus-4",
+          "name": "Drop Point +4",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-point-plus-5",
+          "name": "Drop Point +5",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "feedback-message",
+          "name": "Feedback Message",
+          "interactionType": "show"
+        },
+        {
+          "id": "score-display",
+          "name": "Score Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "check-answer-button",
+          "name": "Check Answer Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "reset-button",
+          "name": "Reset Button",
+          "interactionType": "clickable"
+        }
+      ]
+    },
+    {
+      "id": "section-10",
+      "order": 10,
+      "type": "text",
+      "title": "Rational Numbers",
+      "text": "Rational numbers are numbers that can be written as a fraction of two integers, such as 1/2, -3/4, and 5. Decimals that end or repeat are also rational numbers."
+    },
+    {
+      "id": "section-11",
+      "order": 11,
+      "type": "image",
+      "title": "Examples of Rational Numbers",
+      "imageDescription": "A visual showing fractions, whole numbers, and repeating or terminating decimals as examples of rational numbers.",
+      "imageSource": "examples-of-rational-numbers.png",
+      "components": [
+        {
+          "id": "fraction-example",
+          "label": "1/2",
+          "x": 194,
+          "y": 632
+        },
+        {
+          "id": "integer-example",
+          "label": "5",
+          "x": 502,
+          "y": 658
+        },
+        {
+          "id": "decimal-example",
+          "label": "0.75",
+          "x": 860,
+          "y": 658
+        },
+        {
+          "id": "repeating-decimal-example",
+          "label": "0.333...",
+          "x": 1229,
+          "y": 658
+        }
+      ]
+    },
+    {
+      "id": "section-12",
+      "order": 12,
+      "type": "text",
+      "title": "Irrational Numbers",
+      "text": "Irrational numbers cannot be written as a fraction of two integers. Their decimal forms do not end and do not repeat. Examples include π and √2."
+    },
+    {
+      "id": "section-13",
+      "order": 13,
+      "type": "image",
+      "title": "Rational and Irrational Numbers",
+      "imageDescription": "A comparison diagram showing the difference between rational numbers and irrational numbers, with examples of each.",
+      "imageSource": "rational-vs-irrational.png",
+      "components": [
+        {
+          "id": "main-title",
+          "label": "Rational and Irrational Numbers",
+          "x": 730,
+          "y": 78
+        },
+        {
+          "id": "rational-side",
+          "label": "Rational Numbers",
+          "x": 368,
+          "y": 212
+        },
+        {
+          "id": "irrational-side",
+          "label": "Irrational Numbers",
+          "x": 1089,
+          "y": 212
+        },
+        {
+          "id": "rational-definition",
+          "label": "Rational numbers can be written as a fraction of two integers",
+          "x": 370,
+          "y": 346
+        },
+        {
+          "id": "irrational-definition",
+          "label": "Irrational numbers cannot be written as a fraction of two integers",
+          "x": 1082,
+          "y": 348
+        },
+        {
+          "id": "rational-fraction-rule",
+          "label": "a/b, a and b are integers, b ≠ 0",
+          "x": 372,
+          "y": 504
+        },
+        {
+          "id": "irrational-not-fraction-rule",
+          "label": "No integers a and b can write these numbers as a fraction",
+          "x": 1078,
+          "y": 504
+        },
+        {
+          "id": "rational-examples-banner",
+          "label": "Examples",
+          "x": 358,
+          "y": 619
+        },
+        {
+          "id": "irrational-examples-banner",
+          "label": "Examples",
+          "x": 1062,
+          "y": 619
+        },
+        {
+          "id": "fraction-example",
+          "label": "1/2",
+          "x": 119,
+          "y": 793
+        },
+        {
+          "id": "integer-example",
+          "label": "5",
+          "x": 269,
+          "y": 843
+        },
+        {
+          "id": "terminating-decimal-example",
+          "label": "0.75",
+          "x": 428,
+          "y": 843
+        },
+        {
+          "id": "repeating-decimal-example",
+          "label": "0.333...",
+          "x": 611,
+          "y": 845
+        },
+        {
+          "id": "pi-example",
+          "label": "π",
+          "x": 855,
+          "y": 727
+        },
+        {
+          "id": "pi-decimal-example",
+          "label": "3.1415926535...",
+          "x": 859,
+          "y": 789
+        },
+        {
+          "id": "sqrt2-example",
+          "label": "√2",
+          "x": 1074,
+          "y": 727
+        },
+        {
+          "id": "sqrt2-decimal-example",
+          "label": "1.4142135623...",
+          "x": 1077,
+          "y": 789
+        },
+        {
+          "id": "sqrt7-example",
+          "label": "√7",
+          "x": 1296,
+          "y": 727
+        },
+        {
+          "id": "sqrt7-decimal-example",
+          "label": "2.6457513110...",
+          "x": 1296,
+          "y": 789
+        }
+      ]
+    },
+    {
+      "id": "section-14",
+      "order": 14,
+      "type": "text",
+      "title": "Real Numbers",
+      "text": "Real numbers include both rational numbers and irrational numbers. This means every number we have studied in this lesson belongs to the real number system."
+    },
+    {
+      "id": "section-15",
+      "order": 15,
+      "type": "interactive",
+      "title": "Classify the Number",
+      "htmlDescription": "Students classify a shown number as natural, whole, integer, rational, irrational, or real.",
+      "htmlSource": "classify-real-numbers.html",
+      "components": [
+        {
+          "id": "question-card",
+          "name": "Question Card",
+          "interactionType": "show"
+        },
+        {
+          "id": "number-display",
+          "name": "Number Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "answer-options",
+          "name": "Answer Options",
+          "interactionType": "show"
+        },
+        {
+          "id": "natural-number-button",
+          "name": "Natural Number Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "whole-number-button",
+          "name": "Whole Number Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "integer-button",
+          "name": "Integer Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "rational-number-button",
+          "name": "Rational Number Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "irrational-number-button",
+          "name": "Irrational Number Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "real-number-button",
+          "name": "Real Number Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "feedback-message",
+          "name": "Feedback Message",
+          "interactionType": "show"
+        },
+        {
+          "id": "score-display",
+          "name": "Score Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "next-question-button",
+          "name": "Next Question Button",
+          "interactionType": "clickable"
+        }
+      ]
+    },
+    {
+      "id": "section-16",
+      "order": 16,
+      "type": "text",
+      "title": "Comparing Number Categories",
+      "text": "Natural numbers are inside whole numbers, whole numbers are inside integers, and integers are inside rational numbers. Rational and irrational numbers together make up the real numbers."
+    },
+    {
+      "id": "section-17",
+      "order": 17,
+      "type": "interactive",
+      "title": "Final Review",
+      "htmlDescription": "Students review the lesson by sorting numbers into their correct categories and checking their understanding.",
+      "htmlSource": "real-numbers-final-review.html",
+      "components": [
+        {
+          "id": "number-cards",
+          "name": "Number Cards",
+          "interactionType": "show"
+        },
+        {
+          "id": "number-card-7",
+          "name": "Number Card 7",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-0",
+          "name": "Number Card 0",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-minus-6",
+          "name": "Number Card -6",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-three-fourths",
+          "name": "Number Card 3/4",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-0-25",
+          "name": "Number Card 0.25",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-pi",
+          "name": "Number Card Pi",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-sqrt-2",
+          "name": "Number Card Square Root of 2",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "number-card-minus-8-fifths",
+          "name": "Number Card -8/5",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "category-boxes",
+          "name": "Category Boxes",
+          "interactionType": "show"
+        },
+        {
+          "id": "natural-number-box",
+          "name": "Natural Number Box",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "whole-number-box",
+          "name": "Whole Number Box",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "integer-box",
+          "name": "Integer Box",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "rational-number-box",
+          "name": "Rational Number Box",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "irrational-number-box",
+          "name": "Irrational Number Box",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "real-number-box",
+          "name": "Real Number Box",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "review-tip",
+          "name": "Review Tip",
+          "interactionType": "show"
+        },
+        {
+          "id": "feedback-message",
+          "name": "Feedback Message",
+          "interactionType": "show"
+        },
+        {
+          "id": "score-display",
+          "name": "Score Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "check-answer-button",
+          "name": "Check Answer Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "restart-button",
+          "name": "Restart Button",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Triangles",
+  "teacherName": "Dr. Einstein",
+  "subject": "Mathematics",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Triangles.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Triangles",
+      "text": "Welcome to Triangles. In this lesson, you will learn about Study properties and theorems of triangles."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Triangles",
+      "imageDescription": "An educational diagram showing concepts of Triangles.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Triangles",
+      "htmlDescription": "Interactive exercise where students practice Triangles.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

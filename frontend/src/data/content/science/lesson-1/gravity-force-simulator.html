@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gravity Force Simulator</title>
+  <style>
+    :root {
+      --bg: #050b18;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-soft: rgba(255, 255, 255, 0.78);
+      --text: #0f172a;
+      --muted: #64748b;
+      --blue: #38bdf8;
+      --blue-dark: #0369a1;
+      --orange: #fb923c;
+      --orange-dark: #c2410c;
+      --green: #22c55e;
+      --yellow: #facc15;
+      --red: #ef4444;
+      --shadow: 0 24px 80px rgba(2, 8, 23, 0.28);
+      --arrow-opacity: 0.55;
+      --arrow-height: 12px;
+      --arrow-glow: 10px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .lesson-shell {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 620px;
+      overflow: hidden;
+      padding: clamp(14px, 2vw, 26px);
+      background:
+        radial-gradient(circle at 15% 12%, rgba(56, 189, 248, 0.22), transparent 28%),
+        radial-gradient(circle at 84% 18%, rgba(251, 146, 60, 0.18), transparent 25%),
+        radial-gradient(circle at 50% 115%, rgba(79, 70, 229, 0.22), transparent 34%),
+        linear-gradient(135deg, #020617 0%, #08111f 46%, #020617 100%);
+    }
+
+    .stars {
+      position: absolute;
+      inset: 0;
+      opacity: 0.34;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.45) 1px, transparent 1px);
+      background-size: 64px 64px, 112px 112px;
+      background-position: 14px 18px, 36px 58px;
+      pointer-events: none;
+    }
+
+    .grid {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(380px, 1.2fr) minmax(320px, 0.8fr);
+      gap: clamp(14px, 1.6vw, 22px);
+    }
+
+    .panel {
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .space-panel {
+      position: relative;
+      min-height: 0;
+      background:
+        radial-gradient(circle at 22% 42%, rgba(56, 189, 248, 0.14), transparent 24%),
+        radial-gradient(circle at 78% 46%, rgba(251, 146, 60, 0.12), transparent 24%),
+        rgba(15, 23, 42, 0.55);
+    }
+
+    .space-header {
+      position: absolute;
+      z-index: 5;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .title-card,
+    .force-card {
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(15, 23, 42, 0.72);
+      color: white;
+      padding: 14px 16px;
+      box-shadow: 0 16px 50px rgba(2, 8, 23, 0.22);
+      backdrop-filter: blur(12px);
+    }
+
+    .title-card {
+      max-width: 380px;
+    }
+
+    .eyebrow {
+      color: #93c5fd;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .title {
+      margin: 5px 0 0;
+      font-size: clamp(24px, 2.8vw, 38px);
+      line-height: 0.95;
+      letter-spacing: -0.055em;
+    }
+
+    .force-card {
+      width: min(240px, 33vw);
+    }
+
+    .force-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .force-label {
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .force-value {
+      color: white;
+      font-size: 26px;
+      font-weight: 950;
+      letter-spacing: -0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .force-track {
+      height: 13px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .force-fill {
+      width: 28%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #38bdf8, #22c55e, #facc15, #fb923c, #ef4444);
+      transition: width 220ms ease;
+    }
+
+    .force-word {
+      margin-top: 8px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .space-stage {
+      position: absolute;
+      inset: 0;
+    }
+
+    .center-line {
+      position: absolute;
+      top: 51%;
+      left: 14%;
+      right: 14%;
+      height: 2px;
+      border-top: 2px dashed rgba(255,255,255,0.42);
+      transform: translateY(-50%);
+    }
+
+    .distance-line {
+      position: absolute;
+      top: 61%;
+      left: var(--obj-a-center, 28%);
+      width: var(--distance-width, 44%);
+      height: 34px;
+      transform: translateY(-50%);
+      transition: left 260ms ease, width 260ms ease;
+    }
+
+    .distance-line::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 16px;
+      border-top: 2px solid rgba(255,255,255,0.72);
+    }
+
+    .distance-line::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 9px;
+      height: 16px;
+      border-left: 2px solid rgba(255,255,255,0.78);
+      border-right: 2px solid rgba(255,255,255,0.78);
+    }
+
+    .distance-label {
+      position: absolute;
+      left: 50%;
+      top: -7px;
+      transform: translateX(-50%);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.78);
+      color: white;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .object {
+      position: absolute;
+      top: 50%;
+      width: var(--size, 150px);
+      height: var(--size, 150px);
+      border-radius: 999px;
+      transform: translate(-50%, -50%);
+      transition:
+        left 260ms ease,
+        width 220ms ease,
+        height 220ms ease,
+        box-shadow 220ms ease,
+        filter 220ms ease;
+      z-index: 3;
+    }
+
+    .object-a {
+      left: var(--obj-a-center, 28%);
+      --size: 156px;
+      background:
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,0.96), transparent 8%),
+        radial-gradient(circle at 42% 36%, #7dd3fc 0%, transparent 20%),
+        radial-gradient(circle at 65% 72%, #0f172a 0%, transparent 48%),
+        linear-gradient(135deg, #38bdf8, #1d4ed8 55%, #082f49);
+      box-shadow:
+        0 0 calc(var(--arrow-glow) * 2.2) rgba(56, 189, 248, 0.62),
+        inset -18px -24px 44px rgba(2, 8, 23, 0.38);
+    }
+
+    .object-b {
+      left: var(--obj-b-center, 72%);
+      --size: 130px;
+      background:
+        radial-gradient(circle at 34% 28%, rgba(255,255,255,0.80), transparent 8%),
+        radial-gradient(circle at 54% 48%, #fed7aa 0%, transparent 18%),
+        radial-gradient(circle at 72% 70%, #7c2d12 0%, transparent 46%),
+        linear-gradient(135deg, #fb923c, #ea580c 52%, #7c2d12);
+      box-shadow:
+        0 0 calc(var(--arrow-glow) * 2) rgba(251, 146, 60, 0.58),
+        inset -18px -22px 40px rgba(67, 20, 7, 0.38);
+    }
+
+    .object-label {
+      position: absolute;
+      left: 50%;
+      top: -72px;
+      transform: translateX(-50%);
+      width: max-content;
+      text-align: center;
+      color: white;
+      text-shadow: 0 2px 18px rgba(0,0,0,0.7);
+      font-weight: 900;
+      line-height: 1.12;
+    }
+
+    .object-label span {
+      display: block;
+      color: #cbd5e1;
+      font-size: 13px;
+      font-weight: 800;
+      margin-top: 3px;
+    }
+
+    .object-a .object-label strong { color: #7dd3fc; }
+    .object-b .object-label strong { color: #fdba74; }
+
+    .arrow-zone {
+      position: absolute;
+      top: 43%;
+      left: var(--arrow-left, 39%);
+      width: var(--arrow-width, 22%);
+      height: 64px;
+      transform: translateY(-50%);
+      transition: left 260ms ease, width 260ms ease, opacity 220ms ease;
+      opacity: var(--arrow-opacity);
+      z-index: 2;
+    }
+
+    .pull-arrow {
+      position: absolute;
+      top: 50%;
+      width: calc(50% - 10px);
+      height: var(--arrow-height);
+      border-radius: 999px;
+      transform: translateY(-50%);
+      transition: height 220ms ease, box-shadow 220ms ease, opacity 220ms ease;
+    }
+
+    .pull-arrow.left {
+      left: 0;
+      background: linear-gradient(90deg, transparent, var(--blue));
+      box-shadow: 0 0 var(--arrow-glow) rgba(56, 189, 248, 0.95);
+    }
+
+    .pull-arrow.right {
+      right: 0;
+      background: linear-gradient(90deg, var(--orange), transparent);
+      box-shadow: 0 0 var(--arrow-glow) rgba(251, 146, 60, 0.95);
+    }
+
+    .pull-arrow.left::before,
+    .pull-arrow.right::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 0;
+      height: 0;
+      transform: translateY(-50%);
+    }
+
+    .pull-arrow.left::before {
+      left: -2px;
+      border-top: calc(var(--arrow-height) * 1.25) solid transparent;
+      border-bottom: calc(var(--arrow-height) * 1.25) solid transparent;
+      border-right: calc(var(--arrow-height) * 2.1) solid var(--blue);
+      filter: drop-shadow(0 0 var(--arrow-glow) rgba(56, 189, 248, 0.95));
+    }
+
+    .pull-arrow.right::before {
+      right: -2px;
+      border-top: calc(var(--arrow-height) * 1.25) solid transparent;
+      border-bottom: calc(var(--arrow-height) * 1.25) solid transparent;
+      border-left: calc(var(--arrow-height) * 2.1) solid var(--orange);
+      filter: drop-shadow(0 0 var(--arrow-glow) rgba(251, 146, 60, 0.95));
+    }
+
+    .arrow-label {
+      position: absolute;
+      left: 50%;
+      top: -38px;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+      white-space: nowrap;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.72);
+    }
+
+    .hint {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      z-index: 4;
+    }
+
+    .rule-card,
+    .challenge-card {
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(15, 23, 42, 0.76);
+      color: white;
+      padding: 14px 16px;
+      box-shadow: 0 16px 42px rgba(2, 8, 23, 0.18);
+      backdrop-filter: blur(12px);
+    }
+
+    .rule-card h3,
+    .challenge-card h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+    }
+
+    .rule-card p,
+    .challenge-card p {
+      margin: 0;
+      color: #dbeafe;
+      font-size: 13px;
+      line-height: 1.38;
+      font-weight: 650;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: clamp(16px, 2vw, 24px);
+      overflow-y: auto;
+    }
+
+    .controls-title {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(26px, 3vw, 40px);
+      line-height: 0.96;
+      letter-spacing: -0.055em;
+    }
+
+    .controls-subtitle {
+      margin: -4px 0 2px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      font-weight: 650;
+    }
+
+    .slider-card {
+      border-radius: 22px;
+      border: 1px solid #e2e8f0;
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      padding: 15px;
+    }
+
+    .slider-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 11px;
+    }
+
+    .slider-label {
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .slider-value {
+      color: #334155;
+      font-size: 14px;
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slider {
+      width: 100%;
+      accent-color: #4f46e5;
+      cursor: pointer;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .mini-result {
+      border-radius: 22px;
+      background: #0f172a;
+      color: white;
+      padding: 16px;
+    }
+
+    .mini-result-title {
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .mini-result-word {
+      margin-top: 5px;
+      font-size: clamp(30px, 3vw, 44px);
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -0.055em;
+    }
+
+    .mini-result-text {
+      margin: 10px 0 0;
+      color: #dbeafe;
+      font-size: 13px;
+      line-height: 1.42;
+      font-weight: 650;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 0.8fr;
+      gap: 10px;
+    }
+
+    .btn {
+      cursor: pointer;
+      border: 0;
+      border-radius: 18px;
+      padding: 14px 16px;
+      font-weight: 950;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .check-button {
+      background: #4f46e5;
+      color: white;
+      box-shadow: 0 16px 34px rgba(79, 70, 229, 0.24);
+    }
+
+    .check-button:hover {
+      background: #4338ca;
+    }
+
+    .reset-button {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .reset-button:hover {
+      background: #cbd5e1;
+    }
+
+    .feedback-message {
+      min-height: 72px;
+      border-radius: 20px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      color: #312e81;
+      padding: 13px 14px;
+      font-size: 13px;
+      line-height: 1.42;
+      font-weight: 800;
+    }
+
+    .concept-box {
+      display: grid;
+      gap: 8px;
+      border-radius: 20px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 13px;
+    }
+
+    .concept-row {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 750;
+    }
+
+    .dot {
+      flex: 0 0 auto;
+      width: 9px;
+      height: 9px;
+      margin-top: 5px;
+      border-radius: 999px;
+      background: #4f46e5;
+    }
+
+    .flash {
+      animation: flash 520ms ease;
+    }
+
+    @keyframes flash {
+      0% { transform: scale(1); }
+      42% { transform: scale(1.035); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 980px) {
+      html,
+      body {
+        overflow: auto;
+      }
+
+      .lesson-shell {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .space-panel {
+        min-height: 640px;
+      }
+
+      .controls-panel {
+        overflow: visible;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .lesson-shell {
+        padding: 10px;
+      }
+
+      .space-panel {
+        min-height: 640px;
+      }
+
+      .space-header {
+        flex-direction: column;
+      }
+
+      .force-card {
+        width: 100%;
+      }
+
+      .title-card {
+        max-width: none;
+        width: 100%;
+      }
+
+      .object-a {
+        --size: 112px;
+      }
+
+      .object-b {
+        --size: 96px;
+      }
+
+      .object-label {
+        top: -64px;
+        font-size: 13px;
+      }
+
+      .hint {
+        grid-template-columns: 1fr;
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+      }
+
+      .action-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="lesson-shell">
+    <div class="stars" aria-hidden="true"></div>
+
+    <section class="grid">
+      <section class="panel space-panel" aria-label="Gravity force visual simulator">
+        <div class="space-header">
+          <div class="title-card">
+            <div class="eyebrow">Universal Gravitation</div>
+            <h1 class="title">Build a gravity force</h1>
+          </div>
+
+          <div id="force-meter" data-id="force-meter" class="force-card">
+            <div class="force-top">
+              <span class="force-label">Force meter</span>
+              <span id="force-score" class="force-value">28</span>
+            </div>
+            <div class="force-track">
+              <div id="force-fill" class="force-fill"></div>
+            </div>
+            <div id="force-word" class="force-word">Medium</div>
+          </div>
+        </div>
+
+        <div id="space-stage" class="space-stage">
+          <div class="center-line" aria-hidden="true"></div>
+
+          <div id="object-a-display" data-id="object-a-display" class="object object-a">
+            <div class="object-label">
+              <strong>Object A</strong>
+              <span id="object-a-label">Mass: 50</span>
+            </div>
+          </div>
+
+          <div id="object-b-display" data-id="object-b-display" class="object object-b">
+            <div class="object-label">
+              <strong>Object B</strong>
+              <span id="object-b-label">Mass: 50</span>
+            </div>
+          </div>
+
+          <div id="gravity-arrows" data-id="gravity-arrows" class="arrow-zone">
+            <div class="arrow-label">mutual gravitational pull</div>
+            <div class="pull-arrow left" aria-hidden="true"></div>
+            <div class="pull-arrow right" aria-hidden="true"></div>
+          </div>
+
+          <div class="distance-line">
+            <div class="distance-label">distance</div>
+          </div>
+        </div>
+
+        <div class="hint">
+          <div id="rule-card" data-id="rule-card" class="rule-card">
+            <h3>Rule</h3>
+            <p>Gravity becomes stronger when mass increases and weaker when distance increases.</p>
+          </div>
+
+          <div id="challenge-card" data-id="challenge-card" class="challenge-card">
+            <h3>Challenge</h3>
+            <p id="challenge-text">Can you make the gravitational force very strong?</p>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel controls-panel">
+        <div>
+          <h2 class="controls-title">Change mass and distance</h2>
+          <p class="controls-subtitle">
+            Move the sliders. Watch the objects, arrows, and force meter change in real time.
+          </p>
+        </div>
+
+        <div class="slider-card">
+          <div class="slider-head">
+            <label id="mass-a-slider-label" class="slider-label" for="mass-a-slider">Mass of Object A</label>
+            <span id="mass-a-value" data-id="mass-a-value" class="slider-value">50</span>
+          </div>
+          <input id="mass-a-slider" data-id="mass-a-slider" class="slider" type="range" min="10" max="100" value="50" step="1" />
+          <div class="range-labels">
+            <span>small mass</span>
+            <span>large mass</span>
+          </div>
+        </div>
+
+        <div class="slider-card">
+          <div class="slider-head">
+            <label id="mass-b-slider-label" class="slider-label" for="mass-b-slider">Mass of Object B</label>
+            <span id="mass-b-value" data-id="mass-b-value" class="slider-value">50</span>
+          </div>
+          <input id="mass-b-slider" data-id="mass-b-slider" class="slider" type="range" min="10" max="100" value="50" step="1" />
+          <div class="range-labels">
+            <span>small mass</span>
+            <span>large mass</span>
+          </div>
+        </div>
+
+        <div class="slider-card">
+          <div class="slider-head">
+            <label id="distance-slider-label" class="slider-label" for="distance-slider">Distance between objects</label>
+            <span id="distance-value" data-id="distance-value" class="slider-value">50</span>
+          </div>
+          <input id="distance-slider" data-id="distance-slider" class="slider" type="range" min="20" max="90" value="50" step="1" />
+          <div class="range-labels">
+            <span>closer</span>
+            <span>farther</span>
+          </div>
+        </div>
+
+        <div class="mini-result">
+          <div class="mini-result-title">Current result</div>
+          <div id="current-force-word" class="mini-result-word">Medium</div>
+          <p id="current-force-text" class="mini-result-text">
+            The objects have medium mass and medium distance, so the pull is medium.
+          </p>
+        </div>
+
+        <div class="action-row">
+          <button id="check-answer-button" data-id="check-answer-button" class="btn check-button" type="button">
+            Check challenge
+          </button>
+          <button id="reset-button" data-id="reset-button" class="btn reset-button" type="button">
+            Reset
+          </button>
+        </div>
+
+        <div id="feedback-message" data-id="feedback-message" class="feedback-message">
+          Try increasing both masses and decreasing the distance. The arrows should become brighter and thicker.
+        </div>
+
+        <div class="concept-box">
+          <div class="concept-row">
+            <span class="dot"></span>
+            <span><strong>More mass</strong> gives a stronger gravitational pull.</span>
+          </div>
+          <div class="concept-row">
+            <span class="dot"></span>
+            <span><strong>More distance</strong> gives a weaker gravitational pull.</span>
+          </div>
+          <div class="concept-row">
+            <span class="dot"></span>
+            <span>The force meter is simplified so beginners can see the pattern clearly.</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const idsToMap = [
+      "object-a-display",
+      "object-b-display",
+      "gravity-arrows",
+      "mass-a-slider",
+      "mass-b-slider",
+      "distance-slider",
+      "mass-a-value",
+      "mass-b-value",
+      "distance-value",
+      "force-meter",
+      "rule-card",
+      "challenge-card",
+      "check-answer-button",
+      "reset-button",
+      "feedback-message"
+    ];
+
+    const stage = document.getElementById("space-stage");
+    const massASlider = document.getElementById("mass-a-slider");
+    const massBSlider = document.getElementById("mass-b-slider");
+    const distanceSlider = document.getElementById("distance-slider");
+
+    const massAValue = document.getElementById("mass-a-value");
+    const massBValue = document.getElementById("mass-b-value");
+    const distanceValue = document.getElementById("distance-value");
+
+    const objectA = document.getElementById("object-a-display");
+    const objectB = document.getElementById("object-b-display");
+    const objectALabel = document.getElementById("object-a-label");
+    const objectBLabel = document.getElementById("object-b-label");
+
+    const forceScore = document.getElementById("force-score");
+    const forceFill = document.getElementById("force-fill");
+    const forceWord = document.getElementById("force-word");
+    const currentForceWord = document.getElementById("current-force-word");
+    const currentForceText = document.getElementById("current-force-text");
+    const feedback = document.getElementById("feedback-message");
+
+    const checkButton = document.getElementById("check-answer-button");
+    const resetButton = document.getElementById("reset-button");
+
+    let currentCategory = "medium";
+    let completed = false;
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function getCategory(score) {
+      if (score < 18) return { key: "weak", label: "Weak", text: "Weak gravitational pull" };
+      if (score < 45) return { key: "medium", label: "Medium", text: "Medium gravitational pull" };
+      if (score < 75) return { key: "strong", label: "Strong", text: "Strong gravitational pull" };
+      return { key: "very-strong", label: "Very strong", text: "Very strong gravitational pull" };
+    }
+
+    function calculate() {
+      const massA = Number(massASlider.value);
+      const massB = Number(massBSlider.value);
+      const distance = Number(distanceSlider.value);
+
+      // Beginner-friendly normalized version of F ∝ (m1 × m2) / distance².
+      const raw = (massA * massB) / (distance * distance);
+      const score = clamp(Math.round(raw * 11.2), 3, 100);
+      const category = getCategory(score);
+
+      return { massA, massB, distance, raw, score, category };
+    }
+
+    function updateVisual(sendMap = true) {
+      const { massA, massB, distance, score, category } = calculate();
+      currentCategory = category.key;
+
+      massAValue.textContent = massA;
+      massBValue.textContent = massB;
+      distanceValue.textContent = distance;
+
+      objectALabel.textContent = `Mass: ${massA}`;
+      objectBLabel.textContent = `Mass: ${massB}`;
+
+      const leftCenter = 50 - distance / 2;
+      const rightCenter = 50 + distance / 2;
+      const arrowLeft = leftCenter + 10;
+      const arrowWidth = Math.max(8, rightCenter - leftCenter - 20);
+
+      stage.style.setProperty("--obj-a-center", `${leftCenter}%`);
+      stage.style.setProperty("--obj-b-center", `${rightCenter}%`);
+      stage.style.setProperty("--distance-width", `${rightCenter - leftCenter}%`);
+      stage.style.setProperty("--arrow-left", `${arrowLeft}%`);
+      stage.style.setProperty("--arrow-width", `${arrowWidth}%`);
+
+      objectA.style.setProperty("--size", `${108 + massA * 0.9}px`);
+      objectB.style.setProperty("--size", `${96 + massB * 0.82}px`);
+
+      const arrowHeight = 5 + score * 0.22;
+      const opacity = 0.22 + score / 128;
+      const glow = 5 + score * 0.38;
+
+      document.documentElement.style.setProperty("--arrow-height", `${arrowHeight}px`);
+      document.documentElement.style.setProperty("--arrow-opacity", `${opacity}`);
+      document.documentElement.style.setProperty("--arrow-glow", `${glow}px`);
+
+      forceScore.textContent = score;
+      forceFill.style.width = `${score}%`;
+      forceWord.textContent = category.label;
+      currentForceWord.textContent = category.label;
+
+      if (category.key === "weak") {
+        currentForceText.textContent = "The pull is weak. Try moving the objects closer or increasing one of the masses.";
+      } else if (category.key === "medium") {
+        currentForceText.textContent = "The pull is medium. More mass will strengthen it, but more distance will weaken it.";
+      } else if (category.key === "strong") {
+        currentForceText.textContent = "The pull is strong because the masses are large enough or the objects are close enough.";
+      } else {
+        currentForceText.textContent = "The pull is very strong. Large masses and short distance make gravity strongest.";
+      }
+
+      [objectA, objectB, document.getElementById("gravity-arrows"), document.getElementById("force-meter")].forEach((el) => {
+        el.classList.remove("flash");
+        void el.offsetWidth;
+        el.classList.add("flash");
+      });
+
+      if (sendMap) {
+        window.requestAnimationFrame(sendComponentMap);
+      }
+    }
+
+    function sendComponentMap() {
+      const centersById = {};
+
+      idsToMap.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        const rect = el.getBoundingClientRect();
+        centersById[id] = {
+          id,
+          x: Math.round(rect.left + rect.width / 2),
+          y: Math.round(rect.top + rect.height / 2),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          label: el.getAttribute("aria-label") || el.textContent.trim().replace(/\s+/g, " ").slice(0, 90)
+        };
+      });
+
+      window.parent.postMessage({
+        type: "COMPONENTS_MAPPED",
+        centersById
+      }, "*");
+    }
+
+    function sendQuizResult(isCorrect, explanation) {
+      window.parent.postMessage({
+        type: "QUIZ_RESULT",
+        isCorrect,
+        question: "Can you make the gravitational force very strong?",
+        explanation
+      }, "*");
+    }
+
+    function sendQuizFinished() {
+      window.parent.postMessage({
+        type: "QUIZ_FINISHED",
+        score: 1,
+        total: 1,
+        percent: 100
+      }, "*");
+    }
+
+    function checkChallenge() {
+      const result = calculate();
+
+      if (result.category.key === "very-strong") {
+        feedback.textContent = "Excellent. You made gravity very strong by using large mass, short distance, or both.";
+        sendQuizResult(true, "Correct. Gravity becomes strongest when masses are large and the distance is small.");
+
+        if (!completed) {
+          completed = true;
+          sendQuizFinished();
+        }
+      } else {
+        feedback.textContent = "Not yet. To make gravity very strong, increase both masses and move the objects closer together.";
+        sendQuizResult(false, "Try increasing mass and decreasing distance. More mass strengthens gravity, while more distance weakens gravity.");
+      }
+
+      feedback.classList.remove("flash");
+      void feedback.offsetWidth;
+      feedback.classList.add("flash");
+      sendComponentMap();
+    }
+
+    function reset() {
+      completed = false;
+      massASlider.value = 50;
+      massBSlider.value = 50;
+      distanceSlider.value = 50;
+      feedback.textContent = "Reset complete. Try increasing both masses and decreasing the distance.";
+      updateVisual();
+    }
+
+    [massASlider, massBSlider, distanceSlider].forEach((slider) => {
+      slider.addEventListener("input", () => updateVisual());
+    });
+
+    checkButton.addEventListener("click", checkChallenge);
+    resetButton.addEventListener("click", reset);
+
+    window.addEventListener("resize", () => {
+      window.requestAnimationFrame(sendComponentMap);
+    });
+
+    window.addEventListener("load", () => {
+      updateVisual(false);
+      setTimeout(sendComponentMap, 80);
+    });
+
+    // Compatible with LessonPage iframe teacher tools.
+    window.addEventListener("message", (event) => {
+      const data = event.data;
+      if (!data || (data.type !== "SHOW_COMPONENT" && data.type !== "CLICK_COMPONENT")) return;
+
+      if (data.type === "CLICK_COMPONENT" && data.id) {
+        const el = document.getElementById(data.id);
+        if (!el) return;
+
+        if (typeof el.click === "function") {
+          setTimeout(() => el.click(), 120);
+        }
+      }
+
+      if (data.type === "SHOW_COMPONENT") {
+        sendComponentMap();
+      }
+    });
+  </script>
+</body>
+</html>

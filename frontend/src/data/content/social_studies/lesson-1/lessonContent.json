@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Geography",
+  "teacherName": "Dr. Einstein",
+  "subject": "Social Studies",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Geography.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Geography",
+      "text": "Welcome to Geography. In this lesson, you will learn about Maps and locations."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Geography",
+      "imageDescription": "An educational diagram showing concepts of Geography.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Geography",
+      "htmlDescription": "Interactive exercise where students practice Geography.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

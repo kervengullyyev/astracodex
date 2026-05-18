@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Star Color Temperature Explorer</title>
+  
+  <!-- Premium Typography Imports -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: transparent; /* Seamless blend with app background */
+      --ink: #0F172A;
+      --muted: #64748B;
+      --line: rgba(226, 232, 240, 0.8);
+      --card: rgba(255, 255, 255, 0.85);
+      --accent: #4F46E5;
+      --accent-soft: #EEF2FF;
+      --shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05), 0 0 0 1px rgba(15, 23, 42, 0.02);
+      --radius: 28px;
+    }
+    
+    * { box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; margin: 0; }
+    
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 8px 12px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .app {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    /* Header Component styling matching the main app */
+    header {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 18px;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+    }
+    
+    h1 {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(20px, 2.5vw, 26px);
+      font-weight: 800;
+      color: #0F172A;
+      letter-spacing: -0.02em;
+    }
+    
+    .subtitle {
+      margin-top: 4px;
+      font-size: clamp(13px, 1.4vw, 15px);
+      color: var(--muted);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    /* Sleek Range Slider Track & Thumb Overhaul */
+    .slider-control {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      background: #FFFFFF;
+      box-shadow: inset 0 0 0 1.5px #E2E8F0, 0 4px 12px rgba(0, 0, 0, 0.02);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      position: relative;
+    }
+    
+    .slider-control input[type="range"] {
+      -webkit-appearance: none;
+      width: clamp(160px, 22vw, 280px);
+      height: 8px;
+      border-radius: 999px;
+      background: #E2E8F0;
+      outline: none;
+      margin: 0;
+      cursor: pointer;
+    }
+    
+    .slider-control input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 4px solid #FFFFFF;
+      box-shadow: 0 0 0 1.5px var(--accent), 0 4px 10px rgba(79, 70, 229, 0.3);
+      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .slider-control input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+    
+    .slider-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      min-width: 78px;
+      text-align: right;
+    }
+    
+    main {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+    
+    /* stage wrapper to match Section 13 */
+    .stage-wrapper {
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      position: relative;
+    }
+    
+    /* Rectangular Viewport Frame matching Section 13 */
+    .stage-card {
+      width: clamp(380px, 48vw, 520px);
+      height: clamp(380px, 48vw, 520px);
+      border-radius: 24px;
+      background: #090B11;
+      border: 6px solid #1E293B;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), inset 0 0 40px rgba(0, 0, 0, 0.8), 0 0 0 1.5px rgba(79, 70, 229, 0.2);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    
+    .space-bg {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 40px 70px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 120px 80px, #e2e8f0, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 200px 50px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 300px 150px, #cbd5e1, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 150px 220px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 80px 280px, #ffffff, rgba(0,0,0,0));
+      background-size: cover;
+      opacity: 0.85;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    /* High-Tech Monospace Space Observatory HUD indicators */
+    .hud-indicator {
+      position: absolute;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.35);
+      text-transform: uppercase;
+      z-index: 6;
+      pointer-events: none;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.15);
+      transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
+    .hud-top-left { top: 12px; left: 16px; }
+    .hud-top-right { top: 12px; right: 16px; }
+    .hud-bottom-left { bottom: 48px; left: 16px; }
+    .hud-bottom-right { bottom: 48px; right: 16px; }
+    
+    .star-view {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      z-index: 3;
+      padding: 24px;
+    }
+    
+    .star-view svg {
+      width: 100%;
+      height: 100%;
+      max-width: 82%;
+      max-height: 82%;
+      overflow: visible;
+    }
+    
+    /* Dynamic Plasma animations */
+    @keyframes rotateFlares {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes coronaPulse {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.52; transform: scale(1.06); }
+    }
+    @keyframes innerPulse {
+      0%, 100% { opacity: 0.75; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(0.95); }
+    }
+    #starFlares {
+      transform-origin: 200px 200px;
+      animation: rotateFlares 22s linear infinite;
+    }
+    #starGlowOuter {
+      transform-origin: 200px 200px;
+      animation: coronaPulse 4.2s ease-in-out infinite;
+    }
+    #starGlowInner {
+      transform-origin: 200px 200px;
+      animation: innerPulse 3s ease-in-out infinite;
+    }
+    
+    .side-card {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: transparent;
+      justify-content: space-between;
+    }
+    
+    /* Premium Cockpit Space Observatory Obsidian Panels */
+    .explanation-panel {
+      background: #090B10;
+      border-radius: 24px;
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6), var(--shadow);
+      flex: 1;
+      min-height: 0;
+    }
+    
+    .class-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+      margin-bottom: 4px;
+    }
+    
+    .class-badge {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+    }
+    
+    .class-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .class-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+    
+    .class-color {
+      font-size: 13px;
+      color: #94A3B8;
+      font-weight: 600;
+    }
+    
+    .desc-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #CBD5E1;
+      margin: 0;
+      font-weight: 500;
+    }
+    
+    .examples-box {
+      background: rgba(129, 140, 248, 0.06);
+      border: 1px solid rgba(129, 140, 248, 0.15);
+      border-radius: 16px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #CBD5E1;
+    }
+    
+    .examples-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      color: #818CF8;
+      margin-bottom: 4px;
+    }
+    
+    /* Wien's Law Summary panel */
+    .summary-card {
+      background: #090B10;
+      border-radius: 24px;
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6), var(--shadow);
+    }
+    
+    .summary-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    #blackbody-explanation-text {
+      font-size: 13px;
+      line-height: 1.52;
+      color: #94A3B8;
+      font-weight: 500;
+      margin: 0;
+    }
+    
+    .sun-marker-container {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 650;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      padding: 6px 12px;
+      border-radius: 999px;
+      color: #F1F5F9;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 7;
+      pointer-events: none;
+    }
+    
+    .sun-dot {
+      width: 8px;
+      height: 8px;
+      background: #F59E0B;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #F59E0B;
+    }
+    
+    .highlight-target {
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 0 0 4px #4F46E5, 0 0 20px rgba(79, 70, 229, 0.4) !important;
+      outline: 3px solid #4F46E5 !important;
+      outline-offset: 2px !important;
+      transition: box-shadow 0.2s ease, outline 0.2s ease;
+    }
+    
+    @media (max-width: 820px) {
+      main { grid-template-columns: 1fr; }
+      header { grid-template-columns: 1fr; }
+      .controls { width: 100%; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Star Color Temperature Explorer</h1>
+        <div class="subtitle">Tune star temperature to examine the relationship between surface heat and visible colors.</div>
+      </div>
+      <div class="controls">
+        <label class="slider-control" for="temperature-slider">Temperature
+          <input type="range" id="temperature-slider" data-id="temperature-slider" min="2000" max="30000" step="100" value="5800">
+          <span class="slider-val" id="temperature-value" data-id="temperature-value">5,800 K</span>
+        </label>
+      </div>
+    </header>
+
+    <main>
+      <div class="stage-wrapper">
+        <section class="stage-card" aria-label="Interactive blackbody star preview">
+          <div class="space-bg"></div>
+          
+          <!-- High-Tech Monospace Space Observatory HUD -->
+          <div class="hud-indicator hud-top-left">SYS: ANALYZING // SPECTRA: BLACKBODY</div>
+          <div class="hud-indicator hud-top-right">DECK: 09-C // CORE: CALIB</div>
+          <div class="hud-indicator hud-bottom-left" id="hud-star-class">TGT: G-CLASS STAR // SOLAR_TYPE</div>
+          <div class="hud-indicator hud-bottom-right" id="hud-star-wien">TEMP: 5,800 K // WIEN'S LAW</div>
+  
+          <div class="star-view" id="star-preview" data-id="star-preview">
+            <svg viewBox="0 0 400 400">
+              <!-- Outermost soft blackbody glow -->
+              <circle id="starGlowOuter" cx="200" cy="200" r="160" fill="url(#outerRadial)" opacity="0.32"></circle>
+              <!-- Middle corona glow -->
+              <circle id="starGlowInner" cx="200" cy="200" r="110" fill="url(#innerRadial)" opacity="0.75"></circle>
+              <!-- Solid glowing Star Sphere -->
+              <circle id="starSphere" cx="200" cy="200" r="65" fill="#FFF7CC"></circle>
+  
+              <!-- Star Flare particles -->
+              <g id="starFlares" stroke-linecap="round" opacity="0.85">
+                <!-- Cardinal directions with advanced telemetry dashes -->
+                <line x1="200" y1="115" x2="200" y2="65" stroke="#FFF7CC" stroke-width="4.5" stroke-dasharray="2 2"></line>
+                <line x1="200" y1="285" x2="200" y2="335" stroke="#FFF7CC" stroke-width="4.5" stroke-dasharray="2 2"></line>
+                <line x1="115" y1="200" x2="65" y2="200" stroke="#FFF7CC" stroke-width="4.5" stroke-dasharray="2 2"></line>
+                <line x1="285" y1="200" x2="335" y2="200" stroke="#FFF7CC" stroke-width="4.5" stroke-dasharray="2 2"></line>
+                
+                <!-- Diagonal directions -->
+                <line x1="140" y1="140" x2="105" y2="105" stroke="#FFF7CC" stroke-width="3"></line>
+                <line x1="260" y1="260" x2="295" y2="295" stroke="#FFF7CC" stroke-width="3"></line>
+                <line x1="140" y1="260" x2="105" y2="295" stroke="#FFF7CC" stroke-width="3"></line>
+                <line x1="260" y1="140" x2="295" y2="105" stroke="#FFF7CC" stroke-width="3"></line>
+              </g>
+  
+              <defs>
+                <radialGradient id="outerRadial" cx="50%" cy="50%" r="50%">
+                  <stop id="outerStop0" offset="0%" stop-color="#FFBD4D"></stop>
+                  <stop id="outerStop100" offset="100%" stop-color="rgba(9,11,17,0)"></stop>
+                </radialGradient>
+                <radialGradient id="innerRadial" cx="50%" cy="50%" r="50%">
+                  <stop id="innerStop0" offset="0%" stop-color="#FFF2A3"></stop>
+                  <stop id="innerStop100" offset="100%" stop-color="rgba(9,11,17,0)"></stop>
+                </radialGradient>
+              </defs>
+            </svg>
+          </div>
+  
+          <div class="sun-marker-container" id="sun-comparison-marker" data-id="sun-comparison-marker">
+            <i class="sun-dot"></i>
+            <span>Our Sun is a G-Class Star (5,778 K)</span>
+          </div>
+        </section>
+      </div>
+
+      <aside class="side-card" aria-label="Star spectral classifications">
+        <section class="explanation-panel" id="star-explanation-card" data-id="star-explanation-card">
+          <div class="class-header">
+            <div class="class-info">
+              <div class="class-name" id="star-class-name">Class G Star</div>
+              <div class="class-color" id="star-class-color">Yellowish White</div>
+            </div>
+            <div class="class-badge" id="star-class-badge" style="background:#F2C94C">G</div>
+          </div>
+          <p class="desc-text" id="star-class-desc">G-type stars are medium-sized stars with moderate temperatures. They produce high amounts of light and have stable lifespans spanning billions of years.</p>
+          
+          <div class="examples-box">
+            <div class="examples-title">Stellar Examples</div>
+            <div id="star-class-examples">Our Sun, Alpha Centauri A, Capella</div>
+          </div>
+        </section>
+
+        <section class="summary-card">
+          <div class="summary-title">
+            <svg style="width:16px; height:16px; color:var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Wien's Law and Stellar Temperatures</span>
+          </div>
+          <p id="blackbody-explanation-text">A star's color depends directly on its surface temperature. The cooler a star is, the longer the wavelength of light it radiates, causing it to glow red (around 3,000 K). Extremely hot stars radiate high-energy, short-wavelength light, glowing brilliant blue (above 20,000 K). Pure white stars sit balanced in the middle.</p>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const componentIds = [
+      'temperature-slider',
+      'temperature-value',
+      'star-preview',
+      'starGlowOuter',
+      'starGlowInner',
+      'starSphere',
+      'starFlares',
+      'sun-comparison-marker',
+      'star-explanation-card',
+      'star-class-name',
+      'star-class-color',
+      'star-class-badge',
+      'star-class-desc',
+      'star-class-examples',
+      'blackbody-explanation-text',
+      'hud-star-class',
+      'hud-star-wien'
+    ];
+
+    const tempInput = document.getElementById('temperature-slider');
+    const tempValLabel = document.getElementById('temperature-value');
+
+    // SVG elements to recolor
+    const starSphere = document.getElementById('starSphere');
+    const starGlowOuter = document.getElementById('starGlowOuter');
+    const starGlowInner = document.getElementById('starGlowInner');
+    const starFlares = document.getElementById('starFlares');
+    
+    const outerStop0 = document.getElementById('outerStop0');
+    const innerStop0 = document.getElementById('innerStop0');
+
+    // Explanation panel targets
+    const starClassName = document.getElementById('star-class-name');
+    const starClassColor = document.getElementById('star-class-color');
+    const starClassBadge = document.getElementById('star-class-badge');
+    const starClassDesc = document.getElementById('star-class-desc');
+    const starClassExamples = document.getElementById('star-class-examples');
+
+    // Wien's Law oscillator pitch variables
+    let audioCtx = null;
+    let humOsc = null;
+    let humGain = null;
+    let isUserInteracting = false;
+
+    // Detect user interactions to trigger oscillator frequency hum safely
+    tempInput.addEventListener('mousedown', () => { isUserInteracting = true; });
+    tempInput.addEventListener('touchstart', () => { isUserInteracting = true; });
+    window.addEventListener('mouseup', () => { isUserInteracting = false; });
+    window.addEventListener('touchend', () => { isUserInteracting = false; });
+
+    function playStarSound(frequency) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        if (!humOsc) {
+          humOsc = audioCtx.createOscillator();
+          humGain = audioCtx.createGain();
+          
+          humOsc.type = 'sine';
+          humOsc.connect(humGain);
+          humGain.connect(audioCtx.destination);
+          
+          humOsc.start();
+        }
+        
+        humOsc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        
+        // Soft click-hum sound level
+        humGain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+        humGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+      } catch (e) {
+        console.warn("Audio context hum blocked:", e);
+      }
+    }
+
+    // Stellar class definitions with custom aesthetic color configurations
+    const starData = [
+      { maxTemp: 3700, class: 'M', name: 'Class M Star', color: 'Orange-Red', badgeBg: '#EF4444', sphereColor: '#EF4444', glowColor: '#DC2626', desc: 'Coolest main sequence stars, representing over 75% of nearby stars. They are small and have extremely long lifespans.', examples: 'Betelgeuse, Proxima Centauri, Barnard\'s Star' },
+      { maxTemp: 5200, class: 'K', name: 'Class K Star', color: 'Pale Orange', badgeBg: '#F97316', sphereColor: '#F97316', glowColor: '#EA580C', desc: 'Slightly cooler than our Sun. They are highly stable orange dwarfs and are key targets in the search for habitable planets.', examples: 'Arcturus, Aldebaran, Epsilon Eridani' },
+      { maxTemp: 6000, class: 'G', name: 'Class G Star', color: 'Yellowish White', badgeBg: '#EAB308', sphereColor: '#FDE047', glowColor: '#CA8A04', desc: 'Medium-sized yellow dwarf stars. They fuse hydrogen stably for roughly 10 billion years. Our Sun is a prime example.', examples: 'Our Sun, Alpha Centauri A, Capella' },
+      { maxTemp: 7500, class: 'F', name: 'Class F Star', color: 'White', badgeBg: '#F1F5F9', sphereColor: '#FFFFFF', glowColor: '#E2E8F0', desc: 'Slightly larger and hotter than the Sun. They shine a brilliant, powerful pure white and have active convection zones.', examples: 'Procyon, Polaris, Canopus' },
+      { maxTemp: 10000, class: 'A', name: 'Class A Star', color: 'Blue-White', badgeBg: '#93C5FD', sphereColor: '#EFF6FF', glowColor: '#60A5FA', desc: 'Extremely bright and hot stars. They rotate rapidly and emit strong UV radiation, making nearby planetary life highly unlikely.', examples: 'Sirius, Vega, Deneb' },
+      { maxTemp: 30000, class: 'B', name: 'Class B Star', color: 'Deep Blue-White', badgeBg: '#3B82F6', sphereColor: '#DBEAFE', glowColor: '#2563EB', desc: 'Luminous blue giants. They burn fuel extremely rapidly, lasting only tens of millions of years before experiencing supernovae.', examples: 'Rigel, Spica, Bellatrix' },
+      { maxTemp: Infinity, class: 'O', name: 'Class O Star', color: 'Blue', badgeBg: '#1D4ED8', sphereColor: '#93C5FD', glowColor: '#1E40AF', desc: 'Hottest, largest, and most luminous stars. They shine bright blue, emit ferocious stellar winds, and end quickly in violent explosions.', examples: 'Alnitak, Naos, Zeta Puppis' }
+    ];
+
+    function highlightElement(target) {
+      if (!target) return;
+      target.classList.add('highlight-target');
+      clearTimeout(target.__highlightTimer);
+      target.__highlightTimer = setTimeout(() => {
+        target.classList.remove('highlight-target');
+      }, 1200);
+    }
+
+    function getElementByIdOrDataId(id) {
+      if (!id) return null;
+      if (window.CSS && CSS.escape) {
+        return document.getElementById(id) || document.querySelector(`[data-id="${CSS.escape(id)}"]`);
+      }
+      return document.getElementById(id) || document.querySelector(`[data-id="${String(id).replace(/"/g, '\"')}"]`);
+    }
+
+    function sendComponentMap() {
+      const components = componentIds
+        .map(id => {
+          const el = getElementByIdOrDataId(id);
+          if (!el) return null;
+          const rect = el.getBoundingClientRect();
+          return {
+            id,
+            dataId: el.getAttribute('data-id') || id,
+            center: {
+              x: rect.left + rect.width / 2,
+              y: rect.top + rect.height / 2
+            },
+            rect: {
+              left: rect.left,
+              top: rect.top,
+              width: rect.width,
+              height: rect.height
+            }
+          };
+        })
+        .filter(Boolean);
+
+      window.parent.postMessage({
+        type: 'COMPONENTS_MAPPED',
+        components
+      }, '*');
+    }
+
+    function setTemperature(value) {
+      const numericValue = Number(value);
+      if (!Number.isFinite(numericValue)) return;
+      const min = Number(tempInput.min || 2000);
+      const max = Number(tempInput.max || 30000);
+      const clamped = Math.max(min, Math.min(max, numericValue));
+      tempInput.value = String(clamped);
+      updateSimulation();
+      highlightElement(tempInput);
+      sendComponentMap();
+    }
+
+    function annotateElement(target, content) {
+      const el = typeof target === 'string' ? getElementByIdOrDataId(target) : target;
+      if (!el || !content) return;
+
+      const oldTip = document.getElementById('ai-component-annotation');
+      if (oldTip) oldTip.remove();
+
+      const rect = el.getBoundingClientRect();
+      const tip = document.createElement('div');
+      tip.id = 'ai-component-annotation';
+      tip.textContent = content;
+      tip.style.cssText = [
+        'position:fixed',
+        `left:${Math.max(8, rect.left)}px`,
+        `top:${Math.max(8, rect.top - 44)}px`,
+        'max-width:280px',
+        'z-index:9999',
+        'background:#4F46E5',
+        'color:white',
+        'padding:8px 10px',
+        'border-radius:10px',
+        'font:600 12px Inter,system-ui,sans-serif',
+        'box-shadow:0 10px 24px rgba(15,23,42,0.25)',
+        'pointer-events:none'
+      ].join(';');
+
+      document.body.appendChild(tip);
+      setTimeout(() => tip.remove(), 2600);
+    }
+
+    function updateSimulation() {
+      const temp = Number(tempInput.value);
+      tempValLabel.textContent = `${temp.toLocaleString()} K`;
+
+      // Find the corresponding stellar class data
+      const data = starData.find(d => temp <= d.maxTemp) || starData[starData.length - 1];
+
+      // Update Star Sphere and Corona Colors
+      starSphere.setAttribute('fill', data.sphereColor);
+      outerStop0.setAttribute('stop-color', data.glowColor);
+      innerStop0.setAttribute('stop-color', data.sphereColor);
+
+      const flareLines = starFlares.querySelectorAll('line');
+      flareLines.forEach(l => l.setAttribute('stroke', data.sphereColor));
+
+      // Adjust outer glow radius based on temperature magnitude (proxy for brightness)
+      const scale = 110 + (temp / 30000) * 50;
+      starGlowOuter.setAttribute('r', scale.toFixed(1));
+
+      // Update Explanation Panel
+      starClassName.textContent = data.name;
+      starClassColor.textContent = data.color;
+      starClassBadge.textContent = data.class;
+      starClassBadge.style.background = data.badgeBg;
+      
+      // Keep text color readable on G/F white and yellow dwarfs
+      if (data.class === 'F' || data.class === 'G') {
+        starClassBadge.style.color = '#0F172A';
+      } else {
+        starClassBadge.style.color = '#FFFFFF';
+      }
+      
+      starClassDesc.textContent = data.desc;
+      starClassExamples.textContent = data.examples;
+
+      // Wien's Law Audio Feedback
+      if (isUserInteracting) {
+        const soundFreq = 180 + ((temp - 2000) / 28000) * 300;
+        playStarSound(soundFreq);
+      }
+
+      // Update High-Tech space monitor HUD indicators
+      const hudStarClass = document.getElementById('hud-star-class');
+      if (hudStarClass) {
+        hudStarClass.innerText = `TGT: ${data.name.toUpperCase()} // ${data.class}-CLASS`;
+      }
+      
+      const hudStarWien = document.getElementById('hud-star-wien');
+      if (hudStarWien) {
+        hudStarWien.innerText = `TEMP: ${temp.toLocaleString()} K // WIEN'S LAW`;
+        hudStarWien.style.color = data.badgeBg;
+        hudStarWien.style.textShadow = `0 0 6px ${data.badgeBg}80`;
+      }
+
+      sendComponentMap();
+    }
+
+    tempInput.addEventListener('input', updateSimulation);
+    tempInput.addEventListener('change', sendComponentMap);
+
+    // Coordinate/control handlers for external AI tutor
+    window.addEventListener('message', (event) => {
+      const data = event.data || {};
+      const type = data.type || data.action;
+
+      if (type === 'SHOW_COMPONENT' || type === 'HIGHLIGHT_ELEMENT') {
+        const targetId = data.id || data.target || data.componentId;
+        const el = getElementByIdOrDataId(targetId);
+        if (el) {
+          highlightElement(el);
+          if (typeof el.scrollIntoView === 'function') {
+            el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+          }
+        }
+      }
+
+      if (type === 'CLICK_COMPONENT') {
+        const targetId = data.id || data.target || data.componentId;
+        const el = getElementByIdOrDataId(targetId);
+        if (el) {
+          highlightElement(el);
+          setTimeout(() => {
+            if (el === tempInput && data.value !== undefined) {
+              setTemperature(data.value);
+            } else if (typeof el.click === 'function') {
+              el.click();
+            }
+          }, 150);
+        }
+      }
+
+      if (type === 'SET_WIDGET_STATE') {
+        const newState = data.state || data.values || {};
+        if (newState.temperature !== undefined) setTemperature(newState.temperature);
+        if (newState.temperature_slider !== undefined) setTemperature(newState.temperature_slider);
+        if (newState.temperatureValue !== undefined) setTemperature(newState.temperatureValue);
+      }
+
+      if (type === 'SET_COMPONENT_VALUE') {
+        const targetId = data.id || data.target || data.componentId;
+        if (targetId === 'temperature-slider') setTemperature(data.value);
+      }
+
+      if (type === 'ANNOTATE_ELEMENT') {
+        const targetId = data.id || data.target || data.componentId;
+        annotateElement(targetId, data.content || data.text || data.message);
+      }
+
+      if (type === 'GET_COMPONENTS' || type === 'REQUEST_COMPONENTS') {
+        sendComponentMap();
+      }
+    });
+
+    window.addEventListener('resize', sendComponentMap);
+    window.addEventListener('load', () => {
+      updateSimulation();
+    });
+  </script>
+</body>
+</html>

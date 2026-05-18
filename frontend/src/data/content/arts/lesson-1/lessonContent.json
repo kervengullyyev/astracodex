@@ -1,0 +1,109 @@
+{
+  "lessonTitle": "Drawing Basics",
+  "teacherName": "Dr. Einstein",
+  "subject": "Art",
+  "level": "Beginner",
+  "lessonGoal": "Teach students how to recognize and use basic lines, shapes, and simple forms in drawing.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Drawing Basics",
+      "text": "Welcome to Drawing Basics. In this lesson, you will learn how simple lines and shapes can be used to create drawings. Every drawing starts with basic elements such as straight lines, curved lines, circles, squares, triangles, and rectangles."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Lines and Shapes",
+      "imageDescription": "A clean educational diagram showing basic drawing elements: straight line, curved line, circle, square, triangle, rectangle, and simple objects made from these shapes such as a house, sun, tree, and face.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "straight-line",
+          "label": "Straight line",
+          "x": 120,
+          "y": 100
+        },
+        {
+          "id": "curved-line",
+          "label": "Curved line",
+          "x": 300,
+          "y": 100
+        },
+        {
+          "id": "circle",
+          "label": "Circle",
+          "x": 120,
+          "y": 260
+        },
+        {
+          "id": "square",
+          "label": "Square",
+          "x": 300,
+          "y": 260
+        },
+        {
+          "id": "triangle",
+          "label": "Triangle",
+          "x": 480,
+          "y": 260
+        },
+        {
+          "id": "rectangle",
+          "label": "Rectangle",
+          "x": 660,
+          "y": 260
+        },
+        {
+          "id": "simple-house",
+          "label": "House made from shapes",
+          "x": 220,
+          "y": 500
+        },
+        {
+          "id": "simple-tree",
+          "label": "Tree made from shapes",
+          "x": 520,
+          "y": 500
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Find the Basic Shapes",
+      "htmlDescription": "Interactive exercise where students click on lines and shapes in a drawing. When they click correctly, the shape name appears with a short explanation.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "straight-line",
+          "name": "Straight line",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "circle",
+          "name": "Circle",
+          "interactionType": "displayOnly"
+        },
+        {
+          "id": "square",
+          "name": "Square",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "triangle",
+          "name": "Triangle",
+          "interactionType": "displayOnly"
+        },
+        {
+          "id": "rectangle",
+          "name": "Rectangle",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

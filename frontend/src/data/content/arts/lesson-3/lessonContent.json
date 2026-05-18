@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Painting",
+  "teacherName": "Dr. Einstein",
+  "subject": "Arts",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Painting.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Painting",
+      "text": "Welcome to Painting. In this lesson, you will learn about Brush techniques."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Painting",
+      "imageDescription": "An educational diagram showing concepts of Painting.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Painting",
+      "htmlDescription": "Interactive exercise where students practice Painting.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

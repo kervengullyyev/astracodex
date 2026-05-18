@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Build a Star Life Cycle</title>
+
+  <!-- Premium Typography Imports -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: transparent;
+      /* Seamless blend with app background */
+      --bg-card: rgba(255, 255, 255, 0.85);
+      /* Glassmorphic card */
+      --bg-panel: rgba(248, 250, 252, 0.85);
+      /* Slate-50 panel inside card */
+      --ink: #0F172A;
+      /* Slate-900 */
+      --ink-dark: #000000;
+      --muted: #64748B;
+      /* Slate-500 */
+      --muted-2: #94A3B8;
+      /* Slate-400 */
+      --soft: #4F46E5;
+      /* Indigo-600 */
+      --line: rgba(226, 232, 240, 0.8);
+      /* Slate-200 border */
+      --line-strong: rgba(203, 213, 225, 0.95);
+      /* Slate-300 border */
+      --accent: #4F46E5;
+      /* Indigo-600 */
+      --accent-soft: #EEF2FF;
+      /* Indigo-50 */
+      --accent-2: #FF7AC8;
+      /* Custom star pink */
+      --accent-3: #8B5CF6;
+      /* Violet-500 */
+      --success: #10B981;
+      /* Emerald-500 */
+      --success-bg: #ECFDF5;
+      /* Emerald-50 */
+      --danger: #EF4444;
+      /* Red-500 */
+      --danger-bg: #FEF2F2;
+      /* Red-50 */
+      --warning: #F59E0B;
+      /* Amber-500 */
+      --warning-bg: #FEF3C7;
+      /* Amber-50 */
+      --shadow:
+        0 20px 40px -15px rgba(15, 23, 42, 0.05),
+        0 0 0 1px rgba(15, 23, 42, 0.015);
+      --shadow-soft:
+        0 10px 24px -10px rgba(15, 23, 42, 0.03),
+        inset 0 1px 2px rgba(255, 255, 255, 0.9);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: clamp(12px, 1.8vw, 20px);
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      /* background:
+        radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.05), transparent 42%),
+        radial-gradient(circle at 90% 10%, rgba(6, 182, 212, 0.04), transparent 36%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.04), transparent 42%); */
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 1.5vw, 16px);
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    header {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      padding: clamp(14px, 2vw, 20px);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--bg-card);
+      backdrop-filter: blur(18px) saturate(1.2);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero-copy {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(79, 70, 229, 0.08);
+      border: 1px solid rgba(79, 70, 229, 0.15);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(22px, 3.2vw, 36px);
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin-top: 9px;
+      font-size: clamp(12.5px, 1.4vw, 14.5px);
+      line-height: 1.45;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .header-panel {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      min-width: 260px;
+    }
+
+    .mission-stat {
+      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      background: var(--bg-panel);
+      border: 1.5px solid var(--line);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .stat-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .progress-track {
+      margin-top: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent-2), var(--accent), var(--success));
+      transition: width 260ms cubic-bezier(.16, 1, .3, 1);
+      box-shadow: 0 0 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 9px;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 10px 18px;
+      background: #FFFFFF;
+      color: var(--ink);
+      box-shadow: inset 0 0 0 1.5px var(--line), 0 2px 4px rgba(15, 23, 42, 0.02);
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: var(--bg-panel);
+      box-shadow: inset 0 0 0 1.5px var(--line-strong), 0 6px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    button:focus-visible,
+    .drag-card:focus-visible,
+    .drop-zone:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    button.primary-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #fff;
+      box-shadow: 0 8px 20px -6px rgba(79, 70, 229, 0.35);
+    }
+
+    button.primary-btn:hover {
+      background: linear-gradient(135deg, #3B32D4, #7342E3);
+      box-shadow: 0 12px 24px -6px rgba(79, 70, 229, 0.45);
+    }
+
+    main {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.78fr);
+      gap: clamp(10px, 1.5vw, 16px);
+    }
+
+    .deck-card,
+    .lanes-card {
+      min-height: 0;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--bg-card);
+      backdrop-filter: blur(18px) saturate(1.2);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .deck-card {
+      padding: clamp(12px, 1.8vw, 16px);
+      gap: 13px;
+    }
+
+    .deck-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 11px;
+      border-bottom: 1.5px solid var(--line);
+    }
+
+    .deck-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .deck-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--bg-panel);
+      border: 1.5px solid var(--line);
+      color: var(--accent);
+      font-size: 11.5px;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .deck-note {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--accent-soft);
+      border: 1.5px solid rgba(79, 70, 229, 0.12);
+      color: var(--ink);
+      font-size: 12.5px;
+      line-height: 1.45;
+      font-weight: 500;
+    }
+
+    .cards-container {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      overflow-y: auto;
+      padding: 2px;
+    }
+
+    .drag-card {
+      position: relative;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: #FFFFFF;
+      border: 1.5px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      cursor: grab;
+      color: var(--ink);
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+      user-select: none;
+      transition: transform 170ms cubic-bezier(.16, 1, .3, 1), box-shadow 170ms ease, border-color 170ms ease, background 170ms ease;
+    }
+
+    .drag-card:active {
+      cursor: grabbing;
+    }
+
+    .drag-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+      background: var(--bg-panel);
+    }
+
+    .drag-card.selected-for-drop {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18), var(--shadow-soft);
+    }
+
+    .drag-card[aria-grabbed="true"]::after {
+      content: "Selected";
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1.5px solid rgba(79, 70, 229, 0.25);
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset -3px -4px 8px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+
+    .card-icon.white-dwarf {
+      background: radial-gradient(circle at 30% 30%, #FFFFFF, #E2F3FF 70%, #90C3E6 100%);
+      box-shadow: 0 0 12px rgba(144, 195, 230, 0.4), inset -3px -4px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-icon.supernova {
+      background: radial-gradient(circle at 50% 50%, #FFFFFF 0%, #FFD166 30%, #FF7A68 70%, #C91A54 100%);
+      box-shadow: 0 0 15px rgba(255, 122, 104, 0.4), inset -3px -4px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-icon.nebula {
+      background: radial-gradient(circle at 30% 30%, #FFE5F5 0%, #FF8ECB 50%, #7D5BFF 100%);
+      box-shadow: 0 0 12px rgba(255, 142, 203, 0.4), inset -3px -4px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .drag-copy {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .drag-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .drag-desc {
+      color: var(--muted);
+      font-size: 11.5px;
+      line-height: 1.35;
+      font-weight: 500;
+    }
+
+    .lanes-card {
+      padding: clamp(12px, 1.8vw, 16px);
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    .board-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-panel);
+      border: 1.5px solid var(--line);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .board-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .board-subtitle {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: #FFFFFF;
+      border: 1.5px solid var(--line);
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--warning);
+      box-shadow: 0 0 10px var(--warning);
+    }
+
+    .status-pill.ready::before {
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    .status-pill.error::before {
+      background: var(--danger);
+      box-shadow: 0 0 10px var(--danger);
+    }
+
+    .feedback-panel {
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--line);
+      padding: 13px 16px;
+      font-size: 13px;
+      line-height: 1.45;
+      display: none;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .feedback-success {
+      background: var(--success-bg);
+      border-color: rgba(16, 185, 129, 0.25);
+      color: #065F46;
+    }
+
+    .feedback-error {
+      background: var(--danger-bg);
+      border-color: rgba(239, 68, 68, 0.2);
+      color: #991B1B;
+    }
+
+    .lane {
+      position: relative;
+      border-radius: var(--radius-lg);
+      background: #FFFFFF;
+      border: 1.5px solid var(--line);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .lane::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 5px;
+      background: linear-gradient(180deg, var(--accent-2), var(--accent));
+      opacity: 0.85;
+    }
+
+    .lane.massive::before {
+      background: linear-gradient(180deg, #F59E0B, #EF4444);
+    }
+
+    .lane-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      padding-left: 4px;
+    }
+
+    .lane-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16.5px;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+
+    .lane-title .emoji {
+      width: 32px;
+      height: 32px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--bg-panel);
+      border: 1.5px solid var(--line);
+      font-size: 14px;
+    }
+
+    .lane-subtitle {
+      margin-top: 3px;
+      font-size: 12.5px;
+      line-height: 1.35;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .lane-badge {
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--bg-panel);
+      border: 1.5px solid var(--line);
+      color: var(--muted);
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .sequence-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) 24px minmax(120px, 1fr) 24px minmax(120px, 1fr) 24px minmax(160px, 1.08fr);
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .lane.massive .sequence-row {
+      grid-template-columns: minmax(120px, 1fr) 24px minmax(120px, 1fr) 24px minmax(160px, 1.08fr) 24px minmax(140px, 1.05fr);
+    }
+
+    .seq-step {
+      min-height: 74px;
+      padding: 12px;
+      background: var(--bg-panel);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-md);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .step-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .step-title {
+      font-size: 12.5px;
+      line-height: 1.25;
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .step-note {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.25;
+    }
+
+    .seq-step.static-nebula {
+      background: #FFF5F7;
+      border-color: rgba(255, 122, 200, 0.25);
+    }
+
+    .seq-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--muted-2);
+      font-weight: 900;
+      user-select: none;
+      font-size: 18px;
+    }
+
+    .drop-zone {
+      min-height: 74px;
+      border-radius: var(--radius-md);
+      border: 2px dashed rgba(79, 70, 229, 0.25);
+      background: var(--bg-panel);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: transform 170ms ease, background 170ms ease, border-color 170ms ease, box-shadow 170ms ease;
+      cursor: pointer;
+      overflow: hidden;
+      padding: 7px;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+      transform: translateY(-2px);
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.05);
+    }
+
+    .drop-zone.correct {
+      border-style: solid;
+      border-color: var(--success);
+      background: var(--success-bg);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    }
+
+    .drop-zone.incorrect {
+      border-style: solid;
+      border-color: var(--danger);
+      background: var(--danger-bg);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    }
+
+    .drop-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-align: center;
+      pointer-events: none;
+      font-size: 11.5px;
+      line-height: 1.25;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .drop-placeholder small {
+      color: var(--muted-2);
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .drop-zone .drag-card {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line);
+      box-shadow: none;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .drop-zone .drag-card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .fact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .fact-card {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg-panel);
+      border: 1.5px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      font-weight: 500;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .fact-card strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .burst {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      pointer-events: none;
+      z-index: 5;
+      animation: burst 680ms ease-out forwards;
+      box-shadow: 0 0 16px currentColor;
+    }
+
+    @keyframes burst {
+      from {
+        transform: translate(-50%, -50%) scale(0.4);
+        opacity: 1;
+      }
+
+      to {
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0);
+        opacity: 0;
+      }
+    }
+
+    .highlight-target {
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 0 0 4px var(--accent), 0 0 30px rgba(79, 70, 229, 0.4) !important;
+      outline: 3px solid var(--accent) !important;
+      outline-offset: 2px !important;
+      transition: box-shadow 0.2s ease, outline 0.2s ease;
+    }
+
+    @media (max-width: 1050px) {
+
+      .sequence-row,
+      .lane.massive .sequence-row {
+        grid-template-columns: 1fr;
+      }
+
+      .seq-arrow {
+        transform: rotate(90deg);
+        min-height: 14px;
+      }
+
+      .seq-step,
+      .drop-zone {
+        min-height: 66px;
+      }
+
+      .fact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+
+      html,
+      body {
+        overflow: auto;
+        min-height: 100%;
+      }
+
+      body {
+        padding: 12px;
+        overflow-x: hidden;
+      }
+
+      .app {
+        min-height: 100vh;
+      }
+
+      header {
+        grid-template-columns: 1fr;
+      }
+
+      .header-panel {
+        min-width: 0;
+      }
+
+      .controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .controls button {
+        flex: 1;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .deck-card {
+        min-height: 230px;
+      }
+
+      .cards-container {
+        flex-direction: row;
+        overflow-x: auto;
+      }
+
+      .drag-card {
+        min-width: 220px;
+      }
+
+      .board-top {
+        grid-template-columns: 1fr;
+      }
+
+      .status-pill {
+        justify-content: center;
+      }
+
+      .lane-header {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div class="hero-copy">
+        <div class="eyebrow">Stellar Evolution Lab</div>
+        <h1>Build a Star Life Cycle</h1>
+        <div class="subtitle">Place each missing stage into the correct branch. Small-to-average stars fade quietly.
+          Massive stars go out with cosmic drama.</div>
+      </div>
+
+      <div class="header-panel">
+        <div class="mission-stat" aria-live="polite">
+          <div class="stat-label">
+            <span>Timeline completion</span>
+            <span id="progress-label" data-id="progress-label">0 / 2</span>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="reset-life-cycle-button" data-id="reset-life-cycle-button"
+            data-id="reset-life-cycle-button">Reset</button>
+          <button id="check-life-cycle-button" data-id="check-life-cycle-button" class="primary-btn"
+            data-id="check-life-cycle-button">Check Order</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="deck-card" aria-label="Draggable stages deck">
+        <div class="deck-title-row">
+          <div class="deck-title">Stage Deck</div>
+          <div class="deck-count" id="deck-count">2</div>
+        </div>
+
+        <div class="deck-note">
+          Drag a card into a slot, or click a card and then click a slot. Tap a placed card slot again to return it to
+          the deck.
+        </div>
+
+        <div class="cards-container" id="deckContainer" aria-label="Available stellar stage cards"
+          data-id="deckContainer">
+          <div class="drag-card" id="white-dwarf-card" data-id="white-dwarf-card" draggable="true" role="button"
+            tabindex="0" aria-grabbed="false" data-id="white-dwarf-card">
+            <span class="card-icon white-dwarf" aria-hidden="true"></span>
+            <span class="drag-copy">
+              <span class="drag-label">White Dwarf</span>
+              <span class="drag-desc">Small hot remnant left after outer layers drift away.</span>
+            </span>
+          </div>
+
+          <div class="drag-card" id="supernova-card" data-id="supernova-card" draggable="true" role="button"
+            tabindex="0" aria-grabbed="false" data-id="supernova-card">
+            <span class="card-icon supernova" aria-hidden="true"></span>
+            <span class="drag-copy">
+              <span class="drag-label">Supernova</span>
+              <span class="drag-desc">Explosive death event from a massive star’s collapsing core.</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="lanes-card" aria-label="Branching stellar timelines">
+        <div class="board-top">
+          <div>
+            <div class="board-title">Branch the star by mass</div>
+            <div class="board-subtitle">Both pathways begin inside a stellar nebula. The star’s mass decides whether the
+              ending is quiet ember or explosion.</div>
+          </div>
+          <div class="status-pill" id="status-pill" data-id="status-pill">Awaiting placements</div>
+        </div>
+
+        <div class="feedback-panel" id="feedback-card" data-id="feedback-card">Feedback message</div>
+
+        <div class="lane average">
+          <div class="lane-header">
+            <div>
+              <div class="lane-title"><span class="emoji">☀️</span> Average Star Pathway</div>
+              <div class="lane-subtitle">Stars like our Sun expand, shed their outer layers, then settle into a dense
+                remnant.</div>
+            </div>
+            <span class="lane-badge">Lower mass</span>
+          </div>
+
+          <div class="sequence-row">
+            <div class="seq-step static-nebula" id="stage-card-nebula" data-id="stage-card-nebula">
+              <span class="card-icon nebula" aria-hidden="true"></span>
+              <span class="step-copy">
+                <span class="step-title">Stellar Nebula</span>
+                <span class="step-note">Gas and dust nursery</span>
+              </span>
+            </div>
+            <span class="seq-arrow">→</span>
+            <div class="seq-step">
+              <span class="step-copy">
+                <span class="step-title">Red Giant</span>
+                <span class="step-note">Outer layers expand</span>
+              </span>
+            </div>
+            <span class="seq-arrow">→</span>
+            <div class="seq-step">
+              <span class="step-copy">
+                <span class="step-title">Planetary Nebula</span>
+                <span class="step-note">Shell of glowing gas</span>
+              </span>
+            </div>
+            <span class="seq-arrow">→</span>
+            <div class="drop-zone" id="average-star-drop-zone" data-id="average-star-drop-zone"
+              data-expected="white-dwarf-card" role="button" tabindex="0" aria-label="Average star ending drop zone"
+              data-id="average-star-drop-zone">
+              <span class="drop-placeholder">Place ending stage <small>quiet stellar remnant</small></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lane massive">
+          <div class="lane-header">
+            <div>
+              <div class="lane-title"><span class="emoji">💥</span> Massive Star Pathway</div>
+              <div class="lane-subtitle">Very massive stars fuse heavier elements, collapse violently, then leave behind
+                ultra-dense objects.</div>
+            </div>
+            <span class="lane-badge">8×+ solar mass</span>
+          </div>
+
+          <div class="sequence-row">
+            <div class="seq-step static-nebula">
+              <span class="card-icon nebula" aria-hidden="true"></span>
+              <span class="step-copy">
+                <span class="step-title">Stellar Nebula</span>
+                <span class="step-note">Same birthplace</span>
+              </span>
+            </div>
+            <span class="seq-arrow">→</span>
+            <div class="seq-step">
+              <span class="step-copy">
+                <span class="step-title">Red Supergiant</span>
+                <span class="step-note">Enormous unstable star</span>
+              </span>
+            </div>
+            <span class="seq-arrow">→</span>
+            <div class="drop-zone" id="massive-star-drop-zone" data-id="massive-star-drop-zone"
+              data-expected="supernova-card" role="button" tabindex="0" aria-label="Massive star event drop zone"
+              data-id="massive-star-drop-zone">
+              <span class="drop-placeholder">Place stellar event <small>violent core collapse</small></span>
+            </div>
+            <span class="seq-arrow">→</span>
+            <div class="seq-step">
+              <span class="step-copy">
+                <span class="step-title">Neutron Star / Black Hole</span>
+                <span class="step-note">Compact final remnant</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="fact-grid" aria-label="Learning hints">
+          <div class="fact-card"><strong>Mass is destiny</strong> Bigger stars burn fuel faster and die more violently.
+          </div>
+          <div class="fact-card"><strong>White dwarfs do not explode here</strong> In this basic pathway, they are the
+            calm remnant of Sun-like stars.</div>
+          <div class="fact-card"><strong>Supernovae are events</strong> They are not final objects; they create neutron
+            stars or black holes.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const componentIds = [
+      "deckContainer",
+      "white-dwarf-card",
+      "supernova-card",
+      "average-star-drop-zone",
+      "massive-star-drop-zone",
+      "feedback-card",
+      "check-life-cycle-button",
+      "reset-life-cycle-button",
+      "progress-label",
+      "status-pill"
+    ];
+
+    const deckContainer = document.getElementById('deckContainer');
+    const dropZones = document.querySelectorAll('.drop-zone');
+    const checkBtn = document.getElementById('check-life-cycle-button');
+    const resetBtn = document.getElementById('reset-life-cycle-button');
+    const feedbackCard = document.getElementById('feedback-card');
+    const progressFill = document.getElementById('progress-fill');
+    const progressLabel = document.getElementById('progress-label');
+    const deckCount = document.getElementById('deck-count');
+    const statusPill = document.getElementById('status-pill');
+
+    let selectedDraggable = null;
+    let audioCtx = null;
+
+    const placeholders = {
+      'average-star-drop-zone': '<span class="drop-placeholder">Place ending stage <small>quiet stellar remnant</small></span>',
+      'massive-star-drop-zone': '<span class="drop-placeholder">Place stellar event <small>violent core collapse</small></span>'
+    };
+
+    function playTone(freq, type, duration, endFreq) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        if (endFreq) {
+          osc.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + duration);
+        }
+
+        gain.gain.setValueAtTime(0.11, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn('Audio context blocked:', e);
+      }
+    }
+
+    function getPlacedCard(zone) {
+      return zone.querySelector(':scope > .drag-card');
+    }
+
+    function setPlaceholder(zone) {
+      zone.innerHTML = placeholders[zone.id] || '<span class="drop-placeholder">Place card</span>';
+    }
+
+    function clearSelection() {
+      if (selectedDraggable) {
+        selectedDraggable.classList.remove('selected-for-drop');
+        selectedDraggable.setAttribute('aria-grabbed', 'false');
+      }
+      selectedDraggable = null;
+    }
+
+    function selectCard(card) {
+      if (!card) return;
+      if (selectedDraggable === card) {
+        clearSelection();
+        playTone(260, 'sine', 0.08);
+        return;
+      }
+
+      clearSelection();
+      selectedDraggable = card;
+      card.classList.add('selected-for-drop');
+      card.setAttribute('aria-grabbed', 'true');
+      playTone(380, 'sine', 0.08, 460);
+    }
+
+    function updateProgress() {
+      const filled = Array.from(dropZones).filter(zone => !!getPlacedCard(zone)).length;
+      const total = dropZones.length;
+      const percent = Math.round((filled / total) * 100);
+
+      progressFill.style.width = percent + '%';
+      progressLabel.textContent = filled + ' / ' + total;
+      deckCount.textContent = deckContainer.querySelectorAll(':scope > .drag-card').length;
+
+      dropZones.forEach(zone => {
+        zone.classList.remove('correct', 'incorrect');
+      });
+
+      if (filled === 0) {
+        statusPill.className = 'status-pill';
+        statusPill.textContent = 'Awaiting placements';
+      } else if (filled < total) {
+        statusPill.className = 'status-pill';
+        statusPill.textContent = 'Partially built';
+      } else {
+        statusPill.className = 'status-pill ready';
+        statusPill.textContent = 'Ready to check';
+      }
+    }
+
+    function getElementByIdOrDataId(id) {
+      if (!id) return null;
+      return document.getElementById(id) || document.querySelector(`[data-id="${CSS.escape(id)}"]`);
+    }
+
+    function highlightElement(target) {
+      if (!target) return;
+      target.classList.add('highlight-target');
+      clearTimeout(target.__highlightTimer);
+      target.__highlightTimer = setTimeout(() => {
+        target.classList.remove('highlight-target');
+      }, 1200);
+    }
+
+    function sendComponentMap() {
+      const components = componentIds
+        .map(id => {
+          const el = getElementByIdOrDataId(id);
+          if (!el) return null;
+          const rect = el.getBoundingClientRect();
+          return {
+            id,
+            dataId: el.getAttribute('data-id') || id,
+            center: {
+              x: Math.round(rect.left + rect.width / 2),
+              y: Math.round(rect.top + rect.height / 2)
+            },
+            rect: {
+              left: Math.round(rect.left),
+              top: Math.round(rect.top),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height)
+            },
+            name: el.getAttribute('aria-label') || el.textContent.trim().replace(/\s+/g, ' ').slice(0, 90)
+          };
+        })
+        .filter(Boolean);
+
+      const centersById = {};
+      components.forEach(component => {
+        centersById[component.id] = {
+          id: component.id,
+          x: component.center.x,
+          y: component.center.y,
+          width: component.rect.width,
+          height: component.rect.height,
+          label: component.name
+        };
+      });
+
+      window.parent.postMessage({
+        type: 'COMPONENTS_MAPPED',
+        components,
+        centersById
+      }, '*');
+    }
+
+    function bindDragEvents() {
+      const cards = document.querySelectorAll('.drag-card');
+
+      cards.forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', card.id);
+          e.dataTransfer.effectAllowed = 'move';
+          card.classList.add('selected-for-drop');
+          card.setAttribute('aria-grabbed', 'true');
+        });
+
+        card.addEventListener('dragend', () => {
+          card.classList.remove('selected-for-drop');
+          if (selectedDraggable !== card) {
+            card.setAttribute('aria-grabbed', 'false');
+          }
+          dropZones.forEach(zone => zone.classList.remove('drag-over'));
+        });
+
+        card.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectCard(card);
+        });
+
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectCard(card);
+          }
+        });
+      });
+
+      dropZones.forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          zone.classList.add('drag-over');
+        });
+
+        zone.addEventListener('dragleave', () => {
+          zone.classList.remove('drag-over');
+        });
+
+        zone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          zone.classList.remove('drag-over');
+          const id = e.dataTransfer.getData('text/plain');
+          const card = document.getElementById(id);
+          handleDrop(card, zone);
+          clearSelection();
+        });
+
+        zone.addEventListener('click', () => {
+          if (selectedDraggable) {
+            handleDrop(selectedDraggable, zone);
+            clearSelection();
+            return;
+          }
+
+          const placed = getPlacedCard(zone);
+          if (placed) {
+            deckContainer.appendChild(placed);
+            setPlaceholder(zone);
+            feedbackCard.style.display = 'none';
+            playTone(280, 'sine', 0.12);
+            updateProgress();
+            sendComponentMap();
+          }
+        });
+
+        zone.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            zone.click();
+          }
+        });
+      });
+    }
+
+    function handleDrop(card, zone) {
+      if (!card || !zone) return;
+
+      const existing = getPlacedCard(zone);
+      if (existing && existing !== card) {
+        deckContainer.appendChild(existing);
+      }
+
+      zone.textContent = '';
+      zone.appendChild(card);
+
+      feedbackCard.style.display = 'none';
+      zone.classList.remove('correct', 'incorrect');
+      card.setAttribute('aria-grabbed', 'false');
+
+      playTone(440, 'sine', 0.14, 560);
+      updateProgress();
+      sendComponentMap();
+    }
+
+    function createBurst() {
+      const rect = checkBtn.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      for (let i = 0; i < 22; i++) {
+        const particle = document.createElement('span');
+        particle.className = 'burst';
+        const angle = (Math.PI * 2 * i) / 22;
+        const radius = 70 + Math.random() * 52;
+        particle.style.left = cx + 'px';
+        particle.style.top = cy + 'px';
+        particle.style.setProperty('--x', Math.cos(angle) * radius + 'px');
+        particle.style.setProperty('--y', Math.sin(angle) * radius + 'px');
+        particle.style.background = i % 3 === 0 ? '#43F59F' : (i % 3 === 1 ? '#FFD166' : '#FF7AC8');
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 800);
+      }
+    }
+
+    function checkTimelineOrder() {
+      let allCorrect = true;
+      let totalFilled = 0;
+
+      dropZones.forEach(zone => {
+        zone.classList.remove('correct', 'incorrect');
+        const card = getPlacedCard(zone);
+
+        if (card) {
+          totalFilled++;
+          const expected = zone.getAttribute('data-expected');
+
+          if (card.id === expected) {
+            zone.classList.add('correct');
+          } else {
+            zone.classList.add('incorrect');
+            allCorrect = false;
+          }
+        } else {
+          zone.classList.add('incorrect');
+          allCorrect = false;
+        }
+      });
+
+      feedbackCard.style.display = 'block';
+
+      if (totalFilled < dropZones.length) {
+        feedbackCard.className = 'feedback-panel feedback-error';
+        feedbackCard.textContent = 'Not done yet: both branches need a missing stage before the order can be checked.';
+        statusPill.className = 'status-pill error';
+        statusPill.textContent = 'Incomplete';
+        playTone(180, 'sawtooth', 0.35, 120);
+      } else if (allCorrect) {
+        feedbackCard.className = 'feedback-panel feedback-success';
+        feedbackCard.textContent = 'Correct. Average stars end as white dwarfs after a planetary nebula. Massive stars hit supernova first, then leave a neutron star or black hole.';
+        statusPill.className = 'status-pill ready';
+        statusPill.textContent = 'Timeline solved';
+        playTone(554, 'sine', 0.18, 740);
+        setTimeout(() => playTone(880, 'sine', 0.22), 140);
+        createBurst();
+      } else {
+        feedbackCard.className = 'feedback-panel feedback-error';
+        feedbackCard.textContent = 'Close, but swapped. White dwarf belongs to the average-star branch. Supernova belongs to the massive-star branch.';
+        statusPill.className = 'status-pill error';
+        statusPill.textContent = 'Revise placements';
+        playTone(220, 'triangle', 0.4, 150);
+      }
+
+      sendComponentMap();
+    }
+
+    function resetActivity() {
+      const cards = document.querySelectorAll('.drag-card');
+      cards.forEach(card => {
+        deckContainer.appendChild(card);
+        card.classList.remove('selected-for-drop');
+        card.setAttribute('aria-grabbed', 'false');
+      });
+
+      dropZones.forEach(zone => {
+        zone.classList.remove('drag-over', 'correct', 'incorrect');
+        setPlaceholder(zone);
+      });
+
+      feedbackCard.style.display = 'none';
+      clearSelection();
+      updateProgress();
+      playTone(330, 'sine', 0.15, 250);
+      sendComponentMap();
+    }
+
+    checkBtn.addEventListener('click', checkTimelineOrder);
+    resetBtn.addEventListener('click', resetActivity);
+
+    window.addEventListener('message', (event) => {
+      const data = event.data || {};
+      const messageType = data.type || data.action;
+      const targetId = data.id || data.targetId || data.target;
+
+      if (messageType === 'SHOW_COMPONENT' || messageType === 'HIGHLIGHT_ELEMENT') {
+        const el = getElementByIdOrDataId(targetId);
+        if (el) {
+          highlightElement(el);
+          if (typeof el.scrollIntoView === 'function') {
+            el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+          }
+        }
+      }
+
+      if (messageType === 'CLICK_COMPONENT') {
+        const el = getElementByIdOrDataId(targetId);
+        if (el) {
+          highlightElement(el);
+          setTimeout(() => {
+            if (typeof el.click === 'function') el.click();
+          }, 150);
+        }
+      }
+
+      if (messageType === 'SET_WIDGET_STATE' && data.state) {
+        if (data.state.reset === true) resetActivity();
+        if (data.state.check === true) checkTimelineOrder();
+        if (data.state.selected_card_id) {
+          const card = getElementByIdOrDataId(data.state.selected_card_id);
+          if (card && card.classList.contains('drag-card')) selectCard(card);
+        }
+        if (data.state.place_card_id && data.state.drop_zone_id) {
+          const card = getElementByIdOrDataId(data.state.place_card_id);
+          const zone = getElementByIdOrDataId(data.state.drop_zone_id);
+          if (card && zone) handleDrop(card, zone);
+        }
+        sendComponentMap();
+      }
+
+      if (messageType === 'GET_COMPONENTS' || messageType === 'MAP_COMPONENTS') {
+        sendComponentMap();
+      }
+    });
+
+    window.addEventListener('resize', sendComponentMap);
+    window.addEventListener('load', () => {
+      bindDragEvents();
+      updateProgress();
+      setTimeout(sendComponentMap, 150);
+    });
+  </script>
+</body>
+
+</html>

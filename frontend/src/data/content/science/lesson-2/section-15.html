@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Astronomy Mission Planner</title>
+
+  <!-- Premium Typography Imports -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: transparent;
+      /* Seamless blend with app background */
+      --bg-card: rgba(255, 255, 255, 0.85);
+      /* Glassmorphic card */
+      --bg-panel: rgba(248, 250, 252, 0.85);
+      /* Slate-50 panel inside card */
+      --ink: #0F172A;
+      /* Slate-900 */
+      --ink-dark: #000000;
+      --muted: #64748B;
+      /* Slate-500 */
+      --muted-2: #94A3B8;
+      /* Slate-400 */
+      --line: rgba(226, 232, 240, 0.8);
+      /* Slate-200 border */
+      --line-strong: rgba(203, 213, 225, 0.95);
+      /* Slate-300 border */
+      --accent: #4F46E5;
+      /* Indigo-600 */
+      --accent-soft: #EEF2FF;
+      /* Indigo-50 */
+      --accent-2: #06B6D4;
+      /* Cyan-500 */
+      --accent-3: #8B5CF6;
+      /* Violet-500 */
+      --success: #10B981;
+      /* Emerald-500 */
+      --success-bg: #ECFDF5;
+      /* Emerald-50 */
+      --warning: #F59E0B;
+      /* Amber-500 */
+      --warning-bg: #FEF3C7;
+      /* Amber-50 */
+      --danger: #EF4444;
+      /* Red-500 */
+      --danger-bg: #FEF2F2;
+      /* Red-50 */
+      --shadow:
+        0 20px 40px -15px rgba(15, 23, 42, 0.05),
+        0 0 0 1px rgba(15, 23, 42, 0.015);
+      --shadow-soft:
+        0 10px 24px -10px rgba(15, 23, 42, 0.03),
+        inset 0 1px 2px rgba(255, 255, 255, 0.9);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --meter: 0%;
+      --meter-color: var(--accent);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: clamp(12px, 1.8vw, 20px);
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      /* background:
+        radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.05), transparent 42%),
+        radial-gradient(circle at 90% 10%, rgba(6, 182, 212, 0.04), transparent 36%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.04), transparent 42%); */
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 1.5vw, 16px);
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    header {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      padding: clamp(14px, 2vw, 20px);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--bg-card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    header::before {
+      content: "";
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      right: -100px;
+      top: -180px;
+      background: radial-gradient(circle, rgba(79, 70, 229, 0.06), transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 5px 12px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(79, 70, 229, 0.15);
+      border-radius: 999px;
+      background: rgba(79, 70, 229, 0.06);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow .pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+      animation: pulse 1.8s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      70% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 3.5vw, 36px);
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .title-gradient {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(90deg, #0F172A 0%, #312E81 40%, #4F46E5 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      max-width: 780px;
+      font-size: clamp(12px, 1.45vw, 14.5px);
+      line-height: 1.45;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 10px 18px;
+      background: #FFFFFF;
+      color: var(--ink);
+      box-shadow: inset 0 0 0 1.5px var(--line), 0 2px 4px rgba(15, 23, 42, 0.02);
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      font-family: inherit;
+    }
+
+    button:hover {
+      transform: translateY(-1.5px);
+      background: #FFFFFF;
+      box-shadow: inset 0 0 0 1.5px var(--line-strong), 0 8px 16px -4px rgba(15, 23, 42, 0.08);
+      color: var(--ink-dark);
+    }
+
+    button:focus-visible,
+    .option-card:focus-visible {
+      outline: 3px solid rgba(79, 70, 229, 0.55);
+      outline-offset: 3px;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #FFFFFF;
+      box-shadow: 0 8px 20px -6px rgba(79, 70, 229, 0.4);
+    }
+
+    button.primary:hover {
+      background: #4338CA;
+      box-shadow: 0 10px 24px -4px rgba(79, 70, 229, 0.5);
+    }
+
+    main {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.42fr) minmax(330px, 0.92fr);
+      gap: clamp(10px, 1.5vw, 16px);
+    }
+
+    .planner-card,
+    .side-card {
+      min-height: 0;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+    }
+
+    .planner-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: clamp(10px, 1.5vw, 14px);
+      background: var(--bg-card);
+    }
+
+    .mission-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat-card {
+      min-width: 0;
+      padding: 11px 14px;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--bg-panel);
+      box-shadow: var(--shadow-soft);
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--line-strong);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    }
+
+    .stat-label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      display: block;
+      color: var(--ink);
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(13px, 1.45vw, 16px);
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .selection-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(10px, 1.5vw, 14px);
+    }
+
+    .column-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+      padding: 10px;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--bg-panel);
+    }
+
+    .column-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0 2px;
+    }
+
+    .column-title>span:first-child {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .step-dot {
+      width: 22px;
+      height: 22px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #FFFFFF;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .option-count {
+      color: var(--muted-2);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+      flex-shrink: 0;
+    }
+
+    .option-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 2px 4px 2px 0;
+      scrollbar-width: thin;
+    }
+
+    .option-list::-webkit-scrollbar,
+    .plan-summary-card::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .option-list::-webkit-scrollbar-track,
+    .plan-summary-card::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .option-list::-webkit-scrollbar-thumb,
+    .plan-summary-card::-webkit-scrollbar-thumb {
+      background: rgba(15, 23, 42, 0.08);
+      border-radius: 99px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    .option-list::-webkit-scrollbar-thumb:hover,
+    .plan-summary-card::-webkit-scrollbar-thumb:hover {
+      background: rgba(15, 23, 42, 0.16);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    .option-card {
+      position: relative;
+      width: 100%;
+      text-align: left;
+      background: #FFFFFF;
+      border: 1.5px solid var(--line);
+      border-radius: 16px;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      color: inherit;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.015);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
+      font-family: inherit;
+      white-space: normal;
+    }
+
+    .option-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 12% 18%, rgba(79, 70, 229, 0.04), transparent 36%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 0;
+    }
+
+    .option-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(79, 70, 229, 0.35);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+    }
+
+    .option-card:hover::before,
+    .option-card.selected::before {
+      opacity: 1;
+    }
+
+    .option-card.selected {
+      border-color: var(--accent);
+      background: #FFFFFF;
+      box-shadow:
+        0 10px 24px rgba(79, 70, 229, 0.05),
+        inset 0 0 0 1px rgba(79, 70, 229, 0.05);
+    }
+
+    .icon-container {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #F1F5F9;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .option-card:hover .icon-container,
+    .option-card.selected .icon-container {
+      transform: scale(1.04) rotate(-2deg);
+      background: var(--accent-soft);
+      border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    .option-info {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .option-label {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14.5px;
+      font-weight: 750;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .option-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.35;
+      font-weight: 450;
+    }
+
+    .option-meta {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .mini-chip {
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #F1F5F9;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      color: var(--muted);
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .option-card.selected .mini-chip {
+      background: var(--accent-soft);
+      border-color: rgba(79, 70, 229, 0.2);
+      color: var(--accent);
+    }
+
+    .side-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: clamp(10px, 1.5vw, 14px);
+      background: var(--bg-card);
+    }
+
+    .plan-status-panel {
+      background: var(--bg-panel);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .plan-status-panel::after {
+      content: "";
+      position: absolute;
+      width: 170px;
+      height: 170px;
+      right: -82px;
+      top: -82px;
+      background: radial-gradient(circle, color-mix(in srgb, var(--meter-color) 12%, transparent), transparent 70%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .plan-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+
+    .plan-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      border: 1.5px solid transparent;
+    }
+
+    .badge-aim {
+      background: #F1F5F9;
+      color: var(--muted);
+      border-color: rgba(226, 232, 240, 0.8);
+    }
+
+    .badge-optimal {
+      background: var(--success-bg);
+      color: var(--success);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .badge-feasible {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    .badge-impossible {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .meter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .orbit-meter {
+      --size: 68px;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background:
+        conic-gradient(var(--meter-color) 0% var(--meter), rgba(226, 232, 240, 0.8) var(--meter) 100%);
+      box-shadow:
+        inset 0 0 0 1.5px rgba(255, 255, 255, 0.8),
+        0 4px 10px rgba(15, 23, 42, 0.02);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .orbit-meter::before {
+      content: "";
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      box-shadow:
+        inset 0 2px 4px rgba(15, 23, 42, 0.02),
+        0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .meter-value {
+      position: relative;
+      z-index: 1;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 850;
+      color: var(--ink);
+      letter-spacing: -0.04em;
+    }
+
+    .meter-copy {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .meter-copy strong {
+      font-size: 13.5px;
+      font-weight: 750;
+      color: var(--ink);
+      line-height: 1.25;
+    }
+
+    .meter-copy span {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.35;
+      font-weight: 450;
+    }
+
+    .hint-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hint-pill {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      background: #FFFFFF;
+      border: 1.5px solid var(--line);
+      padding: 4px 10px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .plan-summary-card {
+      flex: 1;
+      min-height: 0;
+      background: #FFFFFF;
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--line);
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: inset 0 2px 8px rgba(15, 23, 42, 0.01);
+    }
+
+    .mission-route {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+      margin-top: 2px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--line);
+      border-radius: 16px;
+      background: var(--bg-panel);
+    }
+
+    .route-node {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .route-node:last-child {
+      justify-content: flex-end;
+      text-align: right;
+    }
+
+    .route-icon {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: #FFFFFF;
+      border: 1.5px solid var(--line);
+      font-size: 14px;
+    }
+
+    .route-line {
+      width: clamp(44px, 5vw, 74px);
+      height: 2px;
+      background: #E2E8F0;
+      position: relative;
+    }
+
+    .route-line::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      background: var(--meter-color);
+      box-shadow: 0 0 10px var(--meter-color);
+      animation: scanDot 1.8s ease-in-out infinite;
+    }
+
+    @keyframes scanDot {
+      from {
+        left: 0;
+        opacity: 0.25;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      to {
+        left: 100%;
+        opacity: 0.25;
+      }
+    }
+
+    .plan-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      background: var(--bg-panel);
+      transition: all 0.2s ease;
+    }
+
+    .plan-section:hover {
+      border-color: var(--line-strong);
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .section-label::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--meter-color);
+      box-shadow: 0 0 8px var(--meter-color);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .section-content {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #334155;
+      /* Slate-700 */
+      font-weight: 500;
+    }
+
+    .section-content em {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .highlight-target {
+      position: relative;
+      z-index: 10;
+      box-shadow:
+        0 0 0 4px rgba(79, 70, 229, 0.4),
+        0 0 24px rgba(79, 70, 229, 0.25) !important;
+      outline: 3px solid rgba(79, 70, 229, 0.6) !important;
+      outline-offset: 3px !important;
+      transition: box-shadow 0.2s ease, outline 0.2s ease;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        overflow: auto;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+        overflow: visible;
+      }
+
+      .side-card,
+      .planner-card {
+        min-height: auto;
+      }
+
+      .plan-summary-card,
+      .option-list {
+        overflow: visible;
+      }
+    }
+
+    @media (max-width: 760px) {
+      header {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        justify-content: stretch;
+      }
+
+      .controls button {
+        flex: 1;
+      }
+
+      .mission-strip,
+      .selection-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .option-card {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .option-meta {
+        grid-column: 2;
+        justify-content: flex-start;
+      }
+
+      .mission-route {
+        grid-template-columns: 1fr;
+      }
+
+      .route-node:last-child {
+        justify-content: flex-start;
+        text-align: left;
+      }
+
+      .route-line {
+        width: 2px;
+        height: 34px;
+        margin-left: 15px;
+        background: linear-gradient(180deg, transparent, var(--meter-color), transparent);
+      }
+
+      .route-line::after {
+        left: 50%;
+        top: 0;
+        animation: scanDotVertical 1.8s ease-in-out infinite;
+      }
+    }
+
+    @keyframes scanDotVertical {
+      from {
+        top: 0;
+        opacity: 0.25;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      to {
+        top: 100%;
+        opacity: 0.25;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <div class="eyebrow"><span class="pulse"></span> Mission Control Console</div>
+        <h1><span class="title-gradient">Astronomy Mission Planner</span></h1>
+        <div class="subtitle">Pick a celestial target and an observation instrument to test your spacecraft pairing
+          logic in real-time.</div>
+      </div>
+      <div class="controls">
+        <button id="random-mission-button" type="button">Auto Pick</button>
+        <button id="reset-mission-button" data-id="reset-mission-button" type="button" class="primary">Reset
+          Mission</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="planner-card" aria-label="Mission options configuration board">
+        <div class="mission-strip" aria-label="Current mission telemetry">
+          <div class="stat-card">
+            <span class="stat-label">Target Class</span>
+            <span class="stat-value" id="stat-target-class">Unassigned</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Instrument Mode</span>
+            <span class="stat-value" id="stat-tool-mode">Unassigned</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Science Return</span>
+            <span class="stat-value" id="stat-science-return">Pending</span>
+          </div>
+        </div>
+
+        <div class="selection-grid">
+          <div class="column-panel">
+            <div class="column-title">
+              <span><span class="step-dot">1</span> Select Target</span>
+              <span class="option-count">5 bodies</span>
+            </div>
+            <div class="option-list" id="targets-list">
+              <button class="option-card" id="target-moon" data-id="target-moon" type="button"
+                onclick="selectTarget('moon')">
+                <span class="icon-container" aria-hidden="true">🌕</span>
+                <span class="option-info">
+                  <span class="option-label">The Moon</span>
+                  <span class="option-desc">Nearby rocky world with craters, regolith, and polar shadows.</span>
+                </span>
+                <span class="option-meta"><span class="mini-chip">Rocky</span></span>
+              </button>
+              <button class="option-card" id="target-mars" data-id="target-mars" type="button"
+                onclick="selectTarget('mars')">
+                <span class="icon-container" aria-hidden="true">🔴</span>
+                <span class="option-info">
+                  <span class="option-label">Mars</span>
+                  <span class="option-desc">Dusty terrestrial planet with ancient water signatures.</span>
+                </span>
+                <span class="option-meta"><span class="mini-chip">Rocky</span></span>
+              </button>
+              <button class="option-card" id="target-jupiter" data-id="target-jupiter" type="button"
+                onclick="selectTarget('jupiter')">
+                <span class="icon-container" aria-hidden="true">🪐</span>
+                <span class="option-info">
+                  <span class="option-label">Jupiter</span>
+                  <span class="option-desc">Massive gas giant with storms, moons, and a brutal magnetosphere.</span>
+                </span>
+                <span class="option-meta"><span class="mini-chip">Gas</span></span>
+              </button>
+              <button class="option-card" id="target-star" data-id="target-star" type="button"
+                onclick="selectTarget('star')">
+                <span class="icon-container" aria-hidden="true">☀️</span>
+                <span class="option-info">
+                  <span class="option-label">Distant Star</span>
+                  <span class="option-desc">Thermonuclear light source for spectra, flares, and exoplanet
+                    transits.</span>
+                </span>
+                <span class="option-meta"><span class="mini-chip">Stellar</span></span>
+              </button>
+              <button class="option-card" id="target-galaxy" data-id="target-galaxy" type="button"
+                onclick="selectTarget('galaxy')">
+                <span class="icon-container" aria-hidden="true">🌀</span>
+                <span class="option-info">
+                  <span class="option-label">Distant Galaxy</span>
+                  <span class="option-desc">Huge structure of stars, dust, gas, black holes, and dark matter.</span>
+                </span>
+                <span class="option-meta"><span class="mini-chip">Deep</span></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="column-panel">
+            <div class="column-title">
+              <span><span class="step-dot">2</span> Select Instrument</span>
+              <span class="option-count">5 tools</span>
+            </div>
+            <div class="option-list" id="tools-list">
+              <button class="option-card" id="tool-optical" data-id="tool-optical" type="button"
+                onclick="selectTool('optical')">
+                <span class="icon-container" aria-hidden="true">🔭</span>
+                <span class="option-info">
+                  <span class="option-label">Ground Optical Telescope</span>
+                  <span class="option-desc">Visible-light imaging from Earth, best for bright nearby targets.</span>
+                </span>
+                <span class="option-meta"><span class="mini-chip">Visible</span></span>
+              </button>
+              <button class="option-card" id="tool-radio" data-id="tool-radio" type="button"
+                onclick="selectTool('radio')">
+                <span class="icon-container" aria-hidden="true">📡</span>
+                <span class="option-info">
+                  <span class="option-label">Radio Telescope Dish</span>
+                  <span class="option-desc">Detects long-wavelength emissions from magnetic fields and jets.</span>
+                </span>
+                <span class="option-meta"><span class="mini-chip">Radio</span></span>
+              </button>
+              <button class="option-card" id="tool-space-telescope" data-id="tool-space-telescope" type="button"
+                onclick="selectTool('space-telescope')">
+                <span class="icon-container" aria-hidden="true">🛰️</span>
+                <span class="option-info">
+                  <span class="option-label">Space Telescope</span>
+                  <span class="option-desc">Above atmospheric blur for crisp deep-space and precision photometry.</span>
+                </span>
+                <span class="option-meta"><span class="mini-chip">Orbital</span></span>
+              </button>
+              <button class="option-card" id="tool-rover" data-id="tool-rover" type="button"
+                onclick="selectTool('rover')">
+                <span class="icon-container" aria-hidden="true">🚜</span>
+                <span class="option-info">
+                  <span class="option-label">Surface Rover</span>
+                  <span class="option-desc">Lands on solid ground to drill, image, and chemically analyze
+                    terrain.</span>
+                </span>
+                <span class="option-meta"><span class="mini-chip">Surface</span></span>
+              </button>
+              <button class="option-card" id="tool-flyby" data-id="tool-flyby" type="button"
+                onclick="selectTool('flyby')">
+                <span class="icon-container" aria-hidden="true">🚀</span>
+                <span class="option-info">
+                  <span class="option-label">Flyby Probe</span>
+                  <span class="option-desc">Fast pass for gravity assists, quick scans, and first-look scouting.</span>
+                </span>
+                <span class="option-meta"><span class="mini-chip">Probe</span></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-card" aria-label="Dynamic generated mission profile">
+        <section class="plan-status-panel">
+          <div class="plan-title">
+            <span>Mission Feasibility</span>
+            <span class="plan-badge badge-aim" id="plan-badge">Awaiting Choices</span>
+          </div>
+          <div class="meter-wrap" aria-label="Mission feasibility score">
+            <div class="orbit-meter" id="orbit-meter">
+              <span class="meter-value" id="meter-value">--</span>
+            </div>
+            <div class="meter-copy">
+              <strong id="meter-title">Choose your hardware wisely.</strong>
+              <span id="meter-subtitle">Some pairings are inspired. Some are a rover trying to land on Jupiter. Don’t be
+                that rover.</span>
+            </div>
+          </div>
+          <div class="hint-row" aria-label="Mission planning hints">
+            <span class="hint-pill">🧭 Target first</span>
+            <span class="hint-pill">⚙️ Instrument second</span>
+            <span class="hint-pill">📊 Result updates live</span>
+          </div>
+        </section>
+
+        <section class="plan-summary-card" id="mission-plan-card" data-id="mission-plan-card">
+          <div class="mission-route" aria-label="Selected mission route">
+            <div class="route-node">
+              <span class="route-icon" id="route-target-icon">◎</span>
+              <span id="route-target-label">No target</span>
+            </div>
+            <div class="route-line" aria-hidden="true"></div>
+            <div class="route-node">
+              <span id="route-tool-label">No instrument</span>
+              <span class="route-icon" id="route-tool-icon">◇</span>
+            </div>
+          </div>
+
+          <div class="plan-section">
+            <span class="section-label">Selected Target</span>
+            <span class="section-content" id="plan-target-text"><em>No target selected.</em></span>
+          </div>
+          <div class="plan-section">
+            <span class="section-label">Selected Instrument</span>
+            <span class="section-content" id="plan-tool-text"><em>No instrument selected.</em></span>
+          </div>
+          <div class="plan-section">
+            <span class="section-label">Primary Investigation Objective</span>
+            <span class="section-content" id="plan-question-text"><em>Select target and instrument to view the
+                scientific question.</em></span>
+          </div>
+          <div class="plan-section">
+            <span class="section-label">Expected Observation Data</span>
+            <span class="section-content" id="plan-result-text"><em>Select target and instrument to view expected data
+                results.</em></span>
+          </div>
+          <div class="plan-section">
+            <span class="section-label">Mission Constraint Check</span>
+            <span class="section-content" id="plan-constraint-text"><em>Awaiting a complete mission profile.</em></span>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const componentIds = [
+      "random-mission-button",
+      "reset-mission-button",
+      "targets-list",
+      "target-moon",
+      "target-mars",
+      "target-jupiter",
+      "target-star",
+      "target-galaxy",
+      "tools-list",
+      "tool-optical",
+      "tool-radio",
+      "tool-space-telescope",
+      "tool-rover",
+      "tool-flyby",
+      "stat-target-class",
+      "stat-tool-mode",
+      "stat-science-return",
+      "plan-badge",
+      "orbit-meter",
+      "meter-value",
+      "mission-plan-card",
+      "route-target-label",
+      "route-tool-label",
+      "plan-target-text",
+      "plan-tool-text",
+      "plan-question-text",
+      "plan-result-text",
+      "plan-constraint-text"
+    ];
+
+    let activeTarget = null;
+    let activeTool = null;
+
+    const root = document.documentElement;
+    const badgeEl = document.getElementById('plan-badge');
+    const targetTextEl = document.getElementById('plan-target-text');
+    const toolTextEl = document.getElementById('plan-tool-text');
+    const questionTextEl = document.getElementById('plan-question-text');
+    const resultTextEl = document.getElementById('plan-result-text');
+    const constraintTextEl = document.getElementById('plan-constraint-text');
+    const resetBtn = document.getElementById('reset-mission-button');
+    const randomBtn = document.getElementById('random-mission-button');
+    const statTargetClassEl = document.getElementById('stat-target-class');
+    const statToolModeEl = document.getElementById('stat-tool-mode');
+    const statScienceReturnEl = document.getElementById('stat-science-return');
+    const meterValueEl = document.getElementById('meter-value');
+    const meterTitleEl = document.getElementById('meter-title');
+    const meterSubtitleEl = document.getElementById('meter-subtitle');
+    const routeTargetIconEl = document.getElementById('route-target-icon');
+    const routeTargetLabelEl = document.getElementById('route-target-label');
+    const routeToolIconEl = document.getElementById('route-tool-icon');
+    const routeToolLabelEl = document.getElementById('route-tool-label');
+
+    let audioCtx = null;
+
+    function playTone(freq, type, duration, slideFreq = 0) {
+      try {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        if (slideFreq > 0) {
+          osc.frequency.exponentialRampToValueAtTime(slideFreq, audioCtx.currentTime + duration);
+        }
+
+        gain.gain.setValueAtTime(0.075, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch {
+        console.warn('Audio Context blocked');
+      }
+    }
+
+    const targets = {
+      moon: {
+        label: 'The Moon (🌕)',
+        shortLabel: 'The Moon',
+        icon: '🌕',
+        type: 'Rocky satellite',
+        constraint: 'Low travel distance, solid surface, excellent for landing and close inspection.'
+      },
+      mars: {
+        label: 'Mars (🔴)',
+        shortLabel: 'Mars',
+        icon: '🔴',
+        type: 'Rocky planet',
+        constraint: 'Solid surface and thin atmosphere make orbiters, landers, and rovers scientifically rich.'
+      },
+      jupiter: {
+        label: 'Jupiter (🪐)',
+        shortLabel: 'Jupiter',
+        icon: '🪐',
+        type: 'Gas giant',
+        constraint: 'No solid surface. Great for flybys and remote sensing; catastrophic for rovers.'
+      },
+      star: {
+        label: 'Distant Star (☀️)',
+        shortLabel: 'Distant Star',
+        icon: '☀️',
+        type: 'Stellar object',
+        constraint: 'Best studied remotely. Close approaches run into extreme radiation and heat.'
+      },
+      galaxy: {
+        label: 'Distant Galaxy (🌀)',
+        shortLabel: 'Distant Galaxy',
+        icon: '🌀',
+        type: 'Deep-space structure',
+        constraint: 'Far too large and distant for probes; remote telescopes are the only sane option.'
+      }
+    };
+
+    const tools = {
+      optical: {
+        label: 'Ground Optical Telescope (🔭)',
+        shortLabel: 'Ground Optical',
+        icon: '🔭',
+        mode: 'Visible light',
+        constraint: 'Simple, accessible, and powerful for bright objects, but limited by atmosphere.'
+      },
+      radio: {
+        label: 'Radio Telescope Dish (📡)',
+        shortLabel: 'Radio Dish',
+        icon: '📡',
+        mode: 'Radio spectrum',
+        constraint: 'Excellent for magnetic fields, jets, and long-wavelength emissions.'
+      },
+      'space-telescope': {
+        label: 'Space Telescope (🛰️)',
+        shortLabel: 'Space Telescope',
+        icon: '🛰️',
+        mode: 'Orbital observatory',
+        constraint: 'Escapes atmospheric blur and unlocks precision photometry and infrared/UV work.'
+      },
+      rover: {
+        label: 'Surface Rover (🚜)',
+        shortLabel: 'Surface Rover',
+        icon: '🚜',
+        mode: 'In-situ surface lab',
+        constraint: 'Brilliant on solid ground. Completely silly where no ground exists.'
+      },
+      flyby: {
+        label: 'Flyby Probe (🚀)',
+        shortLabel: 'Flyby Probe',
+        icon: '🚀',
+        mode: 'Fast reconnaissance',
+        constraint: 'Useful for quick close passes, gravity assists, and scouting missions.'
+      }
+    };
+
+    const statusMeta = {
+      idle: {
+        score: '--',
+        meter: '0%',
+        color: '#4F46E5',
+        title: 'Choose your hardware wisely.',
+        subtitle: 'Some pairings are inspired. Some are a rover trying to land on Jupiter. Don’t be that rover.',
+        scienceReturn: 'Pending'
+      },
+      partial: {
+        score: '50',
+        meter: '50%',
+        color: '#4F46E5',
+        title: 'Mission profile half-built.',
+        subtitle: 'Pick the missing half to calculate feasibility and expected science return.',
+        scienceReturn: 'Half-built'
+      },
+      feasible: {
+        score: '72',
+        meter: '72%',
+        color: '#F59E0B',
+        title: 'Workable mission.',
+        subtitle: 'Scientifically useful, though not necessarily the sharpest tool for this target.',
+        scienceReturn: 'Useful'
+      },
+      optimal: {
+        score: '96',
+        meter: '96%',
+        color: '#10B981',
+        title: 'Excellent pairing.',
+        subtitle: 'This combination has a strong science case and a realistic mission profile.',
+        scienceReturn: 'High'
+      },
+      impossible: {
+        score: '08',
+        meter: '8%',
+        color: '#EF4444',
+        title: 'Abort this mission.',
+        subtitle: 'Physics is not negotiating today. Pick a safer instrument-target pairing.',
+        scienceReturn: 'None'
+      }
+    };
+
+    const matrix = {
+      moon: {
+        optical: {
+          status: 'feasible',
+          badge: 'Feasible',
+          question: 'What are the physical size, shape, and density patterns of lunar craters?',
+          result: 'Produces sharp, high-contrast optical photographs of craters, maria, highlands, and terminator shadows from Earth.',
+          constraint: 'Atmospheric shimmer limits the finest details, but the Moon is bright and close enough for excellent ground viewing.'
+        },
+        radio: {
+          status: 'feasible',
+          badge: 'Feasible',
+          question: 'Can we study low-frequency cosmic signals while using the Moon as a shield from Earth noise?',
+          result: 'Ground radio scopes can bounce signals off the Moon and support lunar radio experiments, though Earth radio interference is still a headache.',
+          constraint: 'The far side of the Moon is much better for radio silence than Earth-based observation.'
+        },
+        'space-telescope': {
+          status: 'feasible',
+          badge: 'Feasible',
+          question: 'Can we produce glare-free high-resolution maps of shadowed lunar terrain?',
+          result: 'Captures crisp UV and infrared imagery of craters, regolith textures, and polar shadow regions.',
+          constraint: 'Useful, but often overkill compared with dedicated lunar orbiters.'
+        },
+        rover: {
+          status: 'optimal',
+          badge: 'Optimal Pairing',
+          question: 'What is the mineral and chemical composition of lunar regolith?',
+          result: 'Directly traverses the surface, drills soil samples, and analyzes silica, iron, titanium, and trace ice in real time.',
+          constraint: 'The Moon has solid ground, manageable gravity, and reachable terrain. This is exactly rover country.'
+        },
+        flyby: {
+          status: 'feasible',
+          badge: 'Sub-Optimal',
+          question: 'What does a rapid photographic scan of the lunar disk reveal?',
+          result: 'Captures quick close-pass imagery and topographic snapshots, but orbiting or landing gives much better data.',
+          constraint: 'A flyby works, but for the Moon it feels like driving past a museum and calling it research.'
+        }
+      },
+      mars: {
+        optical: {
+          status: 'feasible',
+          badge: 'Feasible',
+          question: 'Can we observe large-scale seasonal dust storms and polar cap changes from Earth?',
+          result: 'Tracks color variations, polar changes, and major atmospheric dust events, though Earth’s atmosphere blurs fine details.',
+          constraint: 'Good for global monitoring, weak for geology-level detail.'
+        },
+        radio: {
+          status: 'impossible',
+          badge: 'Sub-Optimal',
+          question: 'Does Mars emit strong, unique thermal radio signals worth prioritizing?',
+          result: 'Mars is relatively cold and quiet in the radio spectrum, so a radio dish returns little unique science compared with other tools.',
+          constraint: 'Not physically impossible, just a bad use of mission budget. The universe has better radio targets.'
+        },
+        'space-telescope': {
+          status: 'feasible',
+          badge: 'Feasible',
+          question: 'Can we map Martian atmosphere and surface features above Earth’s atmospheric distortion?',
+          result: 'Produces high-detail global imagery and ultraviolet atmospheric scans of clouds, dust, and water vapor.',
+          constraint: 'Strong remote option, though orbital spacecraft around Mars can do the job even better.'
+        },
+        rover: {
+          status: 'optimal',
+          badge: 'Optimal Pairing',
+          question: 'Are there organic compounds or historical traces of ancient liquid water in Martian rocks?',
+          result: 'A rover can drill into sedimentary beds, inspect minerals, and search for organic biosignatures directly on the surface.',
+          constraint: 'Mars has solid terrain, compelling geology, and reachable samples. Send the rover.'
+        },
+        flyby: {
+          status: 'feasible',
+          badge: 'Sub-Optimal',
+          question: 'What first-pass data can a quick Mars encounter capture?',
+          result: 'Collects close-up images, atmospheric readings, and magnetic field sweeps during a fast pass.',
+          constraint: 'Valuable for early scouting, but Mars rewards orbiters and landers far more.'
+        }
+      },
+      jupiter: {
+        optical: {
+          status: 'feasible',
+          badge: 'Feasible',
+          question: 'Can we observe cloud bands, the Great Red Spot, and Galilean moon motion?',
+          result: 'Tracks Io, Europa, Ganymede, Callisto, storm belts, and large atmospheric features.',
+          constraint: 'Great visual target, especially for cloud dynamics and moon transits.'
+        },
+        radio: {
+          status: 'optimal',
+          badge: 'Fascinating Pairing',
+          question: 'What is the strength and structure of Jupiter’s magnetosphere and deep interior interactions?',
+          result: 'Captures powerful Jovian radio bursts and magnetic interactions between Jupiter and Io.',
+          constraint: 'Jupiter is loud in radio. This pairing is nerd candy.'
+        },
+        'space-telescope': {
+          status: 'feasible',
+          badge: 'Feasible',
+          question: 'What thermal structure and chemistry shape Jupiter’s storm bands?',
+          result: 'Produces high-contrast infrared and ultraviolet views of storms, auroras, and atmospheric layers.',
+          constraint: 'Excellent remote science, especially above Earth’s atmosphere.'
+        },
+        rover: {
+          status: 'impossible',
+          badge: 'Mission Failure',
+          question: 'Can we land a rover on Jupiter’s solid surface to analyze soil?',
+          result: 'Nope. Jupiter is a gas giant with no accessible solid surface; crushing pressure and heat would destroy the rover.',
+          constraint: 'A rover needs ground. Jupiter offers soup, pressure, radiation, and violence.'
+        },
+        flyby: {
+          status: 'feasible',
+          badge: 'Feasible',
+          question: 'What can a gravity-assist pass reveal about Jupiter’s moons, rings, and atmosphere?',
+          result: 'A flyby can gather close imaging, thermal readings, magnetic data, and use Jupiter’s gravity to gain speed.',
+          constraint: 'Radiation is nasty, but flybys are proven and scientifically useful.'
+        }
+      },
+      star: {
+        optical: {
+          status: 'feasible',
+          badge: 'Feasible',
+          question: 'What is the star’s surface temperature, spectral class, and chemical composition?',
+          result: 'Splits starlight into absorption lines that reveal temperature, elements, and stellar behavior.',
+          constraint: 'Remote spectroscopy is the sane way to study stars.'
+        },
+        radio: {
+          status: 'impossible',
+          badge: 'Sub-Optimal',
+          question: 'Does a typical distant star emit strong radio signals worth targeting?',
+          result: 'Most normal stars are quiet in radio except during strong flare events, making this a low-return pairing.',
+          constraint: 'Possible in special cases, but as a default mission? Weak sauce.'
+        },
+        'space-telescope': {
+          status: 'optimal',
+          badge: 'Optimal Pairing',
+          question: 'Can we discover orbiting exoplanets by measuring tiny periodic dips in stellar brightness?',
+          result: 'Above the atmosphere, space telescopes can measure precise transit brightness changes and infer exoplanet orbits.',
+          constraint: 'This is exactly where space photometry shines.'
+        },
+        rover: {
+          status: 'impossible',
+          badge: 'Mission Failure',
+          question: 'Can a rover land on a star to analyze flares?',
+          result: 'Absolutely not. Extreme heat and radiation would vaporize any landing craft long before arrival.',
+          constraint: 'Trying to land on a star is less “mission” and more “very expensive confetti.”'
+        },
+        flyby: {
+          status: 'impossible',
+          badge: 'Mission Failure',
+          question: 'Can a probe safely fly close enough to a star to sample stellar wind?',
+          result: 'A close stellar flyby faces intense thermal load and radiation that would overwhelm ordinary spacecraft systems.',
+          constraint: 'Special solar probes can approach our Sun carefully. A generic distant-star flyby is fantasy.'
+        }
+      },
+      galaxy: {
+        optical: {
+          status: 'feasible',
+          badge: 'Feasible',
+          question: 'What is the galaxy’s structure, dust lane geometry, and core brightness?',
+          result: 'Ground optical arrays can image spiral arms, elliptical profiles, dust lanes, and bright galactic cores.',
+          constraint: 'Atmosphere limits some precision, but large galaxies are excellent optical targets.'
+        },
+        radio: {
+          status: 'optimal',
+          badge: 'Fascinating Pairing',
+          question: 'Are radio jets erupting from a supermassive black hole at the galactic center?',
+          result: 'Radio dishes capture synchrotron radiation from active galactic nuclei and map huge plasma jets.',
+          constraint: 'For active galaxies, radio astronomy is the big gun.'
+        },
+        'space-telescope': {
+          status: 'optimal',
+          badge: 'Optimal Pairing',
+          question: 'What do redshift, faint structure, and early-universe light reveal about cosmic expansion?',
+          result: 'Space telescopes capture faint, redshifted light from distant galaxies and reveal structure hidden from the ground.',
+          constraint: 'Deep-space imaging from orbit is brutally effective.'
+        },
+        rover: {
+          status: 'impossible',
+          badge: 'Mission Failure',
+          question: 'Can a rover land on a galaxy to analyze star dust?',
+          result: 'No. A galaxy is not a surface; it is a vast gravitational system spanning thousands to hundreds of thousands of light-years.',
+          constraint: 'You cannot park on a category error.'
+        },
+        flyby: {
+          status: 'impossible',
+          badge: 'Mission Failure',
+          question: 'Can a probe fly by a neighboring galaxy to take photographs?',
+          result: 'Intergalactic distances are so vast that a conventional flyby would take absurdly longer than human civilization has existed.',
+          constraint: 'A telescope beats a probe here by roughly “all of physics.”'
+        }
+      }
+    };
+
+    function selectTarget(targetId) {
+      activeTarget = targetId;
+
+      document.querySelectorAll('#targets-list .option-card').forEach(card => {
+        const selected = card.id === `target-${targetId}`;
+        card.classList.toggle('selected', selected);
+        card.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      });
+
+      playTone(410, 'triangle', 0.08);
+      updatePlan();
+    }
+
+    function selectTool(toolId) {
+      activeTool = toolId;
+
+      document.querySelectorAll('#tools-list .option-card').forEach(card => {
+        const selected = card.id === `tool-${toolId}`;
+        card.classList.toggle('selected', selected);
+        card.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      });
+
+      playTone(540, 'triangle', 0.08);
+      updatePlan();
+    }
+
+    function updateMeter(status) {
+      const meta = statusMeta[status] || statusMeta.idle;
+      root.style.setProperty('--meter', meta.meter);
+      root.style.setProperty('--meter-color', meta.color);
+      meterValueEl.textContent = meta.score;
+      meterTitleEl.textContent = meta.title;
+      meterSubtitleEl.textContent = meta.subtitle;
+      statScienceReturnEl.textContent = meta.scienceReturn;
+    }
+
+    function updateRoute() {
+      if (activeTarget) {
+        routeTargetIconEl.textContent = targets[activeTarget].icon;
+        routeTargetLabelEl.textContent = targets[activeTarget].shortLabel;
+      } else {
+        routeTargetIconEl.textContent = '◎';
+        routeTargetLabelEl.textContent = 'No target';
+      }
+
+      if (activeTool) {
+        routeToolIconEl.textContent = tools[activeTool].icon;
+        routeToolLabelEl.textContent = tools[activeTool].shortLabel;
+      } else {
+        routeToolIconEl.textContent = '◇';
+        routeToolLabelEl.textContent = 'No instrument';
+      }
+    }
+
+    function resetMission() {
+      activeTarget = null;
+      activeTool = null;
+
+      document.querySelectorAll('.option-card').forEach(card => {
+        card.classList.remove('selected');
+        card.setAttribute('aria-pressed', 'false');
+      });
+
+      badgeEl.className = 'plan-badge badge-aim';
+      badgeEl.textContent = 'Awaiting Choices';
+
+      targetTextEl.innerHTML = '<em>No target selected.</em>';
+      toolTextEl.innerHTML = '<em>No instrument selected.</em>';
+      questionTextEl.innerHTML = '<em>Select target and instrument to view the scientific question.</em>';
+      resultTextEl.innerHTML = '<em>Select target and instrument to view expected data results.</em>';
+      constraintTextEl.innerHTML = '<em>Awaiting a complete mission profile.</em>';
+
+      statTargetClassEl.textContent = 'Unassigned';
+      statToolModeEl.textContent = 'Unassigned';
+      updateMeter('idle');
+      updateRoute();
+
+      playTone(330, 'sine', 0.14);
+      sendComponentMap();
+    }
+
+    function updatePlan() {
+      if (!activeTarget && !activeTool) return;
+
+      if (activeTarget) {
+        targetTextEl.textContent = targets[activeTarget].label;
+        statTargetClassEl.textContent = targets[activeTarget].type;
+      }
+
+      if (activeTool) {
+        toolTextEl.textContent = tools[activeTool].label;
+        statToolModeEl.textContent = tools[activeTool].mode;
+      }
+
+      updateRoute();
+
+      if (activeTarget && activeTool) {
+        const plan = matrix[activeTarget][activeTool];
+
+        let badgeClass = 'badge-aim';
+        if (plan.status === 'optimal') {
+          badgeClass = 'badge-optimal';
+          playTone(587.33, 'sine', 0.24);
+          setTimeout(() => playTone(880, 'sine', 0.20), 95);
+        } else if (plan.status === 'feasible') {
+          badgeClass = 'badge-feasible';
+          playTone(440, 'sine', 0.18);
+        } else if (plan.status === 'impossible') {
+          badgeClass = 'badge-impossible';
+          playTone(180, 'sawtooth', 0.36, 110);
+        }
+
+        badgeEl.className = `plan-badge ${badgeClass}`;
+        badgeEl.textContent = plan.badge;
+
+        questionTextEl.textContent = plan.question;
+        resultTextEl.textContent = plan.result;
+        constraintTextEl.textContent = plan.constraint;
+        updateMeter(plan.status);
+      } else {
+        badgeEl.className = 'plan-badge badge-aim';
+        badgeEl.textContent = 'Awaiting Choices';
+
+        const targetConstraint = activeTarget ? targets[activeTarget].constraint : 'Pick a target to reveal environmental constraints.';
+        const toolConstraint = activeTool ? tools[activeTool].constraint : 'Pick an instrument to reveal operating constraints.';
+
+        questionTextEl.innerHTML = '<em>Select both a target and an instrument to finalize the science objective.</em>';
+        resultTextEl.innerHTML = '<em>Select both a target and an instrument to calculate expected observation data.</em>';
+        constraintTextEl.textContent = `${targetConstraint} ${toolConstraint}`;
+        updateMeter('partial');
+      }
+
+      sendComponentMap();
+    }
+
+    function randomMission() {
+      const targetKeys = Object.keys(targets);
+      const toolKeys = Object.keys(tools);
+      const target = targetKeys[Math.floor(Math.random() * targetKeys.length)];
+      const tool = toolKeys[Math.floor(Math.random() * toolKeys.length)];
+
+      selectTarget(target);
+      setTimeout(() => selectTool(tool), 120);
+    }
+
+
+    function getElementByIdOrDataId(id) {
+      if (!id) return null;
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        return document.getElementById(id) || document.querySelector(`[data-id="${CSS.escape(id)}"]`);
+      }
+      return document.getElementById(id) || document.querySelector(`[data-id="${String(id).replace(/"/g, '\\"')}"]`);
+    }
+
+    function highlightElement(target) {
+      if (!target) return;
+      target.classList.add('highlight-target');
+      clearTimeout(target.__highlightTimer);
+      target.__highlightTimer = setTimeout(() => {
+        target.classList.remove('highlight-target');
+      }, 1200);
+    }
+
+    function sendComponentMap() {
+      const components = componentIds
+        .map(id => {
+          const el = getElementByIdOrDataId(id);
+          if (!el) return null;
+          const rect = el.getBoundingClientRect();
+          return {
+            id,
+            dataId: el.getAttribute('data-id') || id,
+            center: {
+              x: rect.left + rect.width / 2,
+              y: rect.top + rect.height / 2
+            },
+            rect: {
+              left: rect.left,
+              top: rect.top,
+              width: rect.width,
+              height: rect.height
+            }
+          };
+        })
+        .filter(Boolean);
+
+      const centersById = {};
+      components.forEach(component => {
+        const el = getElementByIdOrDataId(component.id);
+        centersById[component.id] = {
+          id: component.id,
+          x: Math.round(component.center.x),
+          y: Math.round(component.center.y),
+          width: Math.round(component.rect.width),
+          height: Math.round(component.rect.height),
+          label: (el?.getAttribute('aria-label') || el?.textContent || '')
+            .trim()
+            .replace(/\s+/g, ' ')
+            .slice(0, 90)
+        };
+      });
+
+      window.parent.postMessage({
+        type: 'COMPONENTS_MAPPED',
+        components,
+        centersById
+      }, '*');
+    }
+
+    resetBtn.addEventListener('click', resetMission);
+    randomBtn.addEventListener('click', randomMission);
+
+    document.querySelectorAll('.option-card').forEach(card => {
+      card.setAttribute('aria-pressed', 'false');
+    });
+
+
+    window.addEventListener('message', (event) => {
+      const data = event.data || {};
+      const targetId = data.id || data.target || data.componentId;
+      const el = getElementByIdOrDataId(targetId);
+
+      if (data.type === 'SHOW_COMPONENT' || data.type === 'HIGHLIGHT_ELEMENT') {
+        if (el) {
+          highlightElement(el);
+          if (typeof el.scrollIntoView === 'function') {
+            el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+          }
+        }
+      }
+
+      if (data.type === 'CLICK_COMPONENT') {
+        if (el) {
+          highlightElement(el);
+          setTimeout(() => {
+            if (typeof el.click === 'function') el.click();
+          }, 150);
+        }
+      }
+
+      if (data.type === 'SET_WIDGET_STATE' && data.state) {
+        if (data.state.target) selectTarget(data.state.target);
+        if (data.state.tool) selectTool(data.state.tool);
+        sendComponentMap();
+      }
+
+      if (data.type === 'REQUEST_COMPONENTS_MAP' || data.type === 'GET_COMPONENTS_MAP') {
+        sendComponentMap();
+      }
+    });
+
+    window.addEventListener('resize', sendComponentMap);
+    window.addEventListener('load', () => {
+      resetMission();
+    });
+  </script>
+</body>
+
+</html>

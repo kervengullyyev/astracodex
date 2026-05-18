@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "World History",
+  "teacherName": "Dr. Einstein",
+  "subject": "Social Studies",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of World History.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to World History",
+      "text": "Welcome to World History. In this lesson, you will learn about Ancient civilizations."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing World History",
+      "imageDescription": "An educational diagram showing concepts of World History.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice World History",
+      "htmlDescription": "Interactive exercise where students practice World History.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

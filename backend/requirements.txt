@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+httpx
+torch
+numpy
+soundfile
+kokoro
+onnxruntime
+transformers
+faster-whisper
+torchaudio
+python-multipart
+pathlib
+websockets
+python-dotenv

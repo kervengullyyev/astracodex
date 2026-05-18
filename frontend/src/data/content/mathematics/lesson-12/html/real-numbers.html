@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+  <title>Cell Architecture Studio</title>
+  <style>
+    :root {
+      --bg-color: #F7F8FB;
+      --panel-bg: #FCFBF8;
+      --text-main: #3D3935;
+      --text-muted: #8C867F;
+      --accent-purple: #EFE6FA;
+      --accent-purple-dark: #8F75A8;
+      --border-color: #E8E4DA;
+      --font-serif: 'Georgia', serif;
+      --font-sans: system-ui, -apple-system, sans-serif;
+      --font-script: 'Caveat', 'Comic Sans MS', cursive;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- HEADER --- */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      flex-shrink: 0;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 45px;
+      height: 45px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23EFE6FA"/></svg>') center/cover;
+      border-radius: 50%;
+    }
+
+    .logo-title {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      font-weight: normal;
+      font-style: italic;
+    }
+
+    .model-viewer {
+      --poster-color: transparent;
+      background-color: transparent;
+    }
+
+    .logo-subtitle {
+      font-family: var(--font-script);
+      font-size: 1.2rem;
+      color: var(--accent-purple-dark);
+      margin-left: 5px;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 30px;
+      font-size: 0.75rem;
+      color: var(--text-main);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .header-nav div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .header-nav div svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--text-main);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .profile-pic {
+      width: 36px;
+      height: 36px;
+      background: #e0d5ce;
+      border-radius: 50%;
+      border: 1px solid var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* --- MAIN LAYOUT --- */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 260px 1fr 320px;
+      gap: 14px;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .panel {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015);
+      overflow-y: auto;
+    }
+
+    h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+
+    h3 span.arrow {
+      font-size: 1.2rem;
+      font-weight: normal;
+      cursor: pointer;
+    }
+
+    h3 span.icon {
+      color: var(--accent-purple-dark);
+    }
+
+    /* --- TOGGLE SWITCH --- */
+    .toggle {
+      appearance: none;
+      width: 36px;
+      height: 20px;
+      background: #ccc;
+      border-radius: 20px;
+      position: relative;
+      cursor: pointer;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .toggle:checked {
+      background: var(--accent-purple-dark);
+    }
+
+    .toggle:checked::after {
+      transform: translateX(16px);
+    }
+
+    /* --- LEFT SIDEBAR --- */
+    .left-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .cell-list,
+    .organelle-list {
+      list-style: none;
+    }
+
+    .cell-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 10px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .cell-item:hover {
+      background-color: rgba(239, 230, 250, 0.5);
+    }
+
+    .cell-item.active {
+      background-color: var(--accent-purple);
+      border-left: 4px solid var(--accent-purple-dark);
+      padding-left: 8px;
+    }
+
+    .cell-item.active::after {
+      content: '★';
+      position: absolute;
+      right: 12px;
+      color: var(--accent-purple-dark);
+      font-size: 1rem;
+    }
+
+    .cell-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      margin-right: 12px;
+      background-color: #eee;
+    }
+
+    .cell-info h4 {
+      font-size: 0.85rem;
+      margin-bottom: 3px;
+      font-weight: 600;
+    }
+
+    .cell-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .organelle-item {
+      font-size: 0.85rem;
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-main);
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    /* --- CENTER AREA --- */
+    .center-column {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .main-viewer {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .viewer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .viewer-header h1 {
+      font-family: var(--font-serif);
+      font-size: 2.8rem;
+      font-weight: normal;
+      color: #222;
+    }
+
+    .viewer-header h2 {
+      font-family: var(--font-script);
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+
+    .view-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 15px;
+    }
+
+    .view-mode-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .view-mode-toggle {
+      display: flex;
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .view-mode-toggle button {
+      border: none;
+      background: transparent;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+    }
+
+    .view-mode-toggle button.active {
+      background-color: var(--accent-purple);
+      color: var(--accent-purple-dark);
+    }
+
+    .cross-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .model-container {
+      flex-grow: 1;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      /* Placeholder for the 3D model image */
+      background: radial-gradient(circle, #FCFBF8 40%, #f0ece1 100%);
+    }
+
+    .sticky-note {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #FCF4C4;
+      padding: 15px 20px;
+      border-radius: 2px 2px 10px 2px;
+      font-family: var(--font-script);
+      font-size: 1.1rem;
+      color: #555;
+      line-height: 1.4;
+      box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.05);
+      transform: rotate(-2deg);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-group button {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-group button:hover {
+      background: #f9f9f9;
+    }
+
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      flex-shrink: 0;
+      max-height: 200px;
+      overflow: hidden;
+    }
+
+    .microscope-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+      height: 100px;
+    }
+
+    .microscope-img {
+      border-radius: 8px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 8px;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      background-color: #ddd;
+      background-size: cover;
+    }
+
+    .add-image {
+      background: transparent;
+      border: 1px dashed var(--text-muted);
+      color: var(--text-muted);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-shadow: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .add-image span {
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+
+    .compare-area {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 25px;
+      margin-top: 15px;
+    }
+
+    .compare-cell {
+      text-align: center;
+    }
+
+    .compare-cell img {
+      width: 40px;
+      height: 40px;
+      border-radius: 5px;
+      margin-bottom: 8px;
+      background: #eee;
+      display: inline-block;
+    }
+
+    .compare-cell .title {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .compare-cell .sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .vs-badge {
+      background: var(--accent-purple-dark);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .compare-btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* --- RIGHT SIDEBAR --- */
+    .right-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .organelle-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-top: 15px;
+      margin-bottom: 20px;
+    }
+
+    .organelle-icon {
+      width: 45px;
+      height: 45px;
+      background: #F8D7DA;
+      border-radius: 8px;
+    }
+
+    .organelle-header h4 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .organelle-header p {
+      font-family: var(--font-script);
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    .details-table {
+      width: 100%;
+      font-size: 0.85rem;
+      border-collapse: collapse;
+    }
+
+    .details-table td {
+      padding: 12px 0;
+      border-bottom: 1px dotted var(--border-color);
+    }
+
+    .details-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .details-table td:first-child {
+      color: var(--text-muted);
+      width: 45%;
+    }
+
+    .note-text {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      margin-top: 10px;
+      color: var(--text-main);
+    }
+
+    .fun-fact {
+      font-family: var(--font-script);
+      color: var(--accent-purple-dark);
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    .diagram-placeholder {
+      width: 100%;
+      height: 160px;
+      background-color: #Fdfbf7;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+
+<body>
+
+
+
+  <div class="layout-grid">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="panel left-sidebar">
+      <div>
+        <h3><span class="icon">✦</span> CELL TYPES <span class="arrow">⌄</span></h3>
+        <ul class="cell-list">
+          <li class="cell-item">
+            <div class="cell-icon" style="background: #E8F4E8;"></div>
+            <div class="cell-info">
+              <h4>Plant Cell</h4>
+              <p>Eukaryotic Cell</p>
+            </div>
+          </li>
+          <li class="cell-item">
+            <div class="cell-icon" style="background: #FFF2E5;"></div>
+            <div class="cell-info">
+              <h4>White Blood Cell</h4>
+              <p>Immune Cell</p>
+            </div>
+          </li>
+          <li class="cell-item">
+            <div class="cell-icon" style="background: #F4E8F8;"></div>
+            <div class="cell-info">
+              <h4>Neuron</h4>
+              <p>Nerve Cell</p>
+            </div>
+          </li>
+          <li class="cell-item active">
+            <div class="cell-icon" style="background: #E0CAE6;"></div>
+            <div class="cell-info">
+              <h4>Epithelial Cell</h4>
+              <p>Human Tissue Cell</p>
+            </div>
+          </li>
+          <li class="cell-item">
+            <div class="cell-icon" style="background: #E8F8EE;"></div>
+            <div class="cell-info">
+              <h4>Bacteria Cell</h4>
+              <p>Prokaryotic Cell</p>
+            </div>
+          </li>
+          <li class="cell-item">
+            <div class="cell-icon" style="background: #E8F0F8;"></div>
+            <div class="cell-info">
+              <h4>Animal Cell</h4>
+              <p>Eukaryotic Cell</p>
+            </div>
+          </li>
+          <li class="cell-item">
+            <div class="cell-icon" style="background: #F8E8E8;"></div>
+            <div class="cell-info">
+              <h4>Muscle Cell</h4>
+              <p>Muscle Fiber</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h3><span class="icon">✦</span> ORGANELLES <span class="arrow">⌄</span></h3>
+        <ul class="organelle-list">
+          <li class="organelle-item">
+            <div class="dot" style="background: #8F75A8;"></div> Nucleus
+          </li>
+          <li class="organelle-item">
+            <div class="dot" style="background: #D98896;"></div> Microvilli
+          </li>
+          <li class="organelle-item">
+            <div class="dot" style="background: #6D9EEB;"></div> Tight Junctions
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- CENTER COLUMN -->
+    <div class="center-column">
+
+      <!-- MAIN VIEWER -->
+      <div class="panel main-viewer">
+        <div class="viewer-header">
+          <div>
+            <h1>Epithelial Cell</h1>
+            <h2>Human Tissue Cell</h2>
+          </div>
+          <div class="view-controls">
+            <div>
+              <div class="view-mode-label">VIEW MODE</div>
+              <div class="view-mode-toggle">
+                <button>⚀</button>
+                <button class="active">⚃</button>
+                <button>⊙</button>
+              </div>
+            </div>
+            <div class="cross-section">
+              Cross-Section <input type="checkbox" class="toggle" checked>
+            </div>
+          </div>
+        </div>
+
+        <div class="model-container">
+          <div class="sticky-note">
+            Tip: Drag to rotate<br>
+            Scroll to zoom<br>
+            Ctrl + drag to pan
+          </div>
+
+          <model-viewer src="real-numbers.glb" ar camera-controls touch-action="pan-y" shadow-intensity="1"
+            alt="A 3D model of an Epithelial Cell" style="width: 100%; height: 100%; outline: none;">
+          </model-viewer>
+        </div>
+
+        <div class="toolbar">
+          <div class="btn-group">
+            <button>↺ Rotate</button>
+            <button>⊙ Isolate</button>
+            <button>✕ Hide Others</button>
+            <button>⎚ Reset View</button>
+          </div>
+          <div class="btn-group">
+            <button>📷 Screenshot</button>
+            <button>🧊 3D Export</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM ROW -->
+      <div class="bottom-row">
+        <div class="panel">
+          <h3>MICROSCOPE VIEW ⓘ</h3>
+          <div class="microscope-grid">
+            <div class="microscope-img" style="background-color: #E8B4C8;">Light Microscope</div>
+            <div class="microscope-img" style="background-color: #D6A8E0;">Stained Selection</div>
+            <div class="microscope-img" style="background-color: #999;">Electron Microscope</div>
+            <div class="microscope-img add-image">
+              <span>+</span> Add Image
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>COMPARE CELLS ⓘ</h3>
+          <div class="compare-area">
+            <div class="compare-cell">
+              <div style="width:40px; height:40px; background:#D8A8A8; border-radius:6px; margin: 0 auto 8px;"></div>
+              <div class="title">Epithelial Cell</div>
+              <div class="sub">(You are here)</div>
+            </div>
+            <div class="vs-badge">VS</div>
+            <div class="compare-cell">
+              <div style="width:40px; height:40px; background:#A8D8D8; border-radius:50%; margin: 0 auto 8px;"></div>
+              <div class="title">Animal Cell</div>
+              <div class="sub">Eukaryotic</div>
+            </div>
+          </div>
+          <button class="compare-btn">Open Comparison View ></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="right-sidebar">
+
+      <div class="panel">
+        <h3 style="justify-content: space-between;">ORGANELLE DETAILS <span
+            style="color: #D98896; font-size: 1.2rem;">♥</span></h3>
+        <div class="organelle-header">
+          <div class="organelle-icon"></div>
+          <div>
+            <h4>Microvilli</h4>
+            <p>The absorption fingers</p>
+          </div>
+        </div>
+        <table class="details-table">
+          <tr>
+            <td>Size</td>
+            <td>0.5 - 1 µm long</td>
+          </tr>
+          <tr>
+            <td>Location</td>
+            <td>Apical surface</td>
+          </tr>
+          <tr>
+            <td>Visible in LM</td>
+            <td>As a brush border</td>
+          </tr>
+          <tr>
+            <td>Label</td>
+            <td style="text-align: right;"><input type="checkbox" class="toggle" checked></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>BIOLOGICAL NOTES</h3>
+        <p class="note-text">In the small intestine, epithelial cells carpet themselves with microvilli, dramatically
+          increasing their absorptive surface area.</p>
+        <p class="fun-fact">Fun fact: Your gut lining is replaced every 4-5 days! ✦</p>
+      </div>
+
+      <!-- <div class="panel" style="flex-grow: 1;">
+        <h3>WHERE IT OCCURS</h3>
+        <div class="diagram-placeholder">
+          [ Human Digestive Anatomy Diagram ]
+        </div>
+      </div> -->
+
+    </div>
+  </div>
+
+</body>
+
+</html>

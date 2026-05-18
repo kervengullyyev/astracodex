@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gravity Concept Check</title>
+  <style>
+    :root {
+      --bg: #050b18;
+      --panel: rgba(255, 255, 255, 0.93);
+      --panel-soft: rgba(255, 255, 255, 0.78);
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --blue: #38bdf8;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --shadow: 0 24px 80px rgba(2, 8, 23, 0.28);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .lesson-shell {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 620px;
+      overflow: hidden;
+      padding: clamp(14px, 2vw, 26px);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(56, 189, 248, 0.22), transparent 28%),
+        radial-gradient(circle at 82% 12%, rgba(79, 70, 229, 0.22), transparent 26%),
+        radial-gradient(circle at 55% 115%, rgba(34, 197, 94, 0.14), transparent 38%),
+        linear-gradient(135deg, #020617 0%, #08111f 48%, #030712 100%);
+    }
+
+    .stars {
+      position: absolute;
+      inset: 0;
+      opacity: 0.32;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.92) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.45) 1px, transparent 1px);
+      background-size: 64px 64px, 110px 110px;
+      background-position: 12px 18px, 42px 58px;
+      pointer-events: none;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(380px, 1fr) minmax(320px, 0.78fr);
+      gap: clamp(14px, 1.7vw, 24px);
+    }
+
+    .panel {
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .quiz-panel {
+      display: flex;
+      flex-direction: column;
+      padding: clamp(18px, 2.2vw, 28px);
+      gap: 16px;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: max-content;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .score-display {
+      min-width: 128px;
+      border-radius: 18px;
+      background: #0f172a;
+      color: white;
+      padding: 12px 14px;
+      text-align: right;
+    }
+
+    .score-label {
+      display: block;
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .score-value {
+      display: block;
+      margin-top: 3px;
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.04em;
+    }
+
+    .title {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(30px, 4vw, 56px);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+
+    .subtitle {
+      margin: -4px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+      font-weight: 650;
+      max-width: 680px;
+    }
+
+    .progress-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    .progress-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 16.666%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #22c55e);
+      transition: width 280ms ease;
+    }
+
+    .question-card {
+      display: grid;
+      gap: 14px;
+      border-radius: 28px;
+      border: 1px solid #e2e8f0;
+      background:
+        radial-gradient(circle at 95% 0%, rgba(79, 70, 229, 0.12), transparent 34%),
+        linear-gradient(180deg, #ffffff, #f8fafc);
+      padding: clamp(18px, 2vw, 24px);
+      min-height: 260px;
+    }
+
+    .question-number {
+      display: inline-flex;
+      width: max-content;
+      align-items: center;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .concept-tag {
+      display: inline-flex;
+      width: max-content;
+      align-items: center;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .question-heading {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .question-text {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(22px, 2.6vw, 34px);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      font-weight: 950;
+    }
+
+    .answer-options {
+      display: grid;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .answer-button {
+      cursor: pointer;
+      width: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      background: #ffffff;
+      color: #0f172a;
+      padding: 14px 15px;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      align-items: center;
+      gap: 11px;
+      outline: none;
+      transition:
+        transform 160ms ease,
+        border-color 160ms ease,
+        background 160ms ease,
+        box-shadow 160ms ease;
+    }
+
+    .answer-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: #c7d2fe;
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.09);
+    }
+
+    .answer-button:disabled {
+      cursor: default;
+    }
+
+    .answer-letter {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .answer-text {
+      font-size: 14px;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .answer-button.correct {
+      border-color: #22c55e;
+      background: #dcfce7;
+      box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.14);
+    }
+
+    .answer-button.correct .answer-letter {
+      background: #16a34a;
+      color: white;
+    }
+
+    .answer-button.wrong {
+      border-color: #ef4444;
+      background: #fee2e2;
+      box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.12);
+    }
+
+    .answer-button.wrong .answer-letter {
+      background: #dc2626;
+      color: white;
+    }
+
+    .feedback-message {
+      min-height: 72px;
+      border-radius: 22px;
+      border: 1px solid #c7d2fe;
+      background: #eef2ff;
+      color: #312e81;
+      padding: 14px 15px;
+      font-size: 14px;
+      line-height: 1.42;
+      font-weight: 800;
+    }
+
+    .feedback-message.correct {
+      border-color: #86efac;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .feedback-message.wrong {
+      border-color: #fecaca;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .explanation-box {
+      min-height: 82px;
+      border-radius: 22px;
+      background: #0f172a;
+      color: white;
+      padding: 15px;
+    }
+
+    .explanation-label {
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .explanation-text {
+      margin: 7px 0 0;
+      color: #dbeafe;
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .next-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: auto;
+    }
+
+    .btn {
+      cursor: pointer;
+      border: 0;
+      border-radius: 18px;
+      padding: 14px 18px;
+      font-weight: 950;
+      transition: transform 160ms ease, background 160ms ease, opacity 160ms ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    .next-question-button {
+      background: #4f46e5;
+      color: white;
+      box-shadow: 0 16px 34px rgba(79, 70, 229, 0.24);
+    }
+
+    .next-question-button:hover:not(:disabled) {
+      background: #4338ca;
+    }
+
+    .next-question-button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .restart-button {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .restart-button:hover {
+      background: #cbd5e1;
+    }
+
+    .summary-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+      padding: clamp(18px, 2vw, 24px);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12), transparent 36%),
+        rgba(255, 255, 255, 0.92);
+    }
+
+    .visual-card {
+      position: relative;
+      min-height: 230px;
+      border-radius: 26px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(56,189,248,0.18), transparent 36%),
+        linear-gradient(135deg, #020617, #0f172a);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .mini-stars {
+      position: absolute;
+      inset: 0;
+      opacity: 0.35;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.45) 1px, transparent 1px);
+      background-size: 46px 46px, 82px 82px;
+      background-position: 8px 12px, 28px 42px;
+    }
+
+    .earth-mini {
+      position: absolute;
+      left: 50%;
+      top: 57%;
+      width: 150px;
+      height: 150px;
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,0.95), transparent 8%),
+        radial-gradient(circle at 40% 42%, #86efac 0 10%, transparent 11%),
+        radial-gradient(circle at 62% 52%, #22c55e 0 11%, transparent 12%),
+        linear-gradient(135deg, #38bdf8, #2563eb 58%, #082f49);
+      box-shadow:
+        0 0 38px rgba(56,189,248,0.72),
+        inset -18px -24px 40px rgba(2,8,23,0.44);
+    }
+
+    .orbit-mini {
+      position: absolute;
+      left: 50%;
+      top: 57%;
+      width: 250px;
+      height: 135px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%) rotate(-12deg);
+      border: 3px dashed rgba(34,197,94,0.78);
+      box-shadow: 0 0 20px rgba(34,197,94,0.28);
+    }
+
+    .sat-mini {
+      position: absolute;
+      left: 66%;
+      top: 35%;
+      width: 42px;
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff, #94a3b8);
+      transform: rotate(22deg);
+      box-shadow: 0 0 18px rgba(255,255,255,0.36);
+    }
+
+    .gravity-lines {
+      position: absolute;
+      inset: 0;
+    }
+
+    .gravity-line {
+      position: absolute;
+      width: 2px;
+      height: 48px;
+      background: linear-gradient(180deg, #facc15, transparent);
+      transform-origin: bottom center;
+      opacity: 0.9;
+    }
+
+    .gravity-line::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -1px;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 10px solid #facc15;
+    }
+
+    .gravity-line.one { left: 38%; top: 24%; transform: rotate(-22deg); }
+    .gravity-line.two { left: 59%; top: 20%; transform: rotate(20deg); }
+    .gravity-line.three { left: 70%; top: 52%; transform: rotate(94deg); }
+
+    .summary-title {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(24px, 3vw, 38px);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+
+    .summary-subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .summary-item {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      align-items: flex-start;
+      gap: 9px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 10px;
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.34;
+      font-weight: 750;
+    }
+
+    .summary-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .summary-icon.mastered {
+      background: #16a34a;
+    }
+
+    .summary-icon.review {
+      background: #f59e0b;
+    }
+
+    .final-summary-card {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      padding: clamp(14px, 2vw, 26px);
+      background: rgba(2, 6, 23, 0.68);
+      backdrop-filter: blur(16px);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .final-summary-card.show {
+      display: flex;
+    }
+
+    .final-card-inner {
+      width: min(760px, 96vw);
+      max-height: 92vh;
+      overflow-y: auto;
+      border-radius: 30px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(255,255,255,0.28);
+      box-shadow: 0 30px 90px rgba(0,0,0,0.32);
+      padding: clamp(18px, 2.5vw, 30px);
+    }
+
+    .final-score {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      background: #0f172a;
+      color: white;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 950;
+      margin-bottom: 14px;
+    }
+
+    .final-title {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(30px, 4vw, 52px);
+      line-height: 0.96;
+      letter-spacing: -0.06em;
+    }
+
+    .final-text {
+      margin: 10px 0 18px;
+      color: #475569;
+      font-size: 15px;
+      line-height: 1.55;
+      font-weight: 650;
+    }
+
+    .final-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .final-section {
+      border-radius: 22px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 14px;
+    }
+
+    .final-section h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: #0f172a;
+    }
+
+    .final-section ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 750;
+    }
+
+    .final-section li {
+      margin: 6px 0;
+    }
+
+    .final-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .flash {
+      animation: flash 520ms ease;
+    }
+
+    @keyframes flash {
+      0% { transform: scale(1); }
+      42% { transform: scale(1.026); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 960px) {
+      html,
+      body {
+        overflow: auto;
+      }
+
+      .lesson-shell {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .summary-panel {
+        min-height: 600px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .lesson-shell {
+        padding: 10px;
+      }
+
+      .top-row {
+        flex-direction: column;
+      }
+
+      .score-display {
+        width: 100%;
+        text-align: left;
+      }
+
+      .question-card {
+        min-height: 0;
+      }
+
+      .final-columns {
+        grid-template-columns: 1fr;
+      }
+
+      .final-actions {
+        flex-direction: column;
+      }
+
+      .final-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="lesson-shell">
+    <div class="stars" aria-hidden="true"></div>
+
+    <section class="content">
+      <section class="panel quiz-panel">
+        <div class="top-row">
+          <div class="eyebrow">Gravity Review</div>
+
+          <div id="score-display" data-id="score-display" class="score-display">
+            <span class="score-label">Score</span>
+            <span id="score-value" class="score-value">0 / 6</span>
+          </div>
+        </div>
+
+        <h1 class="title">Gravity concept check</h1>
+        <p class="subtitle">
+          Answer one short question at a time. Each question checks one important idea from the lesson.
+        </p>
+
+        <div id="progress-bar" data-id="progress-bar" class="progress-wrap">
+          <div class="progress-meta">
+            <span id="progress-label">Question 1 of 6</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <article id="question-card" data-id="question-card" class="question-card">
+          <div class="question-heading">
+            <span id="question-number" data-id="question-number" class="question-number">Question 1</span>
+            <span id="concept-tag" class="concept-tag">Gravity pulls masses together</span>
+          </div>
+
+          <p id="question-text" data-id="question-text" class="question-text">
+            What does gravity do?
+          </p>
+
+          <div id="answer-options" data-id="answer-options" class="answer-options">
+            <button id="answer-button-a" data-id="answer-button-a" class="answer-button" type="button">
+              <span class="answer-letter">A</span>
+              <span class="answer-text">It pushes all objects away from planets.</span>
+            </button>
+            <button id="answer-button-b" data-id="answer-button-b" class="answer-button" type="button">
+              <span class="answer-letter">B</span>
+              <span class="answer-text">It pulls objects with mass toward each other.</span>
+            </button>
+            <button id="answer-button-c" data-id="answer-button-c" class="answer-button" type="button">
+              <span class="answer-letter">C</span>
+              <span class="answer-text">It only works when objects are touching.</span>
+            </button>
+            <button id="answer-button-d" data-id="answer-button-d" class="answer-button" type="button">
+              <span class="answer-letter">D</span>
+              <span class="answer-text">It only exists on Earth.</span>
+            </button>
+          </div>
+        </article>
+
+        <div id="feedback-message" data-id="feedback-message" class="feedback-message">
+          Choose an answer to check your understanding.
+        </div>
+
+        <div id="explanation-box" data-id="explanation-box" class="explanation-box">
+          <div class="explanation-label">Explanation</div>
+          <p id="explanation-text" class="explanation-text">
+            Your explanation will appear here after you answer.
+          </p>
+        </div>
+
+        <div class="next-row">
+          <button id="next-question-button" data-id="next-question-button" class="btn next-question-button" type="button" disabled>
+            Next Question
+          </button>
+          <button id="restart-button" data-id="restart-button" class="btn restart-button" type="button">
+            Restart
+          </button>
+        </div>
+      </section>
+
+      <aside class="panel summary-panel">
+        <div>
+          <h2 class="summary-title">What you are checking</h2>
+          <p class="summary-subtitle">
+            The quiz covers six beginner gravity ideas. Master them and you understand the lesson core.
+          </p>
+        </div>
+
+        <div class="visual-card" aria-hidden="true">
+          <div class="mini-stars"></div>
+          <div class="orbit-mini"></div>
+          <div class="earth-mini"></div>
+          <div class="sat-mini"></div>
+          <div class="gravity-lines">
+            <div class="gravity-line one"></div>
+            <div class="gravity-line two"></div>
+            <div class="gravity-line three"></div>
+          </div>
+        </div>
+
+        <div id="summary-list" class="summary-list">
+          <div class="summary-item">
+            <span id="icon-0" class="summary-icon review">1</span>
+            <span>Gravity pulls objects with mass toward each other.</span>
+          </div>
+          <div class="summary-item">
+            <span id="icon-1" class="summary-icon review">2</span>
+            <span>More mass creates stronger gravity.</span>
+          </div>
+          <div class="summary-item">
+            <span id="icon-2" class="summary-icon review">3</span>
+            <span>Greater distance makes gravity weaker.</span>
+          </div>
+          <div class="summary-item">
+            <span id="icon-3" class="summary-icon review">4</span>
+            <span>Mass and weight are different.</span>
+          </div>
+          <div class="summary-item">
+            <span id="icon-4" class="summary-icon review">5</span>
+            <span>Without air resistance, objects fall at the same rate.</span>
+          </div>
+          <div class="summary-item">
+            <span id="icon-5" class="summary-icon review">6</span>
+            <span>Orbit is continuous falling around a planet.</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="final-summary-card" data-id="final-summary-card" class="final-summary-card" aria-label="Final summary">
+      <div class="final-card-inner">
+        <div id="final-score" class="final-score">Score: 0 / 6</div>
+        <h2 class="final-title">Gravity review complete</h2>
+        <p id="final-text" class="final-text">
+          Review complete. Your mastered concepts and review topics are shown below.
+        </p>
+
+        <div class="final-columns">
+          <div class="final-section">
+            <h3>Mastered concepts</h3>
+            <ul id="mastered-list"></ul>
+          </div>
+
+          <div class="final-section">
+            <h3>Needs review</h3>
+            <ul id="review-list"></ul>
+          </div>
+        </div>
+
+        <div class="final-actions">
+          <button id="close-summary-button" class="btn next-question-button" type="button">Close Summary</button>
+          <button id="restart-summary-button" class="btn restart-button" type="button">Try Again</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        concept: "Gravity pulls masses together",
+        text: "What does gravity do?",
+        options: [
+          "It pushes all objects away from planets.",
+          "It pulls objects with mass toward each other.",
+          "It only works when objects are touching.",
+          "It only exists on Earth."
+        ],
+        correctIndex: 1,
+        explanation: "Gravity is an attractive force. Any object with mass pulls on other objects with mass.",
+        masteredText: "Gravity pulls objects with mass toward each other."
+      },
+      {
+        concept: "More mass means stronger gravity",
+        text: "Which object creates stronger gravity?",
+        options: [
+          "An object with more mass.",
+          "An object with less mass.",
+          "An object with no mass.",
+          "Mass does not affect gravity."
+        ],
+        correctIndex: 0,
+        explanation: "More mass creates a stronger gravitational pull. Earth pulls much more strongly than a small rock because Earth has much more mass.",
+        masteredText: "More mass creates stronger gravity."
+      },
+      {
+        concept: "Greater distance means weaker gravity",
+        text: "What happens to gravity when two objects move farther apart?",
+        options: [
+          "Gravity becomes stronger.",
+          "Gravity disappears instantly.",
+          "Gravity becomes weaker.",
+          "Gravity changes into air resistance."
+        ],
+        correctIndex: 2,
+        explanation: "Gravity becomes weaker as distance increases. Farther objects still attract each other, but the pull is weaker.",
+        masteredText: "Greater distance makes gravity weaker."
+      },
+      {
+        concept: "Mass and weight are different",
+        text: "Why would you weigh less on the Moon than on Earth?",
+        options: [
+          "Your mass disappears on the Moon.",
+          "The Moon has weaker gravity, so your weight is smaller.",
+          "The Moon has no gravity at all.",
+          "Your body contains less matter on the Moon."
+        ],
+        correctIndex: 1,
+        explanation: "Mass is how much matter you have. Weight is gravity pulling on that mass. Your mass stays the same, but weaker Moon gravity gives you less weight.",
+        masteredText: "Mass stays the same, but weight changes with gravity."
+      },
+      {
+        concept: "Falling without air resistance",
+        text: "In a vacuum, which object lands first: a feather or a metal ball?",
+        options: [
+          "The metal ball lands first.",
+          "The feather lands first.",
+          "They land at the same time.",
+          "Neither object falls."
+        ],
+        correctIndex: 2,
+        explanation: "Without air resistance, both objects fall with the same acceleration near Earth. In air, the feather is slowed by air resistance.",
+        masteredText: "Without air resistance, objects fall at the same rate."
+      },
+      {
+        concept: "Orbit is falling around a planet",
+        text: "What is an orbit?",
+        options: [
+          "Floating where there is no gravity.",
+          "Moving so fast that gravity stops existing.",
+          "Continuously falling around a planet while moving sideways.",
+          "Standing still above a planet."
+        ],
+        correctIndex: 2,
+        explanation: "Orbit is continuous falling around a planet. Gravity pulls inward while sideways speed keeps the object moving forward and missing the ground.",
+        masteredText: "Orbit is continuous falling around a planet."
+      }
+    ];
+
+    const idsToMap = [
+      "question-card",
+      "question-number",
+      "question-text",
+      "answer-options",
+      "answer-button-a",
+      "answer-button-b",
+      "answer-button-c",
+      "answer-button-d",
+      "feedback-message",
+      "explanation-box",
+      "score-display",
+      "progress-bar",
+      "next-question-button",
+      "final-summary-card",
+      "restart-button"
+    ];
+
+    const letters = ["A", "B", "C", "D"];
+    const answerButtons = [
+      document.getElementById("answer-button-a"),
+      document.getElementById("answer-button-b"),
+      document.getElementById("answer-button-c"),
+      document.getElementById("answer-button-d")
+    ];
+
+    const questionNumber = document.getElementById("question-number");
+    const conceptTag = document.getElementById("concept-tag");
+    const questionText = document.getElementById("question-text");
+    const feedbackMessage = document.getElementById("feedback-message");
+    const explanationText = document.getElementById("explanation-text");
+    const scoreValue = document.getElementById("score-value");
+    const progressLabel = document.getElementById("progress-label");
+    const progressPercent = document.getElementById("progress-percent");
+    const progressFill = document.getElementById("progress-fill");
+    const nextButton = document.getElementById("next-question-button");
+    const restartButton = document.getElementById("restart-button");
+    const finalSummaryCard = document.getElementById("final-summary-card");
+    const finalScore = document.getElementById("final-score");
+    const finalText = document.getElementById("final-text");
+    const masteredList = document.getElementById("mastered-list");
+    const reviewList = document.getElementById("review-list");
+    const closeSummaryButton = document.getElementById("close-summary-button");
+    const restartSummaryButton = document.getElementById("restart-summary-button");
+
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+    let results = Array(questions.length).fill(false);
+
+    function loadQuestion() {
+      const q = questions[currentIndex];
+      answered = false;
+
+      questionNumber.textContent = `Question ${currentIndex + 1}`;
+      conceptTag.textContent = q.concept;
+      questionText.textContent = q.text;
+
+      answerButtons.forEach((button, index) => {
+        button.classList.remove("correct", "wrong");
+        button.disabled = false;
+        button.querySelector(".answer-letter").textContent = letters[index];
+        button.querySelector(".answer-text").textContent = q.options[index];
+      });
+
+      feedbackMessage.className = "feedback-message";
+      feedbackMessage.textContent = "Choose an answer to check your understanding.";
+      explanationText.textContent = "Your explanation will appear here after you answer.";
+      nextButton.disabled = true;
+      nextButton.textContent = currentIndex === questions.length - 1 ? "Show Summary" : "Next Question";
+
+      updateProgress();
+      sendComponentMap();
+    }
+
+    function updateProgress() {
+      const answeredCount = results.filter(Boolean).length;
+      const percent = Math.round((currentIndex / questions.length) * 100);
+      const displayPercent = Math.round((Math.max(currentIndex, answered ? currentIndex + 1 : currentIndex) / questions.length) * 100);
+
+      scoreValue.textContent = `${score} / ${questions.length}`;
+      progressLabel.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      progressPercent.textContent = `${displayPercent}%`;
+      progressFill.style.width = `${Math.max(8, displayPercent)}%`;
+
+      results.forEach((isCorrect, index) => {
+        const icon = document.getElementById(`icon-${index}`);
+        if (!icon) return;
+
+        if (isCorrect) {
+          icon.classList.remove("review");
+          icon.classList.add("mastered");
+          icon.textContent = "✓";
+        } else {
+          icon.classList.remove("mastered");
+          icon.classList.add("review");
+          icon.textContent = index + 1;
+        }
+      });
+    }
+
+    function chooseAnswer(index) {
+      if (answered) return;
+
+      answered = true;
+      const q = questions[currentIndex];
+      const isCorrect = index === q.correctIndex;
+
+      if (isCorrect) {
+        score += 1;
+        results[currentIndex] = true;
+      }
+
+      answerButtons.forEach((button, buttonIndex) => {
+        button.disabled = true;
+
+        if (buttonIndex === q.correctIndex) {
+          button.classList.add("correct");
+        }
+
+        if (buttonIndex === index && !isCorrect) {
+          button.classList.add("wrong");
+        }
+      });
+
+      feedbackMessage.className = `feedback-message ${isCorrect ? "correct" : "wrong"}`;
+      feedbackMessage.textContent = isCorrect
+        ? "Correct. Nice work."
+        : `Not quite. The correct answer is ${letters[q.correctIndex]}.`;
+
+      explanationText.textContent = q.explanation;
+      nextButton.disabled = false;
+
+      feedbackMessage.classList.remove("flash");
+      void feedbackMessage.offsetWidth;
+      feedbackMessage.classList.add("flash");
+
+      updateProgress();
+      sendQuizResult(isCorrect, q.explanation);
+      sendComponentMap();
+    }
+
+    function nextQuestion() {
+      if (!answered) return;
+
+      if (currentIndex < questions.length - 1) {
+        currentIndex += 1;
+        loadQuestion();
+      } else {
+        showFinalSummary();
+      }
+    }
+
+    function showFinalSummary() {
+      const mastered = questions.filter((_, index) => results[index]);
+      const review = questions.filter((_, index) => !results[index]);
+      const percent = Math.round((score / questions.length) * 100);
+
+      finalScore.textContent = `Score: ${score} / ${questions.length} (${percent}%)`;
+
+      if (score === questions.length) {
+        finalText.textContent = "Excellent. You mastered every core gravity idea in this review.";
+      } else if (score >= 4) {
+        finalText.textContent = "Good progress. You understand most gravity ideas. Review the missed concepts to make your understanding stronger.";
+      } else {
+        finalText.textContent = "Keep practicing. Review the concepts below, then try again.";
+      }
+
+      masteredList.innerHTML = "";
+      reviewList.innerHTML = "";
+
+      if (mastered.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "No concepts mastered yet. Try again and focus on each explanation.";
+        masteredList.appendChild(li);
+      } else {
+        mastered.forEach((q) => {
+          const li = document.createElement("li");
+          li.textContent = q.masteredText;
+          masteredList.appendChild(li);
+        });
+      }
+
+      if (review.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "Nothing to review. Great job.";
+        reviewList.appendChild(li);
+      } else {
+        review.forEach((q) => {
+          const li = document.createElement("li");
+          li.textContent = q.masteredText;
+          reviewList.appendChild(li);
+        });
+      }
+
+      finalSummaryCard.classList.add("show");
+      sendQuizFinished(percent);
+      sendComponentMap();
+    }
+
+    function restartQuiz() {
+      currentIndex = 0;
+      score = 0;
+      answered = false;
+      results = Array(questions.length).fill(false);
+      finalSummaryCard.classList.remove("show");
+      loadQuestion();
+    }
+
+    function sendQuizResult(isCorrect, explanation) {
+      const q = questions[currentIndex];
+
+      window.parent.postMessage({
+        type: "QUIZ_RESULT",
+        isCorrect,
+        question: q.text,
+        explanation
+      }, "*");
+    }
+
+    function sendQuizFinished(percent) {
+      window.parent.postMessage({
+        type: "QUIZ_FINISHED",
+        score,
+        total: questions.length,
+        percent
+      }, "*");
+    }
+
+    function sendComponentMap() {
+      const centersById = {};
+
+      idsToMap.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        const rect = el.getBoundingClientRect();
+        centersById[id] = {
+          id,
+          x: Math.round(rect.left + rect.width / 2),
+          y: Math.round(rect.top + rect.height / 2),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          label: el.getAttribute("aria-label") || el.textContent.trim().replace(/\s+/g, " ").slice(0, 90)
+        };
+      });
+
+      window.parent.postMessage({
+        type: "COMPONENTS_MAPPED",
+        centersById
+      }, "*");
+    }
+
+    answerButtons.forEach((button, index) => {
+      button.addEventListener("click", () => chooseAnswer(index));
+    });
+
+    nextButton.addEventListener("click", nextQuestion);
+    restartButton.addEventListener("click", restartQuiz);
+    closeSummaryButton.addEventListener("click", () => {
+      finalSummaryCard.classList.remove("show");
+      sendComponentMap();
+    });
+    restartSummaryButton.addEventListener("click", restartQuiz);
+
+    window.addEventListener("resize", () => {
+      window.requestAnimationFrame(sendComponentMap);
+    });
+
+    window.addEventListener("load", () => {
+      loadQuestion();
+      setTimeout(sendComponentMap, 100);
+    });
+
+    // Compatible with LessonPage iframe teacher tools.
+    window.addEventListener("message", (event) => {
+      const data = event.data;
+      if (!data || (data.type !== "SHOW_COMPONENT" && data.type !== "CLICK_COMPONENT")) return;
+
+      if (data.type === "CLICK_COMPONENT" && data.id) {
+        const el = document.getElementById(data.id);
+        if (el && typeof el.click === "function") {
+          setTimeout(() => el.click(), 120);
+        }
+      }
+
+      if (data.type === "SHOW_COMPONENT") {
+        sendComponentMap();
+      }
+    });
+  </script>
+</body>
+</html>

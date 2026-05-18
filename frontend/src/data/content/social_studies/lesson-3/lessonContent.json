@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Modern History",
+  "teacherName": "Dr. Einstein",
+  "subject": "Social Studies",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Modern History.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Modern History",
+      "text": "Welcome to Modern History. In this lesson, you will learn about The 20th century."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Modern History",
+      "imageDescription": "An educational diagram showing concepts of Modern History.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Modern History",
+      "htmlDescription": "Interactive exercise where students practice Modern History.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

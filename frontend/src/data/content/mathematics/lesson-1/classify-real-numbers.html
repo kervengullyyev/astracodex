@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classify the Number</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #64748b;
+      --panel: #ffffff;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --purple: #7c3aed;
+      --purple-soft: #f3e8ff;
+      --good: #15803d;
+      --good-soft: #ecfdf5;
+      --bad: #b91c1c;
+      --bad-soft: #fef2f2;
+      --warn: #92400e;
+      --warn-soft: #fffbeb;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.10);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 12px 20px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+      color: var(--ink);
+    }
+
+    .header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .title-wrap {
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.15rem, 2.2vw, 1.7rem);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: clamp(0.78rem, 1.3vw, 0.95rem);
+      line-height: 1.25;
+    }
+
+    .score-pill {
+      flex-shrink: 0;
+      border: 1px solid #c7d2fe;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 900;
+      color: #3730a3;
+      white-space: nowrap;
+      font-size: 0.95rem;
+    }
+
+    .main {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.95fr);
+      gap: 14px;
+    }
+
+    .card {
+      min-height: 0;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(203, 213, 225, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .question-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .small-label {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      font-weight: 850;
+      font-size: 0.82rem;
+    }
+
+    .number-box {
+      flex-shrink: 0;
+      width: min(88%, 430px);
+      min-height: clamp(110px, 25vh, 205px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 30px;
+      border: 2px solid #ddd6fe;
+      background: linear-gradient(145deg, #ffffff, var(--purple-soft));
+      color: #4c1d95;
+      font-size: clamp(3rem, 8.5vw, 6.4rem);
+      font-weight: 950;
+      letter-spacing: -0.08em;
+      line-height: 1;
+    }
+
+    .question-text {
+      flex-shrink: 0;
+      margin: 0;
+      font-size: clamp(1rem, 1.7vw, 1.25rem);
+      font-weight: 850;
+      line-height: 1.28;
+    }
+
+    .hint {
+      flex-shrink: 0;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(0.82rem, 1.15vw, 0.95rem);
+      line-height: 1.35;
+      max-width: 520px;
+    }
+
+    .options-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding: 14px;
+      gap: 12px;
+    }
+
+    .answer-options {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-content: center;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      touch-action: manipulation;
+    }
+
+    .option-button {
+      min-height: 54px;
+      padding: 11px 10px;
+      border-radius: 16px;
+      border: 1px solid #dbeafe;
+      background: #ffffff;
+      color: #1e3a8a;
+      font-weight: 900;
+      box-shadow: 0 7px 16px rgba(15, 23, 42, 0.08);
+      transition: transform 150ms ease, border-color 150ms ease, background 150ms ease, color 150ms ease;
+    }
+
+    .option-button:hover {
+      transform: translateY(-1px);
+      border-color: #60a5fa;
+      background: #eff6ff;
+    }
+
+    .option-button:active {
+      transform: translateY(1px);
+    }
+
+    .option-button.correct-choice {
+      background: var(--good-soft);
+      color: var(--good);
+      border-color: #86efac;
+    }
+
+    .option-button.incorrect-choice {
+      background: var(--bad-soft);
+      color: var(--bad);
+      border-color: #fca5a5;
+    }
+
+    .option-button:disabled {
+      cursor: default;
+      transform: none;
+    }
+
+    .rule-box {
+      flex-shrink: 0;
+      padding: 11px 12px;
+      border-radius: 18px;
+      background: var(--accent-soft);
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      font-weight: 780;
+      font-size: clamp(0.8rem, 1.1vw, 0.92rem);
+      line-height: 1.35;
+    }
+
+    .feedback-message {
+      flex-shrink: 0;
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 18px;
+      background: var(--warn-soft);
+      border: 1px solid #fde68a;
+      color: var(--warn);
+      font-weight: 760;
+      line-height: 1.3;
+      overflow: hidden;
+    }
+
+    .feedback-message.correct {
+      background: var(--good-soft);
+      border-color: #86efac;
+      color: var(--good);
+    }
+
+    .feedback-message.incorrect {
+      background: var(--bad-soft);
+      border-color: #fca5a5;
+      color: var(--bad);
+    }
+
+    .feedback-text {
+      min-width: 0;
+      font-size: clamp(0.82rem, 1.12vw, 0.94rem);
+    }
+
+    .next-question-button {
+      flex-shrink: 0;
+      padding: 10px 13px;
+      border-radius: 14px;
+      background: #111827;
+      color: #ffffff;
+      font-weight: 950;
+      white-space: nowrap;
+      box-shadow: 0 8px 18px rgba(17, 24, 39, 0.18);
+    }
+
+    .next-question-button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .next-question-button:active {
+      transform: translateY(1px);
+    }
+
+    .next-question-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+      transform: none;
+      box-shadow: none;
+    }
+
+    @media (max-width: 780px) {
+      body {
+        padding: 10px 12px;
+      }
+
+      .header {
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        display: none;
+      }
+
+      .main {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 0.95fr) minmax(0, 1.05fr);
+        gap: 10px;
+      }
+
+      .question-card,
+      .options-card {
+        padding: 10px;
+        gap: 9px;
+      }
+
+      .number-box {
+        min-height: clamp(84px, 19vh, 145px);
+      }
+
+      .hint {
+        display: none;
+      }
+
+      .answer-options {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .option-button {
+        min-height: 45px;
+        padding: 8px 6px;
+      }
+
+      .rule-box {
+        display: none;
+      }
+
+      .feedback-message {
+        min-height: 58px;
+        padding: 10px;
+      }
+    }
+
+    @media (max-height: 540px) {
+      body {
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+
+      .header {
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        display: none;
+      }
+
+      .question-card,
+      .options-card {
+        padding: 9px;
+        gap: 8px;
+      }
+
+      .number-box {
+        min-height: 80px;
+      }
+
+      .hint,
+      .rule-box {
+        display: none;
+      }
+
+      .feedback-message {
+        min-height: 48px;
+        padding: 9px;
+      }
+
+      .option-button {
+        min-height: 42px;
+        padding: 8px 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="title-wrap">
+      <h1>Classify the Number</h1>
+      <div class="subtitle">Choose the most specific category for each number.</div>
+    </div>
+    <div class="score-pill" id="score-display">Score: 0 / 8</div>
+  </header>
+
+  <main class="main">
+    <section class="card question-card" id="question-card" aria-live="polite">
+      <div class="small-label">Question <span id="question-number">1</span></div>
+      <div class="number-box" id="number-display">5</div>
+      <p class="question-text">What is the most specific category?</p>
+      <p class="hint">Choose the smallest category that fits first. For example, 5 is natural, so do not choose the broader category real.</p>
+    </section>
+
+    <section class="card options-card">
+      <div class="rule-box">
+        Natural ⊂ Whole ⊂ Integers ⊂ Rational. Irrational numbers are also real, but not rational.
+      </div>
+
+      <div class="answer-options" id="answer-options">
+        <button class="option-button" id="natural-number-button" data-category="natural" type="button">Natural</button>
+        <button class="option-button" id="whole-number-button" data-category="whole" type="button">Whole</button>
+        <button class="option-button" id="integer-button" data-category="integer" type="button">Integer</button>
+        <button class="option-button" id="rational-number-button" data-category="rational" type="button">Rational</button>
+        <button class="option-button" id="irrational-number-button" data-category="irrational" type="button">Irrational</button>
+        <button class="option-button" id="real-number-button" data-category="real" type="button">Real</button>
+      </div>
+
+      <div class="feedback-message" id="feedback-message">
+        <span class="feedback-text" id="feedback-text">Click one category to check your answer.</span>
+        <button class="next-question-button" id="next-question-button" type="button" disabled>Next</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        value: "5",
+        answer: "natural",
+        explanation: "5 is a counting number, so its most specific category here is natural."
+      },
+      {
+        value: "0",
+        answer: "whole",
+        explanation: "0 is whole, but it is not natural in this beginner lesson."
+      },
+      {
+        value: "-3",
+        answer: "integer",
+        explanation: "-3 is an integer because it is a negative whole number."
+      },
+      {
+        value: "1/2",
+        answer: "rational",
+        explanation: "1/2 is rational because it is written as a fraction of two integers."
+      },
+      {
+        value: "0.75",
+        answer: "rational",
+        explanation: "0.75 is a terminating decimal, so it is rational."
+      },
+      {
+        value: "π",
+        answer: "irrational",
+        explanation: "π is irrational because its decimal form does not end or repeat."
+      },
+      {
+        value: "√2",
+        answer: "irrational",
+        explanation: "√2 is irrational because it cannot be written as a fraction of two integers."
+      },
+      {
+        value: "-4/5",
+        answer: "rational",
+        explanation: "-4/5 is rational because it is a fraction of two integers."
+      }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    const numberDisplay = document.getElementById("number-display");
+    const questionNumber = document.getElementById("question-number");
+    const scoreDisplay = document.getElementById("score-display");
+    const feedback = document.getElementById("feedback-message");
+    const feedbackText = document.getElementById("feedback-text");
+    const nextButton = document.getElementById("next-question-button");
+    const optionButtons = Array.from(document.querySelectorAll(".option-button"));
+
+    function updateScore() {
+      scoreDisplay.textContent = `Score: ${score} / ${questions.length}`;
+    }
+
+    function setOptionsDisabled(disabled) {
+      optionButtons.forEach(button => {
+        button.disabled = disabled;
+      });
+    }
+
+    function resetOptionStyles() {
+      optionButtons.forEach(button => {
+        button.classList.remove("correct-choice", "incorrect-choice");
+      });
+    }
+
+    function loadQuestion() {
+      const q = questions[currentIndex];
+      answered = false;
+      numberDisplay.textContent = q.value;
+      questionNumber.textContent = String(currentIndex + 1);
+      feedback.className = "feedback-message";
+      feedbackText.textContent = "Click one category to check your answer.";
+      nextButton.disabled = true;
+      nextButton.textContent = currentIndex === questions.length - 1 ? "Finish" : "Next";
+      resetOptionStyles();
+      setOptionsDisabled(false);
+    }
+
+    function chooseCategory(category, button) {
+      if (answered) return;
+      answered = true;
+
+      const q = questions[currentIndex];
+      const isCorrect = category === q.answer;
+
+      // Notify parent about the quiz result
+      window.parent.postMessage({
+        type: 'QUIZ_RESULT',
+        isCorrect: isCorrect,
+        question: q.value,
+        explanation: q.explanation,
+        userAnswer: category
+      }, '*');
+
+      if (isCorrect) {
+        score += 1;
+        feedback.className = "feedback-message correct";
+        feedbackText.textContent = `Correct. ${q.explanation}`;
+        button.classList.add("correct-choice");
+      } else {
+        feedback.className = "feedback-message incorrect";
+        feedbackText.textContent = `Not quite. ${q.explanation}`;
+        button.classList.add("incorrect-choice");
+
+        const correctButton = optionButtons.find(btn => btn.dataset.category === q.answer);
+        if (correctButton) correctButton.classList.add("correct-choice");
+      }
+
+      updateScore();
+      setOptionsDisabled(true);
+      nextButton.disabled = false;
+      nextButton.focus({ preventScroll: true });
+    }
+
+    function nextQuestion() {
+      if (!answered) return;
+
+      if (currentIndex < questions.length - 1) {
+        currentIndex += 1;
+        loadQuestion();
+        return;
+      }
+
+      const percent = Math.round((score / questions.length) * 100);
+      
+      // Notify parent about the final score
+      window.parent.postMessage({
+        type: 'QUIZ_FINISHED',
+        score: score,
+        total: questions.length,
+        percent: percent
+      }, '*');
+
+      numberDisplay.textContent = `${percent}%`;
+      questionNumber.textContent = "Done";
+      feedback.className = percent >= 70 ? "feedback-message correct" : "feedback-message";
+      feedbackText.textContent = `Finished. Your score is ${score} out of ${questions.length}.`;
+      nextButton.textContent = "Restart";
+      nextButton.disabled = false;
+      setOptionsDisabled(true);
+      nextButton.onclick = restart;
+    }
+
+    function restart() {
+      currentIndex = 0;
+      score = 0;
+      updateScore();
+      nextButton.onclick = nextQuestion;
+      loadQuestion();
+    }
+
+    optionButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        chooseCategory(button.dataset.category, button);
+      });
+    });
+
+    nextButton.addEventListener("click", nextQuestion);
+
+    window.addEventListener("keydown", event => {
+      const keyMap = {
+        "1": "natural",
+        "2": "whole",
+        "3": "integer",
+        "4": "rational",
+        "5": "irrational",
+        "6": "real"
+      };
+
+      if (keyMap[event.key]) {
+        const button = optionButtons.find(btn => btn.dataset.category === keyMap[event.key]);
+        if (button && !button.disabled) button.click();
+      }
+
+      if (event.key === "Enter" && !nextButton.disabled) {
+        nextButton.click();
+      }
+    });
+
+    updateScore();
+    loadQuestion();
+  </script>
+
+  <script>
+    window.addEventListener('message', function(event) {
+      const data = event.data;
+      if (!data || (data.type !== 'SHOW_COMPONENT' && data.type !== 'CLICK_COMPONENT')) return;
+
+      const name = data.name || '';
+      let el = document.getElementById(data.id);
+
+      if (!el && name) {
+        const valMatch = name.match(/(-?\d+(\.\d+)?)/);
+        const val = valMatch ? valMatch[0] : null;
+        
+        const lowerName = name.toLowerCase();
+        if (lowerName.includes('drop point') && val) {
+          el = document.querySelector('.drop-point[data-value="' + val + '"]');
+        } else if (lowerName.includes('number card') && val) {
+          el = document.querySelector('.number-card[data-value="' + val + '"]');
+        } else if (lowerName.includes('reset')) {
+          el = document.getElementById('reset-button') || document.querySelector('.reset-button');
+        } else if (lowerName.includes('check')) {
+          el = document.getElementById('check-answer-button') || document.querySelector('.check-answer-button');
+        } else if (lowerName.includes('natural')) {
+          el = document.querySelector('.bucket[data-target="natural"]');
+        } else if (lowerName.includes('whole')) {
+          el = document.querySelector('.bucket[data-target="whole"]');
+        } else if (lowerName.includes('integer')) {
+          el = document.querySelector('.bucket[data-target="integer"]');
+        } else if (lowerName.includes('rational')) {
+          el = document.querySelector('.bucket[data-target="rational"]');
+        } else if (lowerName.includes('irrational')) {
+          el = document.querySelector('.bucket[data-target="irrational"]');
+        } else if (lowerName.includes('real')) {
+          el = document.querySelector('.bucket[data-target="real"]');
+        }
+      }
+
+      if (el) {
+        const oldOutline = el.style.outline;
+        const oldOutlineOffset = el.style.outlineOffset;
+        const oldBoxShadow = el.style.boxShadow;
+        
+        el.style.outline = '4px solid #3b82f6';
+        el.style.outlineOffset = '4px';
+        el.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.5)';
+        
+        setTimeout(() => {
+          el.style.outline = oldOutline;
+          el.style.outlineOffset = oldOutlineOffset;
+          el.style.boxShadow = oldBoxShadow;
+        }, 2000);
+
+        if (data.type === 'CLICK_COMPONENT') {
+          setTimeout(() => el.click(), 500);
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,139 @@
+{
+  "components": [
+    {
+      "id": "moon-phase-simulator",
+      "name": "Moon phase simulator",
+      "interactionType": "show"
+    },
+    {
+      "id": "orbit-stage",
+      "name": "Moon orbit stage",
+      "interactionType": "show"
+    },
+    {
+      "id": "sun-direction-marker",
+      "name": "Sunlight direction marker",
+      "interactionType": "show"
+    },
+    {
+      "id": "orbit-ring",
+      "name": "Moon orbit ring",
+      "interactionType": "show"
+    },
+    {
+      "id": "earth",
+      "name": "Earth at the center",
+      "interactionType": "show"
+    },
+    {
+      "id": "earth-observer-line",
+      "name": "Earth to Moon viewing line",
+      "interactionType": "show"
+    },
+    {
+      "id": "moon",
+      "name": "Moon",
+      "interactionType": "clickable"
+    },
+    {
+      "id": "moon-shadow-shape",
+      "name": "Moon shadow shape",
+      "interactionType": "show"
+    },
+    {
+      "id": "controls-card",
+      "name": "Moon controls card",
+      "interactionType": "show"
+    },
+    {
+      "id": "moon-angle-slider",
+      "name": "Moon position slider",
+      "interactionType": "clickable"
+    },
+    {
+      "id": "angle-value",
+      "name": "Moon angle value",
+      "interactionType": "show"
+    },
+    {
+      "id": "phase-card",
+      "name": "Current phase card",
+      "interactionType": "show"
+    },
+    {
+      "id": "phase-preview",
+      "name": "Live Moon phase preview",
+      "interactionType": "show"
+    },
+    {
+      "id": "phase-badge",
+      "name": "Illumination badge",
+      "interactionType": "show"
+    },
+    {
+      "id": "phase-name",
+      "name": "Current phase name",
+      "interactionType": "show"
+    },
+    {
+      "id": "phase-description",
+      "name": "Current phase description",
+      "interactionType": "show"
+    },
+    {
+      "id": "explanation-card",
+      "name": "Phase explanation card",
+      "interactionType": "show"
+    },
+    {
+      "id": "legend-card",
+      "name": "Moon simulator legend",
+      "interactionType": "show"
+    },
+    {
+      "id": "phase-strip",
+      "name": "Phase selection strip",
+      "interactionType": "show"
+    },
+    {
+      "id": "phase-chip-new-moon",
+      "name": "New Moon phase chip",
+      "interactionType": "clickable"
+    },
+    {
+      "id": "phase-chip-waxing-crescent",
+      "name": "Waxing Crescent phase chip",
+      "interactionType": "clickable"
+    },
+    {
+      "id": "phase-chip-first-quarter",
+      "name": "First Quarter phase chip",
+      "interactionType": "clickable"
+    },
+    {
+      "id": "phase-chip-waxing-gibbous",
+      "name": "Waxing Gibbous phase chip",
+      "interactionType": "clickable"
+    },
+    {
+      "id": "phase-chip-full-moon",
+      "name": "Full Moon phase chip",
+      "interactionType": "clickable"
+    },
+    {
+      "id": "phase-chip-waning-gibbous",
+      "name": "Waning Gibbous phase chip",
+      "interactionType": "clickable"
+    },
+    {
+      "id": "phase-chip-last-quarter",
+      "name": "Last Quarter phase chip",
+      "interactionType": "clickable"
+    },
+    {
+      "id": "phase-chip-waning-crescent",
+      "name": "Waning Crescent phase chip",
+      "interactionType": "clickable"
+    }
+  ]
+}

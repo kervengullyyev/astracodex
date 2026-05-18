@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Sculpture",
+  "teacherName": "Dr. Einstein",
+  "subject": "Arts",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Sculpture.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Sculpture",
+      "text": "Welcome to Sculpture. In this lesson, you will learn about 3D art."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Sculpture",
+      "imageDescription": "An educational diagram showing concepts of Sculpture.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Sculpture",
+      "htmlDescription": "Interactive exercise where students practice Sculpture.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}

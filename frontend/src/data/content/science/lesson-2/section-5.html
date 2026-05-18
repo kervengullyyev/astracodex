@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moon Phase Simulator</title>
+  <style>
+    :root {
+      --bg: #F7F8FB;
+      --panel: rgba(255, 255, 255, 0.86);
+      --panel-strong: rgba(255, 255, 255, 0.94);
+      --text: #1F2F49;
+      --muted: #667792;
+      --line: rgba(198, 210, 230, 0.85);
+      --accent: #6A8DFF;
+      --accent-2: #8B7CFF;
+      --accent-soft: #EEF3FF;
+      --sun: #FFD96B;
+      --sun-soft: #FFF4C7;
+      --shadow: 0 24px 60px rgba(44, 69, 120, 0.10), 0 8px 22px rgba(44, 69, 120, 0.07);
+      --shadow-soft: 0 10px 28px rgba(44, 69, 120, 0.08);
+      --highlight: 0 0 0 4px rgba(106, 141, 255, 0.16), 0 0 0 2px rgba(106, 141, 255, 0.5);
+      --radius: 24px;
+      --duration: 220ms;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #FFE1C4;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      background: #FFE1C4;
+    }
+
+    #moon-phase-simulator,
+    [data-id="moon-phase-simulator"] {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(340px, 1.18fr) minmax(320px, 0.82fr);
+      gap: 18px;
+      padding: 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: var(--radius);
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.02));
+      opacity: 0.9;
+    }
+
+    #orbit-panel,
+    [data-id="orbit-panel"] {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 18px;
+      gap: 12px;
+    }
+
+    #info-panel,
+    [data-id="info-panel"] {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 14px;
+      padding: 18px;
+    }
+
+    #title-group,
+    [data-id="title-group"] {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    #lesson-title,
+    [data-id="lesson-title"] {
+      margin: 0;
+      font-size: clamp(24px, 2.1vw, 31px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      font-weight: 750;
+    }
+
+    #lesson-subtitle,
+    [data-id="lesson-subtitle"] {
+      margin: 7px 0 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 60ch;
+    }
+
+    #sun-direction-chip,
+    [data-id="sun-direction-chip"] {
+      align-self: flex-start;
+      background: linear-gradient(180deg, #FFF8D7, #FFF0B5);
+      color: #826217;
+      border: 1px solid rgba(237, 212, 118, 0.9);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(255, 208, 86, 0.18);
+      white-space: nowrap;
+    }
+
+    #orbit-stage,
+    [data-id="orbit-stage"] {
+      position: relative;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(212, 223, 242, 0.9);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(110, 146, 255, 0.09), transparent 28%),
+        radial-gradient(circle at 72% 31%, rgba(255, 222, 120, 0.18), transparent 18%),
+        radial-gradient(circle at 20% 20%, rgba(139, 124, 255, 0.08), transparent 20%),
+        linear-gradient(180deg, #FCFDFF 0%, #F3F7FE 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    #orbit-stage::after,
+    [data-id="orbit-stage"]::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 18px;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle at 18% 26%, rgba(108, 121, 150, 0.22) 0 1.2px, transparent 1.4px),
+        radial-gradient(circle at 30% 72%, rgba(108, 121, 150, 0.18) 0 1px, transparent 1.2px),
+        radial-gradient(circle at 76% 18%, rgba(108, 121, 150, 0.20) 0 1.1px, transparent 1.3px),
+        radial-gradient(circle at 82% 68%, rgba(108, 121, 150, 0.17) 0 1.1px, transparent 1.3px),
+        radial-gradient(circle at 56% 20%, rgba(108, 121, 150, 0.16) 0 0.9px, transparent 1.1px),
+        radial-gradient(circle at 14% 82%, rgba(108, 121, 150, 0.12) 0 0.9px, transparent 1.1px);
+      opacity: 0.65;
+    }
+
+    #orbit-svg,
+    [data-id="orbit-svg"] {
+      width: 100%;
+      height: 100%;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    #controls-card,
+    [data-id="controls-card"] {
+      background: var(--panel-strong);
+      border: 1px solid rgba(213, 225, 243, 0.9);
+      border-radius: 20px;
+      padding: 14px;
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    #angle-label,
+    [data-id="angle-label"] {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+      min-width: 96px;
+    }
+
+    #moon-angle-slider,
+    [data-id="moon-angle-slider"] {
+      width: 100%;
+      appearance: none;
+      height: 12px;
+      border-radius: 999px;
+      background:
+        linear-gradient(90deg, #DDE7FF 0%, #C7D8FF 48%, #E4DFFF 100%);
+      outline: none;
+      cursor: pointer;
+      box-shadow:
+        inset 0 2px 4px rgba(40, 60, 100, 0.08),
+        0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    #moon-angle-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 4px solid white;
+      background: linear-gradient(180deg, var(--accent), #7DA2FF);
+      box-shadow:
+        0 10px 22px rgba(106, 141, 255, 0.34),
+        0 2px 6px rgba(106, 141, 255, 0.2);
+    }
+
+    #moon-angle-slider::-moz-range-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 4px solid white;
+      background: linear-gradient(180deg, var(--accent), #7DA2FF);
+      box-shadow:
+        0 10px 22px rgba(106, 141, 255, 0.34),
+        0 2px 6px rgba(106, 141, 255, 0.2);
+    }
+
+    #angle-value,
+    [data-id="angle-value"] {
+      min-width: 62px;
+      text-align: right;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    #phase-card,
+    [data-id="phase-card"] {
+      background:
+        radial-gradient(circle at 20% 20%, rgba(120, 146, 255, 0.08), transparent 32%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 252, 255, 0.94));
+      border: 1px solid rgba(213, 225, 243, 0.95);
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      grid-template-columns: 124px 1fr;
+      gap: 18px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    #phase-preview-wrap,
+    [data-id="phase-preview-wrap"] {
+      display: grid;
+      place-items: center;
+      gap: 9px;
+    }
+
+    #phase-preview,
+    [data-id="phase-preview"] {
+      width: 98px;
+      height: 98px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.18), transparent 26%),
+        #0F172A;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 14px 30px rgba(15, 23, 42, 0.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #phase-preview::after,
+    [data-id="phase-preview"]::after {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(125, 162, 255, 0.18), transparent 62%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #phase-preview svg,
+    [data-id="phase-preview-svg"] {
+      width: 100%;
+      height: 100%;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    #phase-badge,
+    [data-id="phase-badge"] {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid #D6E3FF;
+      border-radius: 999px;
+      padding: 6px 11px;
+      white-space: nowrap;
+      box-shadow: 0 6px 16px rgba(106, 141, 255, 0.10);
+    }
+
+    #phase-details,
+    [data-id="phase-details"] {
+      min-width: 0;
+    }
+
+    #phase-name,
+    [data-id="phase-name"] {
+      margin: 0 0 8px 0;
+      font-size: clamp(23px, 2vw, 29px);
+      line-height: 1.07;
+      letter-spacing: -0.04em;
+      font-weight: 760;
+    }
+
+    #phase-description,
+    [data-id="phase-description"] {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.58;
+    }
+
+    #explanation-card,
+    [data-id="explanation-card"],
+    #legend-card,
+    [data-id="legend-card"] {
+      background: var(--panel-strong);
+      border: 1px solid rgba(213, 225, 243, 0.92);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      z-index: 1;
+    }
+
+    #explanation-card::before,
+    [data-id="explanation-card"]::before,
+    #legend-card::before,
+    [data-id="legend-card"]::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.02));
+    }
+
+    #legend-card,
+    [data-id="legend-card"] {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    #explanation-title,
+    [data-id="explanation-title"],
+    #legend-title,
+    [data-id="legend-title"] {
+      font-size: 15px;
+      font-weight: 760;
+      margin: 0 0 8px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    #explanation-text,
+    [data-id="explanation-text"] {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.62;
+      position: relative;
+      z-index: 1;
+    }
+
+    #legend-list,
+    [data-id="legend-list"] {
+      display: grid;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.5),
+        0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    #phase-strip,
+    [data-id="phase-strip"] {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      padding: 2px;
+      min-height: 0;
+      align-self: end;
+      position: relative;
+      z-index: 1;
+    }
+
+    .phase-chip {
+      min-width: 0;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(213, 225, 243, 0.95);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      border-radius: 999px;
+      padding: 9px 10px;
+      box-shadow: 0 8px 18px rgba(72, 99, 145, 0.06);
+      transition:
+        transform var(--duration) ease,
+        box-shadow var(--duration) ease,
+        border-color var(--duration) ease,
+        color var(--duration) ease,
+        background var(--duration) ease;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .phase-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(72, 99, 145, 0.10);
+    }
+
+    .phase-chip.active {
+      color: var(--accent);
+      border-color: #C7D8FF;
+      background: linear-gradient(180deg, #F2F6FF, #EAF1FF);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(106, 141, 255, 0.12);
+    }
+
+    .highlight-target {
+      position: relative;
+      z-index: 4;
+      box-shadow: var(--highlight) !important;
+      transition: box-shadow var(--duration) ease;
+    }
+
+    .screen-reader-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    @media (max-width: 940px) {
+
+      #moon-phase-simulator,
+      [data-id="moon-phase-simulator"] {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(340px, 1fr) minmax(300px, auto);
+      }
+
+      #phase-card,
+      [data-id="phase-card"] {
+        grid-template-columns: 110px 1fr;
+      }
+
+      #phase-strip,
+      [data-id="phase-strip"] {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+
+      #moon-phase-simulator,
+      [data-id="moon-phase-simulator"] {
+        padding: 10px;
+        gap: 10px;
+      }
+
+      #controls-card,
+      [data-id="controls-card"] {
+        grid-template-columns: 1fr;
+      }
+
+      #angle-value,
+      [data-id="angle-value"] {
+        text-align: left;
+      }
+
+      #phase-card,
+      [data-id="phase-card"] {
+        grid-template-columns: 1fr;
+        justify-items: start;
+      }
+
+      #title-group,
+      [data-id="title-group"] {
+        flex-direction: column;
+      }
+
+      #phase-strip,
+      [data-id="phase-strip"] {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main id="moon-phase-simulator" data-id="moon-phase-simulator" aria-label="Interactive Moon phase simulator">
+    <section id="orbit-panel" data-id="orbit-panel" class="panel" aria-labelledby="lesson-title">
+      <div id="title-group" data-id="title-group">
+        <div id="title-copy" data-id="title-copy">
+          <h1 id="lesson-title" data-id="lesson-title">Moon Phase Simulator</h1>
+          <p id="lesson-subtitle" data-id="lesson-subtitle">
+            Move the Moon around Earth to see why the Moon’s shape seems to change from Earth, even though the Sun
+            always lights half of it.
+          </p>
+        </div>
+        <div id="sun-direction-chip" data-id="sun-direction-chip" aria-label="Sunlight direction">☀ Sunlight from the
+          right</div>
+      </div>
+
+      <div id="orbit-stage" data-id="orbit-stage">
+        <svg id="orbit-svg" data-id="orbit-svg" viewBox="0 0 900 650" preserveAspectRatio="xMidYMid meet"
+          aria-label="Moon orbit diagram">
+          <defs>
+            <radialGradient id="earthGlow" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stop-color="#9FCBFF" stop-opacity="0.22"></stop>
+              <stop offset="100%" stop-color="#9FCBFF" stop-opacity="0"></stop>
+            </radialGradient>
+
+            <radialGradient id="earthGradient" cx="38%" cy="32%" r="70%">
+              <stop offset="0%" stop-color="#B7E7FF"></stop>
+              <stop offset="46%" stop-color="#68A7FF"></stop>
+              <stop offset="100%" stop-color="#3365D4"></stop>
+            </radialGradient>
+
+            <radialGradient id="moonGlow" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18"></stop>
+              <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"></stop>
+            </radialGradient>
+
+            <radialGradient id="moonGradient" cx="35%" cy="30%" r="75%">
+              <stop offset="0%" stop-color="#FAFBFD"></stop>
+              <stop offset="58%" stop-color="#DDE2EB"></stop>
+              <stop offset="100%" stop-color="#B9C0CD"></stop>
+            </radialGradient>
+
+            <linearGradient id="sunRayGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#FFE181" stop-opacity="0"></stop>
+              <stop offset="100%" stop-color="#FFD34F" stop-opacity="0.82"></stop>
+            </linearGradient>
+
+            <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#14305f" flood-opacity="0.14" />
+            </filter>
+
+            <filter id="sunGlow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="8" result="blur"></feGaussianBlur>
+              <feMerge>
+                <feMergeNode in="blur"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <g id="sun-direction-marker" data-id="sun-direction-marker">
+            <line x1="710" y1="105" x2="854" y2="105" stroke="url(#sunRayGradient)" stroke-width="22"
+              stroke-linecap="round"></line>
+            <circle cx="848" cy="105" r="14" fill="#FFD34F" opacity="0.26" filter="url(#sunGlow)"></circle>
+            <polygon points="854,105 816,84 816,126" fill="#FFD34F" filter="url(#sunGlow)"></polygon>
+            <text x="693" y="112" fill="#9A7B21" font-size="18" font-weight="700" text-anchor="end">Sunlight</text>
+          </g>
+
+          <g id="orbit-ring" data-id="orbit-ring">
+            <circle cx="450" cy="325" r="190" fill="none" stroke="#D6E1F3" stroke-width="3.2" stroke-dasharray="4 10">
+            </circle>
+            <circle cx="450" cy="325" r="205" fill="none" stroke="rgba(224,232,246,0.7)" stroke-width="1.3"></circle>
+          </g>
+
+          <g id="sun-side-glow" data-id="sun-side-glow">
+            <ellipse cx="578" cy="325" rx="170" ry="110" fill="rgba(255,223,122,0.18)"></ellipse>
+            <ellipse cx="618" cy="325" rx="125" ry="82" fill="rgba(255,232,165,0.10)"></ellipse>
+          </g>
+
+          <g id="earth" data-id="earth" filter="url(#softShadow)" style="cursor:pointer">
+            <circle cx="450" cy="325" r="92" fill="url(#earthGlow)" opacity="0.9"></circle>
+            <circle cx="450" cy="325" r="58" fill="url(#earthGradient)"></circle>
+            <path d="M426 300 C442 290, 468 294, 480 304 C470 312, 456 316, 439 312 C431 311, 426 307, 426 300Z"
+              fill="#57D089"></path>
+            <path d="M458 333 C480 329, 494 343, 488 359 C472 363, 456 358, 447 346 C446 340, 451 335, 458 333Z"
+              fill="#6ED89D"></path>
+            <path d="M406 339 C420 334, 430 342, 431 353 C422 357, 411 355, 404 349 C403 345, 404 341, 406 339Z"
+              fill="#85DFAE"></path>
+            <ellipse cx="434" cy="304" rx="12" ry="7" fill="rgba(255,255,255,0.22)"></ellipse>
+          </g>
+
+          <g id="earth-observer-line" data-id="earth-observer-line">
+            <line x1="450" y1="325" x2="640" y2="325" stroke="#8CA4D5" stroke-width="2.6" opacity="0.9"></line>
+          </g>
+
+          <g id="moon-orbit-position" data-id="moon-orbit-position">
+            <circle id="moon-orbit-ghost" data-id="moon-orbit-ghost" cx="640" cy="325" r="6.5" fill="#C4D3EF"></circle>
+
+            <g id="moon" data-id="moon" filter="url(#softShadow)" style="cursor:grab">
+              <circle cx="640" cy="325" r="46" fill="url(#moonGlow)" opacity="0.9"></circle>
+              <circle id="moon-body" data-id="moon-body" cx="640" cy="325" r="28" fill="url(#moonGradient)"></circle>
+              <circle cx="632" cy="316" r="3.8" fill="rgba(145,151,165,0.42)"></circle>
+              <circle cx="648" cy="334" r="4.6" fill="rgba(145,151,165,0.35)"></circle>
+              <circle cx="651" cy="315" r="2.8" fill="rgba(145,151,165,0.28)"></circle>
+              <circle cx="636" cy="330" r="2.3" fill="rgba(145,151,165,0.22)"></circle>
+              <path id="moon-shadow-shape" data-id="moon-shadow-shape" fill="#111827" opacity="0.72"></path>
+            </g>
+          </g>
+
+          <g id="earth-view-label" data-id="earth-view-label">
+            <rect x="352" y="388" rx="13" ry="13" width="196" height="42" fill="rgba(255,255,255,0.94)"
+              stroke="#DCE4F0"></rect>
+            <text x="450" y="415" fill="#607492" font-size="16" font-weight="700" text-anchor="middle">View from
+              Earth</text>
+          </g>
+        </svg>
+      </div>
+
+      <div id="controls-card" data-id="controls-card">
+        <label id="angle-label" data-id="angle-label" for="moon-angle-slider">Moon position</label>
+        <input id="moon-angle-slider" data-id="moon-angle-slider" type="range" min="0" max="359" value="0" step="1"
+          aria-label="Move Moon around Earth" />
+        <div id="angle-value" data-id="angle-value" aria-live="polite">0°</div>
+      </div>
+    </section>
+
+    <aside id="info-panel" data-id="info-panel" class="panel">
+      <section id="phase-card" data-id="phase-card" aria-labelledby="phase-name">
+        <div id="phase-preview-wrap" data-id="phase-preview-wrap">
+          <div id="phase-preview" data-id="phase-preview" aria-label="Real-time Moon phase preview">
+            <svg id="phase-preview-svg" data-id="phase-preview-svg" viewBox="0 0 100 100"
+              preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <defs>
+                <radialGradient id="previewMoonGradient" cx="35%" cy="30%" r="75%">
+                  <stop offset="0%" stop-color="#FAFBFD"></stop>
+                  <stop offset="58%" stop-color="#DDE2EB"></stop>
+                  <stop offset="100%" stop-color="#B9C0CD"></stop>
+                </radialGradient>
+              </defs>
+              <circle cx="50" cy="50" r="44" fill="url(#previewMoonGradient)"></circle>
+              <circle cx="50" cy="50" r="44" fill="#0F172A" opacity="1"></circle>
+              <path id="phase-preview-lit" data-id="phase-preview-lit" fill="url(#previewMoonGradient)"></path>
+              <circle cx="40" cy="37" r="3" fill="rgba(150,155,170,0.28)"></circle>
+              <circle cx="60" cy="59" r="4.5" fill="rgba(150,155,170,0.28)"></circle>
+              <circle cx="61" cy="37" r="2.5" fill="rgba(150,155,170,0.20)"></circle>
+            </svg>
+          </div>
+          <div id="phase-badge" data-id="phase-badge">Visible from Earth</div>
+        </div>
+
+        <div id="phase-details" data-id="phase-details">
+          <h2 id="phase-name" data-id="phase-name">New Moon</h2>
+          <p id="phase-description" data-id="phase-description">
+            The lit half faces away from Earth, so the Moon looks dark to us.
+          </p>
+        </div>
+      </section>
+
+      <section id="explanation-card" data-id="explanation-card" aria-labelledby="explanation-title">
+        <h3 id="explanation-title" data-id="explanation-title">Why the shape changes</h3>
+        <p id="explanation-text" data-id="explanation-text">
+          The Sun always lights half of the Moon. As the Moon moves around Earth, we see different amounts of that
+          bright half, which creates the phases.
+        </p>
+      </section>
+
+      <section id="legend-card" data-id="legend-card" aria-labelledby="legend-title">
+        <h3 id="legend-title" data-id="legend-title">What you are seeing</h3>
+        <div id="legend-list" data-id="legend-list">
+          <div class="legend-item" id="legend-earth" data-id="legend-earth">
+            <span class="legend-dot" style="background:linear-gradient(180deg,#8FD4FF,#5E95FF);"></span>
+            <span>Earth stays in the center.</span>
+          </div>
+          <div class="legend-item" id="legend-moon" data-id="legend-moon">
+            <span class="legend-dot" style="background:linear-gradient(180deg,#FCFCFE,#C3CAD6);"></span>
+            <span>The Moon moves around Earth.</span>
+          </div>
+          <div class="legend-item" id="legend-sunlight" data-id="legend-sunlight">
+            <span class="legend-dot" style="background:linear-gradient(180deg,#FFE586,#FFD54A);"></span>
+            <span>Sunlight always comes from the right.</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="phase-strip" data-id="phase-strip" aria-label="Moon phase names">
+        <div class="phase-chip active" id="phase-chip-new-moon" data-id="phase-chip-new-moon">New</div>
+        <div class="phase-chip" id="phase-chip-waxing-crescent" data-id="phase-chip-waxing-crescent">Crescent</div>
+        <div class="phase-chip" id="phase-chip-first-quarter" data-id="phase-chip-first-quarter">1st Quarter</div>
+        <div class="phase-chip" id="phase-chip-waxing-gibbous" data-id="phase-chip-waxing-gibbous">Gibbous</div>
+        <div class="phase-chip" id="phase-chip-full-moon" data-id="phase-chip-full-moon">Full</div>
+        <div class="phase-chip" id="phase-chip-waning-gibbous" data-id="phase-chip-waning-gibbous">Waning</div>
+        <div class="phase-chip" id="phase-chip-last-quarter" data-id="phase-chip-last-quarter">Last Quarter</div>
+        <div class="phase-chip" id="phase-chip-waning-crescent" data-id="phase-chip-waning-crescent">Waning Crescent
+        </div>
+      </section>
+    </aside>
+
+    <div class="screen-reader-only" id="aria-status" data-id="aria-status" aria-live="polite"></div>
+  </main>
+
+  <script>
+    (function () {
+      const componentIds = [
+        "moon-phase-simulator",
+        "orbit-panel",
+        "info-panel",
+        "title-group",
+        "title-copy",
+        "lesson-title",
+        "lesson-subtitle",
+        "sun-direction-chip",
+        "orbit-stage",
+        "orbit-svg",
+        "sun-direction-marker",
+        "orbit-ring",
+        "sun-side-glow",
+        "earth",
+        "earth-observer-line",
+        "moon-orbit-position",
+        "moon-orbit-ghost",
+        "moon",
+        "moon-body",
+        "moon-shadow-shape",
+        "earth-view-label",
+        "controls-card",
+        "angle-label",
+        "moon-angle-slider",
+        "angle-value",
+        "phase-card",
+        "phase-preview-wrap",
+        "phase-preview",
+        "phase-preview-svg",
+        "phase-preview-lit",
+        "phase-badge",
+        "phase-details",
+        "phase-name",
+        "phase-description",
+        "explanation-card",
+        "explanation-title",
+        "explanation-text",
+        "legend-card",
+        "legend-title",
+        "legend-list",
+        "legend-earth",
+        "legend-moon",
+        "legend-sunlight",
+        "phase-strip",
+        "phase-chip-new-moon",
+        "phase-chip-waxing-crescent",
+        "phase-chip-first-quarter",
+        "phase-chip-waxing-gibbous",
+        "phase-chip-full-moon",
+        "phase-chip-waning-gibbous",
+        "phase-chip-last-quarter",
+        "phase-chip-waning-crescent",
+        "aria-status"
+      ];
+
+      const slider = document.getElementById("moon-angle-slider");
+      const angleValue = document.getElementById("angle-value");
+      const phaseName = document.getElementById("phase-name");
+      const phaseDescription = document.getElementById("phase-description");
+      const explanationText = document.getElementById("explanation-text");
+      const ariaStatus = document.getElementById("aria-status");
+
+      const moonGroup = document.getElementById("moon");
+      const moonShadowShape = document.getElementById("moon-shadow-shape");
+      const moonGhost = document.getElementById("moon-orbit-ghost");
+      const earthObserverLine = document.querySelector("#earth-observer-line line");
+      const phasePreviewLit = document.getElementById("phase-preview-lit");
+
+      const centerX = 450;
+      const centerY = 325;
+      const orbitR = 190;
+      const moonR = 28;
+
+      const phaseChips = {
+        "new-moon": document.getElementById("phase-chip-new-moon"),
+        "waxing-crescent": document.getElementById("phase-chip-waxing-crescent"),
+        "first-quarter": document.getElementById("phase-chip-first-quarter"),
+        "waxing-gibbous": document.getElementById("phase-chip-waxing-gibbous"),
+        "full-moon": document.getElementById("phase-chip-full-moon"),
+        "waning-gibbous": document.getElementById("phase-chip-waning-gibbous"),
+        "last-quarter": document.getElementById("phase-chip-last-quarter"),
+        "waning-crescent": document.getElementById("phase-chip-waning-crescent")
+      };
+
+      const phaseData = [
+        {
+          key: "new-moon",
+          label: "New Moon",
+          start: -22.5,
+          end: 22.5,
+          description: "The lit half faces away from Earth, so the Moon looks dark to us.",
+          explain: "At new moon, the Moon is between Earth and the Sun. Sunlight hits the far side, not the side facing Earth."
+        },
+        {
+          key: "waxing-crescent",
+          label: "Waxing Crescent",
+          start: 22.5,
+          end: 67.5,
+          description: "A thin bright edge appears as we begin to see a little of the lit half.",
+          explain: "As the Moon moves forward in its orbit, a small part of the sunlit half becomes visible from Earth."
+        },
+        {
+          key: "first-quarter",
+          label: "First Quarter",
+          start: 67.5,
+          end: 112.5,
+          description: "We see half of the Moon lit because we are viewing it from the side.",
+          explain: "At first quarter, the angle between Earth, Moon, and Sun lets us see exactly half of the bright half."
+        },
+        {
+          key: "waxing-gibbous",
+          label: "Waxing Gibbous",
+          start: 112.5,
+          end: 157.5,
+          description: "More than half looks bright as the Moon moves toward full moon.",
+          explain: "Now most of the side facing Earth is illuminated, so the Moon looks almost full."
+        },
+        {
+          key: "full-moon",
+          label: "Full Moon",
+          start: 157.5,
+          end: 202.5,
+          description: "The entire face toward Earth is lit, so the Moon looks fully bright.",
+          explain: "At full moon, Earth is between the Sun and Moon, so the whole near side is sunlit."
+        },
+        {
+          key: "waning-gibbous",
+          label: "Waning Gibbous",
+          start: 202.5,
+          end: 247.5,
+          description: "The Moon is still mostly bright, but the lit part is shrinking.",
+          explain: "After full moon, we begin to see less of the sunlit half from Earth each night."
+        },
+        {
+          key: "last-quarter",
+          label: "Last Quarter",
+          start: 247.5,
+          end: 292.5,
+          description: "Half of the Moon is lit again, now on the opposite side.",
+          explain: "At last quarter, we once again see half of the bright side, but the orbit has carried the Moon to the other side."
+        },
+        {
+          key: "waning-crescent",
+          label: "Waning Crescent",
+          start: 292.5,
+          end: 337.5,
+          description: "Only a thin bright edge remains before the Moon returns to new moon.",
+          explain: "Near the end of the cycle, only a small sliver of the sunlit half still faces Earth."
+        },
+        {
+          key: "new-moon",
+          label: "New Moon",
+          start: 337.5,
+          end: 360.5,
+          description: "The lit half faces away from Earth, so the Moon looks dark to us.",
+          explain: "The cycle is nearly complete and the lit side is turning away from Earth again."
+        }
+      ];
+
+      function normalizeAngle(angle) {
+        let a = angle % 360;
+        if (a < 0) a += 360;
+        return a;
+      }
+
+      function getPhase(angleDeg) {
+        const a = normalizeAngle(angleDeg);
+        for (const phase of phaseData) {
+          if (a >= phase.start && a < phase.end) return phase;
+        }
+        return phaseData[0];
+      }
+
+      function getIlluminationFraction(angleDeg) {
+        const rad = angleDeg * Math.PI / 180;
+        return (1 - Math.cos(rad)) / 2;
+      }
+
+      function setActiveChip(key) {
+        Object.values(phaseChips).forEach(chip => chip.classList.remove("active"));
+        if (phaseChips[key]) phaseChips[key].classList.add("active");
+      }
+
+      function moonLitPath(radius, phaseAngleDeg, cx, cy) {
+        const a = normalizeAngle(phaseAngleDeg);
+        const radians = a * Math.PI / 180;
+        const k = Math.cos(radians);
+        const waxing = a > 0 && a < 180;
+        const sweepTerminator = waxing ? 1 : 0;
+        const largeArc = 1;
+
+        const xTop = cx;
+        const yTop = cy - radius;
+        const xBottom = cx;
+        const yBottom = cy + radius;
+
+        const rxTerminator = Math.max(0.001, Math.abs(k) * radius);
+
+        return [
+          "M", xTop, yTop,
+          "A", radius, radius, 0, largeArc, 1, xBottom, yBottom,
+          "A", rxTerminator, radius, 0, largeArc, sweepTerminator, xTop, yTop,
+          "Z"
+        ].join(" ");
+      }
+
+      function moonShadowPath(radius, phaseAngleDeg, cx, cy) {
+        const a = normalizeAngle(phaseAngleDeg);
+        const radians = a * Math.PI / 180;
+        const k = Math.cos(radians);
+        const waxing = a > 0 && a < 180;
+        const rxTerminator = Math.max(0.001, Math.abs(k) * radius);
+
+        const xTop = cx;
+        const yTop = cy - radius;
+        const xBottom = cx;
+        const yBottom = cy + radius;
+
+        if (a === 180) return "";
+
+        const shadowOnRight = waxing;
+        const sweepOuter = shadowOnRight ? 1 : 0;
+        const sweepInner = shadowOnRight ? 0 : 1;
+
+        return [
+          "M", xTop, yTop,
+          "A", radius, radius, 0, 1, sweepOuter, xBottom, yBottom,
+          "A", rxTerminator, radius, 0, 1, sweepInner, xTop, yTop,
+          "Z"
+        ].join(" ");
+      }
+
+      function updateMoon(angleDeg) {
+        const a = normalizeAngle(angleDeg);
+        const rad = a * Math.PI / 180;
+        const x = centerX + orbitR * Math.cos(rad);
+        const y = centerY - orbitR * Math.sin(rad);
+
+        moonGroup.setAttribute("transform", `translate(${x - 640} ${y - 325})`);
+        moonGhost.setAttribute("cx", x.toFixed(2));
+        moonGhost.setAttribute("cy", y.toFixed(2));
+
+        earthObserverLine.setAttribute("x1", centerX);
+        earthObserverLine.setAttribute("y1", centerY);
+        earthObserverLine.setAttribute("x2", x.toFixed(2));
+        earthObserverLine.setAttribute("y2", y.toFixed(2));
+
+        moonShadowShape.setAttribute("d", moonShadowPath(moonR, a, 640, 325));
+        phasePreviewLit.setAttribute("d", moonLitPath(44, a, 50, 50));
+
+        const phase = getPhase(a);
+        const illumination = getIlluminationFraction(a);
+        const percent = Math.round(illumination * 100);
+
+        angleValue.textContent = `${Math.round(a)}°`;
+        phaseName.textContent = phase.label;
+        phaseDescription.textContent = phase.description;
+        explanationText.textContent = phase.explain;
+        document.getElementById("phase-badge").textContent = `${percent}% illuminated`;
+        ariaStatus.textContent = `${phase.label}. ${percent}% illuminated. ${phase.description}`;
+        setActiveChip(phase.key);
+      }
+
+      function highlightElement(target) {
+        if (!target) return;
+        target.classList.add("highlight-target");
+        clearTimeout(target.__highlightTimer);
+        target.__highlightTimer = setTimeout(() => {
+          target.classList.remove("highlight-target");
+        }, 1200);
+      }
+
+      function getElementByIdOrDataId(id) {
+        if (!id) return null;
+        return document.getElementById(id) || document.querySelector(`[data-id="${CSS.escape(id)}"]`);
+      }
+
+      function sendComponentsMapped() {
+        const components = componentIds
+          .map(id => {
+            const el = getElementByIdOrDataId(id);
+            if (!el) return null;
+            const rect = el.getBoundingClientRect();
+            return {
+              id,
+              dataId: el.getAttribute("data-id") || id,
+              center: {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+              },
+              rect: {
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height
+              }
+            };
+          })
+          .filter(Boolean);
+
+        window.parent.postMessage({
+          type: "COMPONENTS_MAPPED",
+          components
+        }, "*");
+      }
+
+      slider.addEventListener("input", (e) => {
+        updateMoon(Number(e.target.value));
+      });
+
+      slider.addEventListener("change", sendComponentsMapped);
+
+      const snapAngles = {
+        "new-moon": 0,
+        "waxing-crescent": 45,
+        "first-quarter": 90,
+        "waxing-gibbous": 135,
+        "full-moon": 180,
+        "waning-gibbous": 225,
+        "last-quarter": 270,
+        "waning-crescent": 315
+      };
+
+      Object.entries(phaseChips).forEach(([key, chip]) => {
+        chip.setAttribute("role", "button");
+        chip.setAttribute("tabindex", "0");
+        chip.setAttribute("aria-label", `Jump to ${chip.textContent} phase`);
+
+        function selectPhase() {
+          slider.value = String(snapAngles[key]);
+          updateMoon(snapAngles[key]);
+          highlightElement(chip);
+          sendComponentsMapped();
+        }
+
+        chip.addEventListener("click", selectPhase);
+        chip.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            selectPhase();
+          }
+        });
+      });
+
+      let isDragging = false;
+
+      function updateFromPointer(clientX, clientY) {
+        const svg = document.getElementById("orbit-svg");
+        const rect = svg.getBoundingClientRect();
+
+        const sx = (clientX - rect.left) / rect.width;
+        const sy = (clientY - rect.top) / rect.height;
+
+        const x = sx * 900;
+        const y = sy * 650;
+
+        const dx = x - centerX;
+        const dy = centerY - y;
+        const angle = normalizeAngle(Math.atan2(dy, dx) * 180 / Math.PI);
+
+        slider.value = String(Math.round(angle));
+        updateMoon(angle);
+      }
+
+      moonGroup.addEventListener("pointerdown", (event) => {
+        isDragging = true;
+        moonGroup.style.cursor = "grabbing";
+        try { moonGroup.setPointerCapture(event.pointerId); } catch (e) { }
+        updateFromPointer(event.clientX, event.clientY);
+      });
+
+      document.getElementById("orbit-stage").addEventListener("pointermove", (event) => {
+        if (!isDragging) return;
+        updateFromPointer(event.clientX, event.clientY);
+      });
+
+      window.addEventListener("pointerup", () => {
+        isDragging = false;
+        moonGroup.style.cursor = "grab";
+      });
+
+      window.addEventListener("message", (event) => {
+        const data = event.data || {};
+        const type = data.type;
+
+        if (type === "SHOW_COMPONENT") {
+          const targetId = data.id || data.dataId || data.componentId;
+          const el = getElementByIdOrDataId(targetId);
+          if (el) {
+            highlightElement(el);
+            if (typeof el.scrollIntoView === "function") {
+              el.scrollIntoView({ block: "nearest", inline: "nearest" });
+            }
+          }
+        }
+
+        if (type === "CLICK_COMPONENT") {
+          const targetId = data.id || data.dataId || data.componentId;
+          const el = getElementByIdOrDataId(targetId);
+          if (el) {
+            highlightElement(el);
+            setTimeout(() => {
+              if (typeof el.click === "function") el.click();
+            }, 180);
+          }
+        }
+      });
+
+      window.addEventListener("resize", sendComponentsMapped);
+
+      window.addEventListener("load", () => {
+        updateMoon(Number(slider.value));
+        sendComponentsMapped();
+      });
+
+      updateMoon(Number(slider.value));
+    })();
+  </script>
+</body>
+
+</html>

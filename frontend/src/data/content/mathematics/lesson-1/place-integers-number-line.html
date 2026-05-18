@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Place Integers on the Number Line</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #64748b;
+      --line: #334155;
+      --tick: #64748b;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --purple: #7c3aed;
+      --purple-soft: #f3e8ff;
+      --good: #15803d;
+      --good-soft: #ecfdf5;
+      --bad: #b91c1c;
+      --bad-soft: #fef2f2;
+      --warn: #92400e;
+      --warn-soft: #fffbeb;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.10);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 12px 20px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+      color: var(--ink);
+    }
+
+    .header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .title-wrap {
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.1rem, 2.2vw, 1.7rem);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: clamp(0.78rem, 1.3vw, 0.95rem);
+      line-height: 1.25;
+    }
+
+    .score-pill {
+      flex-shrink: 0;
+      border: 1px solid #c7d2fe;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 900;
+      color: #3730a3;
+      white-space: nowrap;
+      font-size: 0.95rem;
+    }
+
+    .main {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(270px, 0.7fr);
+      gap: 14px;
+    }
+
+    .card {
+      min-height: 0;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(203, 213, 225, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .number-line-card {
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      gap: 12px;
+    }
+
+    .number-line {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+      border-radius: 20px;
+      border: 1px solid #dbeafe;
+      background: linear-gradient(180deg, rgba(239, 246, 255, 0.72), rgba(255, 255, 255, 0.92));
+      padding: 10px;
+    }
+
+    .line-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .drop-points {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .drop-point {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: clamp(32px, 4.4vw, 52px);
+      aspect-ratio: 1;
+      border: 2px dashed transparent;
+      border-radius: 999px;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .drop-point.available {
+      border-color: #93c5fd;
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .drop-point.active {
+      border-color: var(--accent);
+      background: #dbeafe;
+      transform: translate(-50%, -50%) scale(1.06);
+    }
+
+    .drop-point.correct {
+      border-color: #22c55e;
+      background: var(--good-soft);
+    }
+
+    .drop-point.incorrect {
+      border-color: #ef4444;
+      background: var(--bad-soft);
+    }
+
+    .placed-card {
+      width: clamp(30px, 4vw, 46px);
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      background: var(--purple);
+      color: #ffffff;
+      font-weight: 950;
+      font-size: clamp(0.9rem, 1.55vw, 1.2rem);
+      box-shadow: 0 8px 18px rgba(124, 58, 237, 0.26);
+    }
+
+    .axis-label {
+      position: absolute;
+      top: calc(50% + 42px);
+      transform: translateX(-50%);
+      font-weight: 950;
+      color: #1d4ed8;
+      font-size: clamp(1rem, 1.6vw, 1.35rem);
+    }
+
+    .hint-row {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: clamp(0.76rem, 1.05vw, 0.9rem);
+      line-height: 1.25;
+    }
+
+    .zero-pill {
+      justify-self: center;
+      background: var(--accent-soft);
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      border-radius: 999px;
+      padding: 7px 11px;
+      white-space: nowrap;
+    }
+
+    .controls-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding: 14px;
+      gap: 12px;
+    }
+
+    .number-cards {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      align-content: start;
+    }
+
+    .number-card {
+      min-width: 0;
+      padding: 12px 10px;
+      border-radius: 16px;
+      border: 1px solid #ddd6fe;
+      background: linear-gradient(145deg, #ffffff, var(--purple-soft));
+      color: #4c1d95;
+      font-weight: 950;
+      font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+      text-align: center;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.10);
+      transition: transform 140ms ease, opacity 140ms ease, border-color 140ms ease;
+    }
+
+    .number-card:hover,
+    .number-card.selected {
+      transform: translateY(-1px);
+      border-color: var(--purple);
+    }
+
+    .number-card:active {
+      cursor: grabbing;
+      transform: translateY(1px);
+    }
+
+    .number-card.used {
+      opacity: 0.28;
+      cursor: default;
+      transform: none;
+    }
+
+    .feedback-message {
+      flex-shrink: 0;
+      min-height: 78px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 18px;
+      background: var(--warn-soft);
+      border: 1px solid #fde68a;
+      color: var(--warn);
+      font-weight: 760;
+      line-height: 1.3;
+      overflow: hidden;
+    }
+
+    .feedback-message.correct {
+      background: var(--good-soft);
+      border-color: #86efac;
+      color: var(--good);
+    }
+
+    .feedback-message.incorrect {
+      background: var(--bad-soft);
+      border-color: #fca5a5;
+      color: var(--bad);
+    }
+
+    .feedback-text {
+      flex: 1;
+      min-width: 0;
+      font-size: clamp(0.82rem, 1.15vw, 0.94rem);
+    }
+
+    .button-row {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      touch-action: manipulation;
+    }
+
+    .check-answer-button,
+    .reset-button {
+      padding: 11px 12px;
+      border-radius: 15px;
+      color: #ffffff;
+      font-weight: 950;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
+      transition: transform 150ms ease, filter 150ms ease;
+    }
+
+    .check-answer-button {
+      background: #2563eb;
+    }
+
+    .reset-button {
+      background: #111827;
+    }
+
+    .check-answer-button:hover,
+    .reset-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+    }
+
+    .check-answer-button:active,
+    .reset-button:active {
+      transform: translateY(1px);
+    }
+
+    @media (max-width: 820px) {
+      body {
+        padding: 10px 12px;
+      }
+
+      .header {
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        display: none;
+      }
+
+      .main {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) auto;
+        gap: 10px;
+      }
+
+      .number-line-card,
+      .controls-card {
+        padding: 10px;
+        gap: 9px;
+      }
+
+      .number-cards {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .number-card {
+        padding: 9px 6px;
+      }
+
+      .feedback-message {
+        min-height: 58px;
+        padding: 10px;
+      }
+    }
+
+    @media (max-height: 540px) {
+      body {
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+
+      .header {
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        display: none;
+      }
+
+      .number-line-card,
+      .controls-card {
+        padding: 9px;
+        gap: 8px;
+      }
+
+      .hint-row {
+        display: none;
+      }
+
+      .feedback-message {
+        min-height: 48px;
+        padding: 9px;
+      }
+
+      .number-card {
+        padding: 8px 6px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="title-wrap">
+      <h1>Place Integers on the Number Line</h1>
+      <div class="subtitle">Use 0 as your starting point, then count left or right.</div>
+    </div>
+    <div class="score-pill" id="score-display">Placed: 0 / 5</div>
+  </header>
+
+  <main class="main">
+    <section class="card number-line-card">
+      <div class="number-line" id="number-line">
+        <div class="line-stage">
+          <svg viewBox="0 0 1000 360" role="img" aria-label="Unlabeled number line with zero marked in the center">
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"
+                markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#334155"></path>
+              </marker>
+            </defs>
+
+            <line x1="70" y1="180" x2="930" y2="180" stroke="#334155" stroke-width="5" stroke-linecap="round"
+              marker-end="url(#arrow)" marker-start="url(#arrow)"></line>
+
+            <g stroke="#64748b" stroke-width="4" stroke-linecap="round">
+              <line x1="90" y1="160" x2="90" y2="200"></line>
+              <line x1="172" y1="160" x2="172" y2="200"></line>
+              <line x1="254" y1="160" x2="254" y2="200"></line>
+              <line x1="336" y1="160" x2="336" y2="200"></line>
+              <line x1="418" y1="160" x2="418" y2="200"></line>
+              <line x1="500" y1="150" x2="500" y2="210" stroke="#1d4ed8" stroke-width="6"></line>
+              <line x1="582" y1="160" x2="582" y2="200"></line>
+              <line x1="664" y1="160" x2="664" y2="200"></line>
+              <line x1="746" y1="160" x2="746" y2="200"></line>
+              <line x1="828" y1="160" x2="828" y2="200"></line>
+              <line x1="910" y1="160" x2="910" y2="200"></line>
+            </g>
+          </svg>
+
+          <div class="axis-label" style="left: 50%;">0</div>
+
+          <div class="drop-points" id="drop-points">
+            <div class="drop-point" data-value="-5" style="left: 9%;" aria-label="Drop point five steps left of zero">
+            </div>
+            <div class="drop-point available" data-value="-4" style="left: 17.2%;"
+              aria-label="Drop point four steps left of zero"></div>
+            <div class="drop-point" data-value="-3" style="left: 25.4%;"
+              aria-label="Drop point three steps left of zero"></div>
+            <div class="drop-point available" data-value="-2" style="left: 33.6%;"
+              aria-label="Drop point two steps left of zero"></div>
+            <div class="drop-point" data-value="-1" style="left: 41.8%;" aria-label="Drop point one step left of zero">
+            </div>
+            <div class="drop-point available" data-value="0" style="left: 50%;" aria-label="Drop point zero"></div>
+            <div class="drop-point" data-value="1" style="left: 58.2%;" aria-label="Drop point one step right of zero">
+            </div>
+            <div class="drop-point available" data-value="2" style="left: 66.4%;"
+              aria-label="Drop point two steps right of zero"></div>
+            <div class="drop-point" data-value="3" style="left: 74.6%;"
+              aria-label="Drop point three steps right of zero"></div>
+            <div class="drop-point" data-value="4" style="left: 82.8%;"
+              aria-label="Drop point four steps right of zero"></div>
+            <div class="drop-point available" data-value="5" style="left: 91%;"
+              aria-label="Drop point five steps right of zero"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hint-row">
+        <span>Negative integers go left.</span>
+        <span class="zero-pill">Start at 0</span>
+        <span style="text-align:right;">Positive integers go right.</span>
+      </div>
+    </section>
+
+    <aside class="card controls-card">
+      <div class="number-cards" id="number-cards">
+        <div class="number-card" data-value="5" tabindex="0">5</div>
+        <div class="number-card" data-value="-2" tabindex="0">-2</div>
+        <div class="number-card" data-value="0" tabindex="0">0</div>
+        <div class="number-card" data-value="-4" tabindex="0">-4</div>
+        <div class="number-card" data-value="2" tabindex="0">2</div>
+      </div>
+
+      <div class="feedback-message" id="feedback-message">
+        <span class="feedback-text" id="feedback-text">Click a card, then count from 0 and click the correct tick
+          mark.</span>
+      </div>
+
+      <div class="button-row">
+        <button class="check-answer-button" id="check-answer-button" type="button">Check Answer</button>
+        <button class="reset-button" id="reset-button" type="button">Reset</button>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const cards = Array.from(document.querySelectorAll(".number-card"));
+    const points = Array.from(document.querySelectorAll(".drop-point"));
+    const feedback = document.getElementById("feedback-message");
+    const feedbackText = document.getElementById("feedback-text");
+    const scoreDisplay = document.getElementById("score-display");
+    const resetButton = document.getElementById("reset-button");
+    const checkButton = document.getElementById("check-answer-button");
+
+    let draggedCard = null;
+    let selectedCard = null;
+
+    function updatePlacedCount() {
+      const placed = points.filter(point => point.dataset.placed).length;
+      scoreDisplay.textContent = `Placed: ${placed} / 5`;
+    }
+
+    function clearPointState(point) {
+      point.classList.remove("correct", "incorrect");
+    }
+
+    function placeCardOnPoint(card, point) {
+      if (!card || card.classList.contains("used")) return;
+
+      const oldPoint = points.find(p => p.dataset.placed === card.dataset.value);
+      if (oldPoint) {
+        oldPoint.innerHTML = "";
+        delete oldPoint.dataset.placed;
+        clearPointState(oldPoint);
+      }
+
+      if (point.dataset.placed) {
+        const previousCard = cards.find(c => c.dataset.value === point.dataset.placed);
+        if (previousCard) previousCard.classList.remove("used");
+      }
+
+      point.innerHTML = "";
+      const placed = document.createElement("div");
+      placed.className = "placed-card";
+      placed.textContent = card.dataset.value;
+      point.appendChild(placed);
+      point.dataset.placed = card.dataset.value;
+      card.classList.add("used");
+
+      points.forEach(clearPointState);
+      feedback.className = "feedback-message";
+      feedbackText.textContent = "Good. Click the next card and place it by counting from 0.";
+      updatePlacedCount();
+    }
+
+    cards.forEach(card => {
+      card.addEventListener("click", () => {
+        if (card.classList.contains("used")) return;
+        cards.forEach(c => c.classList.remove("selected"));
+        selectedCard = card;
+        card.classList.add("selected");
+        feedback.className = "feedback-message";
+        feedbackText.textContent = `Selected ${card.dataset.value}. Now click the correct tick mark.`;
+      });
+
+      card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          card.click();
+        }
+      });
+    });
+
+    points.forEach(point => {
+      point.addEventListener("click", () => {
+        if (selectedCard) {
+          placeCardOnPoint(selectedCard, point);
+          selectedCard.classList.remove("selected");
+          selectedCard = null;
+        }
+      });
+    });
+
+    checkButton.addEventListener("click", () => {
+      let correct = 0;
+      let placed = 0;
+
+      points.forEach(point => {
+        clearPointState(point);
+        if (!point.dataset.placed) return;
+
+        placed += 1;
+        const isCorrect = point.dataset.placed === point.dataset.value;
+        if (isCorrect) {
+          correct += 1;
+          point.classList.add("correct");
+        } else {
+          point.classList.add("incorrect");
+        }
+
+        // Report each placement to the parent
+        window.parent.postMessage({
+          type: 'QUIZ_RESULT',
+          isCorrect: isCorrect,
+          question: `Place ${point.dataset.placed} on the number line`,
+          explanation: isCorrect
+            ? `${point.dataset.placed} is correctly placed at position ${point.dataset.value}.`
+            : `${point.dataset.placed} was placed at position ${point.dataset.value}, but it belongs at position ${point.dataset.placed}.`,
+          userAnswer: `Position ${point.dataset.value}`
+        }, '*');
+      });
+
+      if (placed < cards.length) {
+        feedback.className = "feedback-message";
+        feedbackText.textContent = `You placed ${placed} out of ${cards.length}. Place all cards before finishing.`;
+        return;
+      }
+
+      if (correct === cards.length) {
+        feedback.className = "feedback-message correct";
+        feedbackText.textContent = "Excellent. You counted correctly from 0 and placed every integer.";
+      } else {
+        feedback.className = "feedback-message incorrect";
+        feedbackText.textContent = `${correct} out of ${cards.length} are correct. Count left for negatives and right for positives.`;
+      }
+
+      // Report final score to the parent
+      const percent = Math.round((correct / cards.length) * 100);
+      window.parent.postMessage({
+        type: 'QUIZ_FINISHED',
+        score: correct,
+        total: cards.length,
+        percent: percent
+      }, '*');
+    });
+
+    resetButton.addEventListener("click", () => {
+      points.forEach(point => {
+        point.innerHTML = "";
+        delete point.dataset.placed;
+        point.classList.remove("active", "correct", "incorrect");
+      });
+      cards.forEach(card => card.classList.remove("used", "selected"));
+      selectedCard = null;
+      draggedCard = null;
+      feedback.className = "feedback-message";
+      feedbackText.textContent = "Click a card, then count from 0 and click the correct tick mark.";
+      updatePlacedCount();
+    });
+
+    updatePlacedCount();
+  </script>
+
+  <script>
+    window.addEventListener('message', function (event) {
+      const data = event.data;
+      if (!data || (data.type !== 'SHOW_COMPONENT' && data.type !== 'CLICK_COMPONENT')) return;
+
+      const name = data.name || '';
+      let el = document.getElementById(data.id);
+
+      if (!el && name) {
+        const valMatch = name.match(/(-?\d+(\.\d+)?)/);
+        const val = valMatch ? valMatch[0] : null;
+
+        const lowerName = name.toLowerCase();
+        if (lowerName.includes('drop point') && val) {
+          el = document.querySelector('.drop-point[data-value="' + val + '"]');
+        } else if (lowerName.includes('number card') && val) {
+          el = document.querySelector('.number-card[data-value="' + val + '"]');
+        } else if (lowerName.includes('reset')) {
+          el = document.getElementById('reset-button') || document.querySelector('.reset-button');
+        } else if (lowerName.includes('check')) {
+          el = document.getElementById('check-answer-button') || document.querySelector('.check-answer-button');
+        } else if (lowerName.includes('natural')) {
+          el = document.querySelector('.bucket[data-target="natural"]');
+        } else if (lowerName.includes('whole')) {
+          el = document.querySelector('.bucket[data-target="whole"]');
+        } else if (lowerName.includes('integer')) {
+          el = document.querySelector('.bucket[data-target="integer"]');
+        } else if (lowerName.includes('rational')) {
+          el = document.querySelector('.bucket[data-target="rational"]');
+        } else if (lowerName.includes('irrational')) {
+          el = document.querySelector('.bucket[data-target="irrational"]');
+        } else if (lowerName.includes('real')) {
+          el = document.querySelector('.bucket[data-target="real"]');
+        }
+      }
+
+      if (el) {
+        const oldOutline = el.style.outline;
+        const oldOutlineOffset = el.style.outlineOffset;
+        const oldBoxShadow = el.style.boxShadow;
+
+        el.style.outline = '4px solid #3b82f6';
+        el.style.outlineOffset = '4px';
+        el.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.5)';
+
+        setTimeout(() => {
+          el.style.outline = oldOutline;
+          el.style.outlineOffset = oldOutlineOffset;
+          el.style.boxShadow = oldBoxShadow;
+        }, 2000);
+
+        if (data.type === 'CLICK_COMPONENT') {
+          setTimeout(() => el.click(), 500);
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,47 @@
+{
+  "lessonTitle": "Periodic Table",
+  "teacherName": "Dr. Einstein",
+  "subject": "Science",
+  "level": "Beginner",
+  "lessonGoal": "Teach students the core concepts of Periodic Table.",
+  "sections": [
+    {
+      "id": "section-1",
+      "order": 1,
+      "type": "text",
+      "title": "Introduction to Periodic Table",
+      "text": "Welcome to Periodic Table. In this lesson, you will learn about Learn about elements and their organization."
+    },
+    {
+      "id": "section-2",
+      "order": 2,
+      "type": "image",
+      "title": "Visualizing Periodic Table",
+      "imageDescription": "An educational diagram showing concepts of Periodic Table.",
+      "imageSource": "/section-2.png",
+      "components": [
+        {
+          "id": "example-component",
+          "label": "Example Element",
+          "x": 150,
+          "y": 200
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "order": 3,
+      "type": "interactive",
+      "title": "Practice Periodic Table",
+      "htmlDescription": "Interactive exercise where students practice Periodic Table.",
+      "htmlSource": "/section-3.html",
+      "components": [
+        {
+          "id": "interactive-element",
+          "name": "Interactive Element",
+          "interactionType": "clickable"
+        }
+      ]
+    }
+  ]
+}
