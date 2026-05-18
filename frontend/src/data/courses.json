@@ -189,47 +189,6 @@
       ]
     },
     {
-      "id": "hindi",
-      "name": "Hindi",
-      "icon": "/assets/hindi_icon.png",
-      "heroImage": "/assets/hindi_icon.png",
-      "bgColor": "bg-pink-50",
-      "btnColor": "bg-pink-500",
-      "arrowColor": "text-white",
-      "themeColor": "pink",
-      "currentTopic": "Vocabulary",
-      "progress": 45,
-      "lessonsCompleted": 4,
-      "totalLessons": 9,
-      "lessons": [
-        {
-          "id": 1,
-          "title": "Alphabet",
-          "description": "Learning Hindi letters.",
-          "status": "Completed"
-        },
-        {
-          "id": 2,
-          "title": "Basic Greetings",
-          "description": "Saying hello and goodbye.",
-          "status": "Completed"
-        },
-        {
-          "id": 3,
-          "title": "Vocabulary",
-          "description": "Common words and phrases.",
-          "status": "In Progress",
-          "progress": 45
-        },
-        {
-          "id": 4,
-          "title": "Grammar",
-          "description": "Sentence formation.",
-          "status": "Locked"
-        }
-      ]
-    },
-    {
       "id": "computer_science",
       "name": "Computer Science",
       "icon": "/assets/computer_science_icon.png",

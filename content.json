@@ -99,7 +99,7 @@
       "order": 3,
       "type": "interactive",
       "title": "Solar System Orbit Explorer",
-      "htmlDescription": "An interactive Solar System orbit explorer on a #F7F8FB background. The interactive explains how planets orbit the Sun and how planets differ in size, distance, and orbital speed. It contains a 2D top-down orbit layout, animated planet motion, clickable planets with simple fact cards, a distance comparison view, a pause/play control, and an orbit speed slider. Soft planet colors, thin orbit rings, rounded cards, and light-to-medium typography give the activity a clean beginner-friendly style.",
+      "htmlDescription": "An interactive Solar System orbit explorer on a #F7F8FB background. The interactive explains how planets orbit the Sun and how planets differ in size, distance, and orbital speed. It contains a 2D top-down orbit layout, animated planet motion, clickable planets with simple fact cards, a distance comparison view, a pause/play control, an orbit speed slider, and a 3D GLB planet viewer. Each planet row has a View 3D chip that opens the selected planet model full-size on the left side, while the View orbit button returns to the current orbit animation. Soft planet colors, thin orbit rings, rounded cards, and light-to-medium typography give the activity a clean beginner-friendly style.",
       "htmlSource": "section-3.html",
       "components": [
         {
@@ -110,6 +110,11 @@
         {
           "id": "distanceView",
           "name": "Distance guide toggle button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "viewOrbit",
+          "name": "Return to animated orbit view button",
           "interactionType": "clickable"
         },
         {
@@ -268,8 +273,18 @@
           "interactionType": "clickable"
         },
         {
+          "id": "view3d-mercury",
+          "name": "View Mercury 3D model chip",
+          "interactionType": "clickable"
+        },
+        {
           "id": "planet-venus",
           "name": "Venus planet menu row",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "view3d-venus",
+          "name": "View Venus 3D model chip",
           "interactionType": "clickable"
         },
         {
@@ -278,8 +293,18 @@
           "interactionType": "clickable"
         },
         {
+          "id": "view3d-earth",
+          "name": "View Earth 3D model chip",
+          "interactionType": "clickable"
+        },
+        {
           "id": "planet-mars",
           "name": "Mars planet menu row",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "view3d-mars",
+          "name": "View Mars 3D model chip",
           "interactionType": "clickable"
         },
         {
@@ -288,8 +313,18 @@
           "interactionType": "clickable"
         },
         {
+          "id": "view3d-jupiter",
+          "name": "View Jupiter 3D model chip",
+          "interactionType": "clickable"
+        },
+        {
           "id": "planet-saturn",
           "name": "Saturn planet menu row",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "view3d-saturn",
+          "name": "View Saturn 3D model chip",
           "interactionType": "clickable"
         },
         {
@@ -298,8 +333,18 @@
           "interactionType": "clickable"
         },
         {
+          "id": "view3d-uranus",
+          "name": "View Uranus 3D model chip",
+          "interactionType": "clickable"
+        },
+        {
           "id": "planet-neptune",
           "name": "Neptune planet menu row",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "view3d-neptune",
+          "name": "View Neptune 3D model chip",
           "interactionType": "clickable"
         }
       ]
