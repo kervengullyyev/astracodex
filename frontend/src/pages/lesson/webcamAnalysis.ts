@@ -6,7 +6,7 @@ type WebcamAnalysisOptions = {
 
 const ANALYSIS_STORAGE_KEY = "astracodex_webcam_analysis";
 const SUMMARY_STORAGE_KEY = "astracodex_webcam_summaries";
-const OLLAMA_VISION_ENDPOINT = "https://ollama.derkarhanak.space/api/generate";
+const OLLAMA_VISION_ENDPOINT = "https://www.derkarhanak.space/v1/generate";
 
 function appendWebcamAnalysis(analysis: string, lessonTitle: string, slideIndex: number) {
   const existing = localStorage.getItem(ANALYSIS_STORAGE_KEY);

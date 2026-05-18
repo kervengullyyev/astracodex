@@ -42,7 +42,7 @@ CORS_ALLOW_ORIGINS = [
 ]
 CORS_ALLOW_ORIGIN_REGEX = os.getenv("CORS_ALLOW_ORIGIN_REGEX", "").strip() or None
 
-MAX_THREAD_MESSAGES = 3
+MAX_THREAD_MESSAGES = 8
 
 KOKORO_VOICE = os.getenv("KOKORO_VOICE", "bm_fable")
 KOKORO_SPEED = float(os.getenv("KOKORO_SPEED", "0.9"))
