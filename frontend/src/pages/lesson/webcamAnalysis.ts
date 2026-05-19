@@ -6,7 +6,7 @@ type WebcamAnalysisOptions = {
 
 const ANALYSIS_STORAGE_KEY = "astracodex_webcam_analysis";
 const SUMMARY_STORAGE_KEY = "astracodex_webcam_summaries";
-const OLLAMA_VISION_ENDPOINT = "https://www.derkarhanak.space/v1/generate";
+const VISION_ENDPOINT = "https://www.derkarhanak.space/v1/generate";
 
 function appendWebcamAnalysis(analysis: string, lessonTitle: string, slideIndex: number) {
   const existing = localStorage.getItem(ANALYSIS_STORAGE_KEY);
@@ -73,7 +73,7 @@ export async function captureAndAnalyzeWebcamSnapshot({
 
     console.log("Captured webcam image, sending...");
 
-    const response = await fetch(OLLAMA_VISION_ENDPOINT, {
+    const response = await fetch(VISION_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,12 +88,12 @@ export async function captureAndAnalyzeWebcamSnapshot({
     });
 
     if (!response.ok) {
-      console.warn('Failed to send image to Ollama. Check if Ollama is running with OLLAMA_ORIGINS="*"');
+      console.warn('Failed to send image. Check if vision model is running with VISION_ORIGINS="*"');
       return true;
     }
 
     const result = await response.json();
-    console.log("Ollama analysis:", result.response);
+    console.log("Vision model analysis:", result.response);
 
     appendWebcamAnalysis(result.response, lessonTitle, slideIndex);
     clearStaleSummary(lessonTitle);
