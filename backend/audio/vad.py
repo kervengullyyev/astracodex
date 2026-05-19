@@ -1,5 +1,4 @@
 import io
-import os
 import threading
 from collections import deque
 from pathlib import Path
@@ -10,6 +9,8 @@ import torch
 
 from config import (
     PCM_SAMPLE_RATE,
+    SILERO_VAD_REPO,
+    TORCH_HOME,
     VAD_ENABLED,
     VAD_END_SILENCE_MS,
     VAD_MIN_SILENCE_MS,
@@ -44,18 +45,19 @@ def load_silero_vad():
         return
 
     print("Loading Silero VAD...", flush=True)
-    repo = os.getenv("SILERO_VAD_REPO", "snakers4/silero-vad")
+    TORCH_HOME.mkdir(parents=True, exist_ok=True)
+    torch.hub.set_dir(str(TORCH_HOME / "hub"))
 
     try:
         vad_model, utils = torch.hub.load(
-            repo_or_dir=repo,
+            repo_or_dir=SILERO_VAD_REPO,
             model="silero_vad",
             force_reload=False,
             trust_repo=True,
         )
     except TypeError:
         vad_model, utils = torch.hub.load(
-            repo_or_dir=repo,
+            repo_or_dir=SILERO_VAD_REPO,
             model="silero_vad",
             force_reload=False,
         )

@@ -72,7 +72,7 @@ def openrouter_provider_options() -> dict | None:
 
 def openrouter_headers() -> dict[str, str]:
     if not OPENROUTER_API_KEY:
-        raise RuntimeError("Missing OPENROUTER_API_KEY environment variable.")
+        raise RuntimeError("Missing OPENROUTER_API_KEY in backend/.env.")
 
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",

@@ -1,11 +1,5 @@
 #!/bin/bash
 
-if [ -f .env ]; then
-  set -a
-  source .env
-  set +a
-fi
-
 if [ -d venv ]; then
   source venv/bin/activate
 fi

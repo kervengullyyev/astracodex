@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 
+from config import HF_HOME, WHISPER_BEAM_SIZE, WHISPER_MODEL_ID, WHISPER_VAD_MIN_SILENCE_MS
 import torch
 from faster_whisper import WhisperModel
 
@@ -16,7 +17,13 @@ def load_model():
     print("Loading Whisper model...", flush=True)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     compute_type = "float16" if device == "cuda" else "int8"
-    whisper_model = WhisperModel("small.en", device=device, compute_type=compute_type)
+    HF_HOME.mkdir(parents=True, exist_ok=True)
+    whisper_model = WhisperModel(
+        WHISPER_MODEL_ID,
+        device=device,
+        compute_type=compute_type,
+        download_root=str(HF_HOME),
+    )
     print("Whisper loaded.", flush=True)
 
 
@@ -51,9 +58,9 @@ def transcribe_audio(wav_path: Path) -> str:
 
     segments, _ = whisper_model.transcribe(
         str(wav_path),
-        beam_size=1,
+        beam_size=WHISPER_BEAM_SIZE,
         vad_filter=True,
-        vad_parameters=dict(min_silence_duration_ms=500),
+        vad_parameters=dict(min_silence_duration_ms=WHISPER_VAD_MIN_SILENCE_MS),
     )
 
     text = "".join(segment.text for segment in segments)

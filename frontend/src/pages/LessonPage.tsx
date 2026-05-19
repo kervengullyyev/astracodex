@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUp, ArrowDown, Camera, Mic2 } from 'lucide-react';
 import { MicVAD } from '@ricky0123/vad-web';
+import { BACKEND_URL, VAD_BASE_ASSET_PATH, VAD_ONNX_WASM_BASE_PATH } from '../config';
 import { getStoredLearnerName } from '../utils/learnerName';
 import { float32ToWavBase64 } from './lesson/audio';
 import { SlideContent } from './lesson/SlideContent';
@@ -227,7 +228,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
 
         try {
           const backendLessonData = learnerName ? { ...lessonData, studentName: learnerName } : lessonData;
-          await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/lesson/content`, {
+          await fetch(`${BACKEND_URL}/api/lesson/content`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -841,8 +842,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
   };
 
   const getVoiceWsUrl = () => {
-    const backendBase = import.meta.env.VITE_BACKEND_URL || window.location.origin;
-    const url = new URL(backendBase);
+    const url = new URL(BACKEND_URL);
     url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     url.pathname = '/ws/talk';
     url.search = '';
@@ -1070,7 +1070,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       abortControllerRef.current = new AbortController();
 
       beginStreamTiming('start lesson: fetch -> model -> TTS');
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/lesson/start/stream`, {
+      const res = await fetch(`${BACKEND_URL}/api/lesson/start/stream`, {
         method: 'POST',
         body: formData,
         signal: abortControllerRef.current.signal
@@ -1218,8 +1218,8 @@ export default function LessonPage({ onBack }: LessonPageProps) {
           console.log('🎤 Browser VAD: ignored short/non-speech noise');
         },
 
-        onnxWASMBasePath: 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/',
-        baseAssetPath: 'https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.29/dist/',
+        onnxWASMBasePath: VAD_ONNX_WASM_BASE_PATH,
+        baseAssetPath: VAD_BASE_ASSET_PATH,
       });
 
       browserVadRef.current = vad;

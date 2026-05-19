@@ -1,3 +1,5 @@
+import { VISION_ENDPOINT, VISION_MODEL } from "../../config";
+
 type WebcamAnalysisOptions = {
   video: HTMLVideoElement;
   lessonTitle: string;
@@ -6,7 +8,6 @@ type WebcamAnalysisOptions = {
 
 const ANALYSIS_STORAGE_KEY = "astracodex_webcam_analysis";
 const SUMMARY_STORAGE_KEY = "astracodex_webcam_summaries";
-const VISION_ENDPOINT = "https://www.derkarhanak.space/v1/generate";
 
 function appendWebcamAnalysis(analysis: string, lessonTitle: string, slideIndex: number) {
   const existing = localStorage.getItem(ANALYSIS_STORAGE_KEY);
@@ -79,7 +80,7 @@ export async function captureAndAnalyzeWebcamSnapshot({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gemma4:e2b",
+        model: VISION_MODEL,
         prompt:
           "This is a frame from a student's webcam during an online lesson. Look at the student's face, posture, and expression. In 1-2 sentences, tell a parent: is this student focused, confused, or disengaged? What do you notice?",
         images: [base64Data],

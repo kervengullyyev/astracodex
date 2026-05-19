@@ -8,6 +8,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import coursesData from './data/courses.json';
 import LessonPage from './pages/LessonPage.tsx';
 import AdminPage from './pages/AdminPage.tsx';
+import { VISION_ENDPOINT, VISION_MODEL } from './config';
 import { getStoredLearnerName, saveStoredLearnerName } from './utils/learnerName';
 
 // Type definitions based on JSON
@@ -143,11 +144,11 @@ function Dashboard() {
     ${entries.map(e => `- ${e.analysis}`).join('\n')}`;
 
     try {
-      const response = await fetch('https://www.derkarhanak.space/v1/generate', {
+      const response = await fetch(VISION_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'gemma4:e2b',
+          model: VISION_MODEL,
           prompt: prompt,
           stream: false
         })
