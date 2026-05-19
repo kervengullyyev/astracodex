@@ -1,6 +1,10 @@
 import json
 import re
 
+SENTENCE_END_RE = re.compile(r'(?<=[.!?])(?=\s|$|<tool_call>)')
+TOOL_OPEN_TAG = "<tool_call>"
+TOOL_CLOSE_TAG = "</tool_call>"
+
 
 def ndjson(data: dict) -> str:
     return json.dumps(data, ensure_ascii=False) + "\n"
@@ -25,13 +29,13 @@ def extract_tool_events(text: str) -> tuple[str, list]:
     tool_events = []
 
     while True:
-        start = text.find("<tool_call>")
+        start = text.find(TOOL_OPEN_TAG)
         if start == -1:
             break
-        end = text.find("</tool_call>", start)
+        end = text.find(TOOL_CLOSE_TAG, start)
         if end == -1:
             break
-        end += len("</tool_call>")
+        end += len(TOOL_CLOSE_TAG)
         full_tag = text[start:end]
 
         try:
@@ -86,37 +90,96 @@ def extract_tool_events(text: str) -> tuple[str, list]:
     return text, tool_events
 
 
+def _append_sentence_event(events: list[tuple[str, str]], raw_segment: str) -> None:
+    spoken = raw_segment.strip()
+    if len(spoken) > 2:
+        events.append(("SENTENCE", spoken))
+
+
+def _append_tool_events(events: list[tuple[str, str]], raw_tool_tag: str) -> None:
+    _, tool_events = extract_tool_events(raw_tool_tag)
+    for tool_event in tool_events:
+        events.append(("TOOL", tool_event))
+
+
+def _sentence_segment_end(buffer: str, match: re.Match) -> int:
+    end = match.start()
+    if end < len(buffer) and buffer[end].isspace():
+        return end + 1
+    return end
+
+
 def tokenize_buffer(tts_buffer: str) -> tuple[str, list[tuple[str, str]]]:
     events: list[tuple[str, str]] = []
 
-    tts_buffer, eager_tool_events = extract_tool_events(tts_buffer)
-    for tool_event in eager_tool_events:
-        events.append(("TOOL", tool_event))
-
-    sentence_end_re = re.compile(r'(?<=[.!?])(?=\s|$)')
-
     while True:
-        match = sentence_end_re.search(tts_buffer)
-        if match is None:
+        tool_start = tts_buffer.find(TOOL_OPEN_TAG)
+        sentence_match = SENTENCE_END_RE.search(tts_buffer)
+
+        if tool_start == -1:
+            if sentence_match is None:
+                break
+
+            segment_end = _sentence_segment_end(tts_buffer, sentence_match)
+            raw_segment = tts_buffer[:segment_end]
+            tts_buffer = tts_buffer[segment_end:]
+            _append_sentence_event(events, raw_segment)
+            continue
+
+        if sentence_match is not None and sentence_match.start() < tool_start:
+            segment_end = _sentence_segment_end(tts_buffer, sentence_match)
+            raw_segment = tts_buffer[:segment_end]
+            tts_buffer = tts_buffer[segment_end:]
+            _append_sentence_event(events, raw_segment)
+            continue
+
+        before_tool = tts_buffer[:tool_start]
+        if before_tool.strip():
+            # The model placed a tool inside an unfinished sentence. Wait for a
+            # boundary instead of firing the visual before its preceding words.
             break
 
-        raw_segment = tts_buffer[:match.start() + 1]
-        tts_buffer = tts_buffer[match.start() + 1:]
+        tool_end = tts_buffer.find(TOOL_CLOSE_TAG, tool_start)
+        if tool_end == -1:
+            break
 
-        clean_segment, inline_tool_events = extract_tool_events(raw_segment)
-        for tool_event in inline_tool_events:
-            events.append(("TOOL", tool_event))
-
-        spoken = clean_segment.strip()
-        if len(spoken) > 2:
-            events.append(("SENTENCE", spoken))
+        tool_end += len(TOOL_CLOSE_TAG)
+        raw_tool_tag = tts_buffer[tool_start:tool_end]
+        _append_tool_events(events, raw_tool_tag)
+        tts_buffer = (tts_buffer[:tool_start] + tts_buffer[tool_end:]).lstrip()
 
     return tts_buffer, events
 
 
+def flush_buffer(tts_buffer: str) -> list[tuple[str, str]]:
+    """Emit all complete final text/tool events in their original order."""
+    events: list[tuple[str, str]] = []
+
+    while tts_buffer.strip():
+        tool_start = tts_buffer.find(TOOL_OPEN_TAG)
+        if tool_start == -1:
+            clean_text = strip_partial_tool_tags(tts_buffer)
+            _append_sentence_event(events, clean_text)
+            break
+
+        before_tool = strip_partial_tool_tags(tts_buffer[:tool_start])
+        _append_sentence_event(events, before_tool)
+
+        tool_end = tts_buffer.find(TOOL_CLOSE_TAG, tool_start)
+        if tool_end == -1:
+            break
+
+        tool_end += len(TOOL_CLOSE_TAG)
+        raw_tool_tag = tts_buffer[tool_start:tool_end]
+        _append_tool_events(events, raw_tool_tag)
+        tts_buffer = tts_buffer[tool_end:]
+
+    return events
+
+
 def strip_partial_tool_tags(text: str) -> str:
     text, _ = extract_tool_events(text)
-    idx = text.find("<tool_call>")
+    idx = text.find(TOOL_OPEN_TAG)
     if idx != -1:
         text = text[:idx]
     return text.strip()

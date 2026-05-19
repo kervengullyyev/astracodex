@@ -1,30 +1,271 @@
 {
-  "lessonTitle": "Intro to Programming",
+  "lessonTitle": "How LLMs Work",
   "teacherName": "Dr. Einstein",
   "subject": "Computer Science",
-  "level": "Beginner",
-  "lessonGoal": "Teach students the core concepts of Intro to Programming.",
+  "level": "Beginner to Advanced",
+  "lessonGoal": "Teach students the complete foundation of Large Language Models: what they are, how text becomes tokens, how embeddings and transformers work, how training and generation happen, how prompting, RAG, tools, agents, multimodal input, safety, evaluation, memory, and deployment work.",
   "sections": [
     {
       "id": "section-1",
       "order": 1,
-      "type": "text",
-      "title": "Introduction to Intro to Programming",
-      "text": "Welcome to Intro to Programming. In this lesson, you will learn about What is code?"
+      "type": "image",
+      "title": "What Is a Large Language Model?",
+      "imageDescription": "A beginner-friendly educational diagram explaining that a Large Language Model is an AI system trained on huge amounts of text to predict and generate language. Show a student asking a question, a prompt entering an AI model, learned language patterns inside the model, and an answer coming out. Include the idea that an LLM predicts tokens instead of thinking like a human.",
+      "imageSource": "section-1.png",
+      "components": [
+        {
+          "id": "student-question-label",
+          "label": "Student Question",
+          "x": 202,
+          "y": 183
+        },
+        {
+          "id": "student-character",
+          "label": "Student",
+          "x": 225,
+          "y": 530
+        },
+        {
+          "id": "question-thought-bubble",
+          "label": "Question Thought Bubble",
+          "x": 140,
+          "y": 300
+        },
+        {
+          "id": "student-question-bubble",
+          "label": "Student Question Bubble",
+          "x": 238,
+          "y": 765
+        },
+        {
+          "id": "student-desk",
+          "label": "Student Desk",
+          "x": 230,
+          "y": 655
+        },
+        {
+          "id": "user-prompt-label",
+          "label": "User Prompt",
+          "x": 500,
+          "y": 188
+        },
+        {
+          "id": "user-prompt-bubble",
+          "label": "User Prompt Bubble",
+          "x": 506,
+          "y": 460
+        },
+        {
+          "id": "arrow-student-to-prompt",
+          "label": "Arrow from Student to Prompt",
+          "x": 374,
+          "y": 455
+        },
+        {
+          "id": "arrow-prompt-to-llm",
+          "label": "Arrow from Prompt to LLM",
+          "x": 632,
+          "y": 456
+        },
+        {
+          "id": "llm-title-label",
+          "label": "Large Language Model (LLM)",
+          "x": 938,
+          "y": 89
+        },
+        {
+          "id": "llm-container",
+          "label": "Large Language Model Container",
+          "x": 936,
+          "y": 456
+        },
+        {
+          "id": "ai-brain",
+          "label": "AI Brain",
+          "x": 936,
+          "y": 310
+        },
+        {
+          "id": "ai-chip",
+          "label": "AI Chip",
+          "x": 938,
+          "y": 315
+        },
+        {
+          "id": "learned-patterns-panel",
+          "label": "Learned Language Patterns Panel",
+          "x": 938,
+          "y": 600
+        },
+        {
+          "id": "learned-patterns-title",
+          "label": "Learned Language Patterns",
+          "x": 935,
+          "y": 458
+        },
+        {
+          "id": "pattern-snippet-1",
+          "label": "Photosynthesis snippet",
+          "x": 759,
+          "y": 520
+        },
+        {
+          "id": "pattern-snippet-2",
+          "label": "Plants use sunlight snippet",
+          "x": 935,
+          "y": 520
+        },
+        {
+          "id": "pattern-snippet-3",
+          "label": "It is important snippet",
+          "x": 1080,
+          "y": 520
+        },
+        {
+          "id": "token-row",
+          "label": "Token Blocks Row",
+          "x": 936,
+          "y": 603
+        },
+        {
+          "id": "pattern-card-subject-action",
+          "label": "Subject to Action Pattern",
+          "x": 755,
+          "y": 675
+        },
+        {
+          "id": "pattern-card-cause-effect",
+          "label": "Cause to Effect Pattern",
+          "x": 880,
+          "y": 675
+        },
+        {
+          "id": "pattern-card-definition",
+          "label": "Definition Pattern",
+          "x": 1000,
+          "y": 675
+        },
+        {
+          "id": "pattern-card-sequence",
+          "label": "Sequence Pattern",
+          "x": 1125,
+          "y": 675
+        },
+        {
+          "id": "arrow-llm-to-answer",
+          "label": "Arrow from LLM to Answer",
+          "x": 1287,
+          "y": 455
+        },
+        {
+          "id": "generated-answer-label",
+          "label": "Generated Answer",
+          "x": 1472,
+          "y": 186
+        },
+        {
+          "id": "generated-answer-bubble",
+          "label": "Generated Answer Bubble",
+          "x": 1480,
+          "y": 482
+        },
+        {
+          "id": "bottom-explanation-box",
+          "label": "Explanation Box",
+          "x": 840,
+          "y": 845
+        },
+        {
+          "id": "lightbulb-icon",
+          "label": "Lightbulb Icon",
+          "x": 492,
+          "y": 846
+        },
+        {
+          "id": "explanation-text",
+          "label": "LLM predicts tokens explanation",
+          "x": 850,
+          "y": 850
+        }
+      ]
     },
     {
       "id": "section-2",
       "order": 2,
-      "type": "image",
-      "title": "Visualizing Intro to Programming",
-      "imageDescription": "An educational diagram showing concepts of Intro to Programming.",
-      "imageSource": "/section-2.png",
+      "type": "interactive",
+      "title": "The Full LLM Pipeline",
+      "htmlDescription": "A full interactive pipeline diagram showing how an LLM works from input to output. It shows prompt, tokenization, embeddings, transformer layers, attention, next-token probabilities, sampling, and final response with arrows between each stage and rounded beginner-friendly boxes.",
+      "htmlSource": "section-2.html",
       "components": [
         {
-          "id": "example-component",
-          "label": "Example Element",
-          "x": 150,
-          "y": 200
+          "id": "pipeline-board",
+          "name": "Full LLM pipeline board",
+          "interactionType": "show"
+        },
+        {
+          "id": "prompt-stage",
+          "name": "Prompt stage",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "tokenization-stage",
+          "name": "Tokenization stage",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "embeddings-stage",
+          "name": "Embeddings stage",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "transformer-layers-stage",
+          "name": "Transformer layers stage",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "attention-stage",
+          "name": "Attention stage",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "probabilities-stage",
+          "name": "Next-token probabilities stage",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "sampling-stage",
+          "name": "Sampling stage",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "final-response-stage",
+          "name": "Final response stage",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "run-pipeline-button",
+          "name": "Run pipeline button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "sample-prompts",
+          "name": "Prompt examples",
+          "interactionType": "show"
+        },
+        {
+          "id": "stage-explanation",
+          "name": "Stage explanation panel",
+          "interactionType": "show"
+        },
+        {
+          "id": "probability-bars",
+          "name": "Next-token probability bars",
+          "interactionType": "show"
+        },
+        {
+          "id": "response-display",
+          "name": "Final response preview",
+          "interactionType": "show"
         }
       ]
     },
@@ -32,14 +273,902 @@
       "id": "section-3",
       "order": 3,
       "type": "interactive",
-      "title": "Practice Intro to Programming",
-      "htmlDescription": "Interactive exercise where students practice Intro to Programming.",
+      "title": "Interactive: Tokenization and Context Window",
+      "htmlDescription": "Interactive exercise where students type or choose example prompts and see them split into tokens. The interactive also shows a context window limit, where old tokens can fall outside the model's visible memory. Students learn that models process token sequences, not raw human sentences.",
       "htmlSource": "/section-3.html",
       "components": [
         {
-          "id": "interactive-element",
-          "name": "Interactive Element",
+          "id": "prompt-display",
+          "name": "Prompt Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "example-simple",
+          "name": "Simple Sentence Button",
           "interactionType": "clickable"
+        },
+        {
+          "id": "example-code",
+          "name": "Code Example Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "example-long-word",
+          "name": "Long Word Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "token-chips",
+          "name": "Token Chips",
+          "interactionType": "show"
+        },
+        {
+          "id": "token-count",
+          "name": "Token Count",
+          "interactionType": "show"
+        },
+        {
+          "id": "context-window-size",
+          "name": "Context Window Size Slider",
+          "interactionType": "slider",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "defaultValue": 40,
+          "valueScale": 1
+        },
+        {
+          "id": "visible-context",
+          "name": "Visible Context",
+          "interactionType": "show"
+        }
+      ]
+    },
+    {
+      "id": "section-4",
+      "order": 4,
+      "type": "interactive",
+      "title": "Interactive: Embedding Space Explorer",
+      "htmlDescription": "Interactive exercise where students click words and see them appear as points in a 2D meaning space. Similar words should appear close together, while unrelated words appear farther away. The lesson teaches that embeddings turn tokens into vectors of numbers that represent meaning and relationships.",
+      "htmlSource": "/section-4.html",
+      "components": [
+        {
+          "id": "word-bank",
+          "name": "Word Bank",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "embedding-vector",
+          "name": "Embedding Vector Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "embedding-map",
+          "name": "Embedding Map",
+          "interactionType": "show"
+        },
+        {
+          "id": "selected-word",
+          "name": "Selected Word Label",
+          "interactionType": "show"
+        },
+        {
+          "id": "similarity-score",
+          "name": "Similarity Score",
+          "interactionType": "show"
+        },
+        {
+          "id": "distance-lines",
+          "name": "Distance Lines",
+          "interactionType": "show"
+        },
+        {
+          "id": "cluster-button",
+          "name": "Cluster Words Button",
+          "interactionType": "clickable"
+        }
+      ]
+    },
+    {
+      "id": "section-5",
+      "order": 5,
+      "type": "image",
+      "title": "Transformer Architecture",
+      "imageDescription": "A clean diagram of the transformer architecture used in modern LLMs. Show input embeddings, positional information, repeated transformer blocks, self-attention, feed-forward network, normalization, and output probabilities. Keep the visual beginner-friendly while still showing the important parts.",
+      "imageSource": "/section-5.png",
+      "components": [
+        {
+          "id": "input-embeddings",
+          "label": "Input Embeddings",
+          "x": 130,
+          "y": 260
+        },
+        {
+          "id": "position-info",
+          "label": "Position Information",
+          "x": 130,
+          "y": 380
+        },
+        {
+          "id": "transformer-blocks",
+          "label": "Transformer Blocks",
+          "x": 430,
+          "y": 260
+        },
+        {
+          "id": "self-attention",
+          "label": "Self-Attention",
+          "x": 430,
+          "y": 150
+        },
+        {
+          "id": "feed-forward",
+          "label": "Feed-Forward Network",
+          "x": 430,
+          "y": 390
+        },
+        {
+          "id": "output-probabilities",
+          "label": "Output Probabilities",
+          "x": 780,
+          "y": 260
+        }
+      ]
+    },
+    {
+      "id": "section-6",
+      "order": 6,
+      "type": "interactive",
+      "title": "Interactive: Attention Map",
+      "htmlDescription": "Interactive exercise where students click a word in a sentence and see which other words the model pays attention to. The interactive should show glowing connection lines, attention strength, and an explanation box. Students learn that attention helps the model use context and connect related tokens.",
+      "htmlSource": "/section-6.html",
+      "components": [
+        {
+          "id": "sentence-display",
+          "name": "Sentence Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "word-tokens",
+          "name": "Clickable Word Tokens",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "attention-lines",
+          "name": "Attention Connection Lines",
+          "interactionType": "show"
+        },
+        {
+          "id": "attention-strength",
+          "name": "Attention Strength Slider",
+          "interactionType": "slider",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "defaultValue": 6,
+          "valueScale": 1
+        },
+        {
+          "id": "explanation-box",
+          "name": "Attention Explanation Box",
+          "interactionType": "show"
+        }
+      ]
+    },
+    {
+      "id": "section-7",
+      "order": 7,
+      "type": "interactive",
+      "title": "Interactive: Next-Token Prediction and Sampling",
+      "htmlDescription": "Interactive exercise where students learn that an LLM generates text one token at a time. Students see a prompt, possible next tokens, probability bars, and generated output. They can adjust temperature, top-k, top-p, and max tokens to see how generation changes.",
+      "htmlSource": "/section-7.html",
+      "components": [
+        {
+          "id": "prompt-box",
+          "name": "Prompt Box",
+          "interactionType": "show"
+        },
+        {
+          "id": "token-options",
+          "name": "Next Token Options",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "probability-bars",
+          "name": "Token Probability Bars",
+          "interactionType": "show"
+        },
+        {
+          "id": "temperature",
+          "name": "Temperature Slider",
+          "interactionType": "slider",
+          "min": 0,
+          "max": 20,
+          "step": 1,
+          "defaultValue": 7,
+          "valueScale": 10
+        },
+        {
+          "id": "top-k",
+          "name": "Top-K Slider",
+          "interactionType": "slider",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "defaultValue": 20,
+          "valueScale": 1
+        },
+        {
+          "id": "top-p",
+          "name": "Top-P Slider",
+          "interactionType": "slider",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "defaultValue": 9,
+          "valueScale": 10
+        },
+        {
+          "id": "max-tokens",
+          "name": "Max Tokens Slider",
+          "interactionType": "slider",
+          "min": 5,
+          "max": 100,
+          "step": 5,
+          "defaultValue": 40,
+          "valueScale": 1
+        },
+        {
+          "id": "generate-button",
+          "name": "Generate Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "response-output",
+          "name": "Generated Response Output",
+          "interactionType": "show"
+        }
+      ]
+    },
+    {
+      "id": "section-8",
+      "order": 8,
+      "type": "image",
+      "title": "Pretraining: How the Base Model Learns",
+      "imageDescription": "A diagram explaining pretraining. Show massive text data going into a model. The model repeatedly practices predicting missing or next tokens. Show prediction, loss/error calculation, backpropagation, weight updates, and a trained base model. Emphasize that the model learns patterns, grammar, facts, code structure, and relationships from data.",
+      "imageSource": "/section-8.png",
+      "components": [
+        {
+          "id": "large-dataset",
+          "label": "Large Text Dataset",
+          "x": 110,
+          "y": 250
+        },
+        {
+          "id": "prediction-task",
+          "label": "Predict Next Token",
+          "x": 330,
+          "y": 180
+        },
+        {
+          "id": "loss",
+          "label": "Loss / Error",
+          "x": 530,
+          "y": 180
+        },
+        {
+          "id": "backpropagation",
+          "label": "Backpropagation",
+          "x": 530,
+          "y": 350
+        },
+        {
+          "id": "weight-update",
+          "label": "Weight Update",
+          "x": 730,
+          "y": 250
+        },
+        {
+          "id": "base-model",
+          "label": "Base Model",
+          "x": 930,
+          "y": 250
+        }
+      ]
+    },
+    {
+      "id": "section-9",
+      "order": 9,
+      "type": "interactive",
+      "title": "Interactive: Training Loop Simulator",
+      "htmlDescription": "Interactive exercise where students simulate model training. Students select a sentence, click train, and watch prediction improve over several steps. Show prediction, correct answer, loss/error score, and improvement chart. This explains how repeated practice changes model weights.",
+      "htmlSource": "/section-9.html",
+      "components": [
+        {
+          "id": "training-sentence",
+          "name": "Training Sentence",
+          "interactionType": "show"
+        },
+        {
+          "id": "prediction-box",
+          "name": "Prediction Box",
+          "interactionType": "show"
+        },
+        {
+          "id": "correct-answer",
+          "name": "Correct Answer",
+          "interactionType": "show"
+        },
+        {
+          "id": "train-button",
+          "name": "Train Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "training-steps",
+          "name": "Training Steps Slider",
+          "interactionType": "slider",
+          "min": 1,
+          "max": 30,
+          "step": 1,
+          "defaultValue": 8,
+          "valueScale": 1
+        },
+        {
+          "id": "error-meter",
+          "name": "Error Meter",
+          "interactionType": "show"
+        },
+        {
+          "id": "improvement-chart",
+          "name": "Improvement Chart",
+          "interactionType": "show"
+        }
+      ]
+    },
+    {
+      "id": "section-10",
+      "order": 10,
+      "type": "image",
+      "title": "Data Quality, Bias, and Dataset Filtering",
+      "imageDescription": "A diagram showing that model behavior depends heavily on training data quality. Show high-quality data, noisy data, duplicated data, biased data, unsafe data, and private data flowing through filtering and cleaning before training. Explain visually that better data leads to better model behavior and safer outputs.",
+      "imageSource": "/section-10.png",
+      "components": [
+        {
+          "id": "raw-data",
+          "label": "Raw Data",
+          "x": 110,
+          "y": 260
+        },
+        {
+          "id": "noisy-data",
+          "label": "Noisy Data",
+          "x": 300,
+          "y": 130
+        },
+        {
+          "id": "biased-data",
+          "label": "Biased Data",
+          "x": 300,
+          "y": 230
+        },
+        {
+          "id": "duplicate-data",
+          "label": "Duplicate Data",
+          "x": 300,
+          "y": 330
+        },
+        {
+          "id": "unsafe-data",
+          "label": "Unsafe / Private Data",
+          "x": 300,
+          "y": 430
+        },
+        {
+          "id": "data-filter",
+          "label": "Filtering and Cleaning",
+          "x": 610,
+          "y": 260
+        },
+        {
+          "id": "clean-training-data",
+          "label": "Clean Training Data",
+          "x": 870,
+          "y": 260
+        }
+      ]
+    },
+    {
+      "id": "section-11",
+      "order": 11,
+      "type": "image",
+      "title": "Fine-Tuning, Instruction Tuning, and Alignment",
+      "imageDescription": "A diagram explaining what happens after pretraining. Show a base model becoming more useful through fine-tuning, instruction tuning, and human preference feedback. Include examples: coding assistant, tutor, customer support bot, and helpful safe assistant. Show that alignment makes the model follow instructions better and behave more safely.",
+      "imageSource": "/section-11.png",
+      "components": [
+        {
+          "id": "base-model",
+          "label": "Base Model",
+          "x": 110,
+          "y": 250
+        },
+        {
+          "id": "fine-tuning",
+          "label": "Fine-Tuning",
+          "x": 330,
+          "y": 160
+        },
+        {
+          "id": "instruction-tuning",
+          "label": "Instruction Tuning",
+          "x": 330,
+          "y": 280
+        },
+        {
+          "id": "human-feedback",
+          "label": "Human Feedback",
+          "x": 330,
+          "y": 400
+        },
+        {
+          "id": "aligned-model",
+          "label": "Aligned Assistant",
+          "x": 620,
+          "y": 250
+        },
+        {
+          "id": "specialized-uses",
+          "label": "Specialized Uses",
+          "x": 860,
+          "y": 250
+        }
+      ]
+    },
+    {
+      "id": "section-12",
+      "order": 12,
+      "type": "interactive",
+      "title": "Interactive: Prompt Engineering Lab",
+      "htmlDescription": "Interactive exercise where students compare weak and strong prompts. Students improve a prompt by adding role, task, context, level, constraints, examples, and output format. The interactive shows how answer quality changes when the prompt becomes clearer.",
+      "htmlSource": "/section-12.html",
+      "components": [
+        {
+          "id": "weak-prompt-card",
+          "name": "Weak Prompt Card",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "strong-prompt-card",
+          "name": "Strong Prompt Card",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "role-button",
+          "name": "Add Role Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "context-button",
+          "name": "Add Context Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "format-button",
+          "name": "Add Format Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "examples-button",
+          "name": "Add Examples Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "prompt-quality-meter",
+          "name": "Prompt Quality Meter",
+          "interactionType": "show"
+        },
+        {
+          "id": "answer-preview",
+          "name": "Answer Preview",
+          "interactionType": "show"
+        }
+      ]
+    },
+    {
+      "id": "section-13",
+      "order": 13,
+      "type": "interactive",
+      "title": "Interactive: Hallucination and Verification Lab",
+      "htmlDescription": "Interactive exercise where students inspect AI answers and decide whether each answer is grounded, uncertain, or hallucinated. The interactive shows evidence cards, missing evidence warnings, confidence level, and verification feedback. Students learn that LLMs can sound correct even when they are wrong.",
+      "htmlSource": "/section-13.html",
+      "components": [
+        {
+          "id": "answer-card",
+          "name": "AI Answer Card",
+          "interactionType": "show"
+        },
+        {
+          "id": "evidence-card",
+          "name": "Evidence Card",
+          "interactionType": "show"
+        },
+        {
+          "id": "confidence-meter",
+          "name": "Confidence Meter",
+          "interactionType": "show"
+        },
+        {
+          "id": "mark-grounded-button",
+          "name": "Mark Grounded Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "mark-uncertain-button",
+          "name": "Mark Uncertain Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "mark-hallucinated-button",
+          "name": "Mark Hallucinated Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "verification-result",
+          "name": "Verification Result",
+          "interactionType": "show"
+        }
+      ]
+    },
+    {
+      "id": "section-14",
+      "order": 14,
+      "type": "image",
+      "title": "Retrieval-Augmented Generation",
+      "imageDescription": "A diagram explaining RAG. Show a user question, a retriever, a knowledge base or vector database, relevant document chunks, and an LLM generating a grounded answer. Explain visually that RAG gives the model external context and reduces hallucinations when the retrieved information is reliable.",
+      "imageSource": "/section-14.png",
+      "components": [
+        {
+          "id": "user-question",
+          "label": "User Question",
+          "x": 110,
+          "y": 260
+        },
+        {
+          "id": "retriever",
+          "label": "Retriever",
+          "x": 310,
+          "y": 260
+        },
+        {
+          "id": "knowledge-base",
+          "label": "Knowledge Base",
+          "x": 540,
+          "y": 150
+        },
+        {
+          "id": "vector-search",
+          "label": "Vector Search",
+          "x": 540,
+          "y": 260
+        },
+        {
+          "id": "relevant-chunks",
+          "label": "Relevant Chunks",
+          "x": 540,
+          "y": 370
+        },
+        {
+          "id": "grounded-answer",
+          "label": "Grounded Answer",
+          "x": 850,
+          "y": 260
+        }
+      ]
+    },
+    {
+      "id": "section-15",
+      "order": 15,
+      "type": "interactive",
+      "title": "Interactive: RAG Retrieval Lab",
+      "htmlDescription": "Interactive exercise where students choose a question and see how retrieval selects relevant document chunks. Then the model uses the selected chunks to answer. Students can adjust the number of retrieved chunks and observe how answer quality changes.",
+      "htmlSource": "/section-15.html",
+      "components": [
+        {
+          "id": "question-list",
+          "name": "Question List",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "document-store",
+          "name": "Document Store",
+          "interactionType": "show"
+        },
+        {
+          "id": "retrieved-chunks",
+          "name": "Retrieved Chunks",
+          "interactionType": "show"
+        },
+        {
+          "id": "chunk-count",
+          "name": "Retrieved Chunk Count Slider",
+          "interactionType": "slider",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "defaultValue": 3,
+          "valueScale": 1
+        },
+        {
+          "id": "similarity-threshold",
+          "name": "Similarity Threshold Slider",
+          "interactionType": "slider",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "defaultValue": 6,
+          "valueScale": 10
+        },
+        {
+          "id": "generate-grounded-answer",
+          "name": "Generate Grounded Answer Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "grounded-answer",
+          "name": "Grounded Answer",
+          "interactionType": "show"
+        }
+      ]
+    },
+    {
+      "id": "section-16",
+      "order": 16,
+      "type": "interactive",
+      "title": "Interactive: Tool Calling and Agent Loop",
+      "htmlDescription": "Interactive exercise where students learn how LLMs use tools and act like agents. Students choose a user request, decide whether the model should answer directly or call a tool, select a tool, fill structured parameters, observe the result, and update the plan. This teaches tool calling, function calling, planning, acting, observing, and final response generation.",
+      "htmlSource": "/section-16.html",
+      "components": [
+        {
+          "id": "request-card",
+          "name": "User Request Card",
+          "interactionType": "show"
+        },
+        {
+          "id": "normal-answer-button",
+          "name": "Normal Answer Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "tool-call-button",
+          "name": "Tool Call Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "tool-list",
+          "name": "Tool List",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "parameter-panel",
+          "name": "Parameter Panel",
+          "interactionType": "show"
+        },
+        {
+          "id": "tool-call-json",
+          "name": "Tool Call JSON",
+          "interactionType": "show"
+        },
+        {
+          "id": "observation-box",
+          "name": "Observation Box",
+          "interactionType": "show"
+        },
+        {
+          "id": "agent-progress",
+          "name": "Agent Progress Meter",
+          "interactionType": "show"
+        }
+      ]
+    },
+    {
+      "id": "section-17",
+      "order": 17,
+      "type": "image",
+      "title": "Multimodal LLMs",
+      "imageDescription": "A diagram explaining multimodal LLMs. Show text, image, audio, video, and code inputs flowing into a model. Show the model producing text, explanations, captions, code, reports, or actions. Explain visually that multimodal models can connect different types of information.",
+      "imageSource": "/section-17.png",
+      "components": [
+        {
+          "id": "text-input",
+          "label": "Text",
+          "x": 150,
+          "y": 120
+        },
+        {
+          "id": "image-input",
+          "label": "Image",
+          "x": 150,
+          "y": 220
+        },
+        {
+          "id": "audio-input",
+          "label": "Audio",
+          "x": 150,
+          "y": 320
+        },
+        {
+          "id": "video-input",
+          "label": "Video",
+          "x": 150,
+          "y": 420
+        },
+        {
+          "id": "multimodal-model",
+          "label": "Multimodal Model",
+          "x": 520,
+          "y": 280
+        },
+        {
+          "id": "output-response",
+          "label": "Response / Action",
+          "x": 850,
+          "y": 280
+        }
+      ]
+    },
+    {
+      "id": "section-18",
+      "order": 18,
+      "type": "image",
+      "title": "Memory in LLM Applications",
+      "imageDescription": "A diagram explaining memory in LLM apps. Show short-term memory as the current context window and long-term memory stored outside the model. Show retrieval bringing relevant memory back into the prompt. Explain that the model itself does not automatically remember everything forever unless the application stores and retrieves memory.",
+      "imageSource": "/section-18.png",
+      "components": [
+        {
+          "id": "current-context",
+          "label": "Current Context",
+          "x": 240,
+          "y": 190
+        },
+        {
+          "id": "context-window",
+          "label": "Context Window",
+          "x": 240,
+          "y": 340
+        },
+        {
+          "id": "long-term-memory",
+          "label": "Long-Term Memory Store",
+          "x": 520,
+          "y": 340
+        },
+        {
+          "id": "memory-retrieval",
+          "label": "Memory Retrieval",
+          "x": 520,
+          "y": 190
+        },
+        {
+          "id": "llm",
+          "label": "LLM",
+          "x": 800,
+          "y": 260
+        }
+      ]
+    },
+    {
+      "id": "section-19",
+      "order": 19,
+      "type": "image",
+      "title": "Deployment, Quantization, Cost, and Privacy",
+      "imageDescription": "A diagram comparing ways to run LLMs: cloud API, private server, local computer, and edge device. Include tradeoffs for speed, cost, privacy, hardware needs, offline ability, and model quality. Show quantization as making a model smaller and faster by using lower precision numbers, sometimes with a small quality tradeoff.",
+      "imageSource": "/section-19.png",
+      "components": [
+        {
+          "id": "cloud-api",
+          "label": "Cloud API",
+          "x": 160,
+          "y": 170
+        },
+        {
+          "id": "private-server",
+          "label": "Private Server",
+          "x": 390,
+          "y": 170
+        },
+        {
+          "id": "local-computer",
+          "label": "Local Computer",
+          "x": 620,
+          "y": 170
+        },
+        {
+          "id": "edge-device",
+          "label": "Edge Device",
+          "x": 850,
+          "y": 170
+        },
+        {
+          "id": "quantization",
+          "label": "Quantization",
+          "x": 380,
+          "y": 390
+        },
+        {
+          "id": "tradeoff-table",
+          "label": "Cost / Speed / Privacy Tradeoffs",
+          "x": 690,
+          "y": 390
+        }
+      ]
+    },
+    {
+      "id": "section-20",
+      "order": 20,
+      "type": "interactive",
+      "title": "Final Challenge: Build and Evaluate an LLM System",
+      "htmlDescription": "Final review exercise where students assemble a complete LLM workflow and evaluate whether it is safe and reliable. Students arrange stages: prompt, tokens, embeddings, transformer, attention, probabilities, sampling, response, verification, RAG, tools, memory, and human review. The challenge also asks students to judge correctness, helpfulness, groundedness, privacy, and safety.",
+      "htmlSource": "/section-20.html",
+      "components": [
+        {
+          "id": "workflow-cards",
+          "name": "Workflow Cards",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "drop-zone",
+          "name": "Workflow Drop Zone",
+          "interactionType": "show"
+        },
+        {
+          "id": "check-order-button",
+          "name": "Check Order Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "correctness-score",
+          "name": "Correctness Score Slider",
+          "interactionType": "slider",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "defaultValue": 7,
+          "valueScale": 1
+        },
+        {
+          "id": "groundedness-score",
+          "name": "Groundedness Score Slider",
+          "interactionType": "slider",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "defaultValue": 7,
+          "valueScale": 1
+        },
+        {
+          "id": "safety-score",
+          "name": "Safety Score Slider",
+          "interactionType": "slider",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "defaultValue": 8,
+          "valueScale": 1
+        },
+        {
+          "id": "score-display",
+          "name": "Score Display",
+          "interactionType": "show"
+        },
+        {
+          "id": "hint-button",
+          "name": "Hint Button",
+          "interactionType": "clickable"
+        },
+        {
+          "id": "completion-message",
+          "name": "Completion Message",
+          "interactionType": "show"
         }
       ]
     }

@@ -57,8 +57,8 @@ from llm.openrouter import (
 )
 from streaming.tool_calls import (
     extract_tool_events as _extract_tool_events,
+    flush_buffer as _flush_buffer_events,
     ndjson,
-    strip_partial_tool_tags as _strip_partial_tool_tags,
     tokenize_buffer as _tokenize_buffer,
 )
 from students.names import remember_student_name, sanitize_student_name
@@ -215,42 +215,22 @@ def build_answer_messages(
 def process_streaming_buffer(tts_buffer: str) -> tuple[str, list]:
     """Process the streaming TTS buffer, interleaving tool events correctly.
 
-    Tool events are emitted EAGERLY — the moment </tool_call> is seen in the
-    buffer, the event fires immediately, before Supertonic even starts on the next
-    sentence.  This gives maximum lead time so the cursor is already visible
-    when the audio begins.
+    Tool events are emitted in stream order: after any completed sentence that
+    precedes the tool tag, and before the sentence that follows it. This keeps
+    frontend queue timing aligned with the model's golden pattern.
 
     NOTE: This function generates TTS audio INLINE (blocking).  It is kept for
     the synchronous ``talk_stream_generator`` path.  The threaded generators
     (message / teach) use ``_tokenize_buffer`` + the tts_worker thread instead.
     """
-    import re
     output_events = []
+    tts_buffer, events = _tokenize_buffer(tts_buffer)
 
-    # 1. Eagerly fire any complete tool calls sitting anywhere in the buffer,
-    #    even if no sentence boundary has arrived yet.
-    tts_buffer, eager_tool_events = _extract_tool_events(tts_buffer)
-    output_events.extend(eager_tool_events)
-
-    # 2. Now split on sentence boundaries and synthesise audio.
-    sentence_end_re = re.compile(r'(?<=[.!?])(?=\s|$)')
-
-    while True:
-        m = sentence_end_re.search(tts_buffer)
-        if m is None:
-            break
-
-        raw_segment = tts_buffer[:m.start() + 1]
-        tts_buffer = tts_buffer[m.start() + 1:]
-
-        # Strip any tool calls that slipped inside a sentence (shouldn't happen
-        # with the new prompt, but be safe).
-        clean_segment, inline_tool_events = _extract_tool_events(raw_segment)
-        output_events.extend(inline_tool_events)
-
-        spoken = clean_segment.strip()
-        if len(spoken) > 2:
-            for audio_event in tts_audio_stream_events_for_sentence(spoken):
+    for kind, payload in events:
+        if kind == "TOOL":
+            output_events.append(payload)
+        elif kind == "SENTENCE":
+            for audio_event in tts_audio_stream_events_for_sentence(payload):
                 output_events.append(audio_event)
 
     return tts_buffer, output_events
@@ -433,12 +413,8 @@ def teach_section_stream_generator(
 
                 # Flush remainder — strip partial tags before TTS.
                 if tts_buffer.strip():
-                    clean_rem, tool_events = _extract_tool_events(tts_buffer.strip())
-                    for te in tool_events:
-                        tts_queue.put(("TOOL", te))
-                    clean_rem = _strip_partial_tool_tags(clean_rem)
-                    if clean_rem.strip():
-                        tts_queue.put(("SENTENCE", clean_rem.strip()))
+                    for kind, payload in _flush_buffer_events(tts_buffer.strip()):
+                        tts_queue.put((kind, payload))
 
                 clean_full = clean_response(full_answer)
                 output_queue.put(("FULL_ANSWER", clean_full))
@@ -640,12 +616,8 @@ def message_stream_generator(
 
                 # Flush remainder — strip partial tags before TTS.
                 if tts_buffer.strip():
-                    clean_rem, tool_events = _extract_tool_events(tts_buffer.strip())
-                    for te in tool_events:
-                        tts_queue.put(("TOOL", te))
-                    clean_rem = _strip_partial_tool_tags(clean_rem)
-                    if clean_rem.strip():
-                        tts_queue.put(("SENTENCE", clean_rem.strip()))
+                    for kind, payload in _flush_buffer_events(tts_buffer.strip()):
+                        tts_queue.put((kind, payload))
 
                 # Save clean answer (no raw tool-call XML) to thread history.
                 clean_full, _ = _extract_tool_events(full_answer)
@@ -869,13 +841,12 @@ def talk_stream_generator(
 
             # Flush remainder — strip partial tags before TTS.
             if tts_buffer.strip():
-                clean_rem, tool_events = _extract_tool_events(tts_buffer.strip())
-                for te in tool_events:
-                    yield te
-                clean_rem = _strip_partial_tool_tags(clean_rem)
-                if clean_rem.strip():
-                    for event in tts_audio_stream_events_for_sentence(clean_rem.strip(), tts_provider=tts_provider):
-                        yield event
+                for kind, payload in _flush_buffer_events(tts_buffer.strip()):
+                    if kind == "TOOL":
+                        yield payload
+                    elif kind == "SENTENCE":
+                        for event in tts_audio_stream_events_for_sentence(payload, tts_provider=tts_provider):
+                            yield event
 
             # Store clean answer in thread history.
             clean_full, raw_tool_events = _extract_tool_events(full_answer)

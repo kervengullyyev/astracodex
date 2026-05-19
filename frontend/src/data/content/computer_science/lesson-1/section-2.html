@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Pipeline</title>
+  <style>
+    :root {
+      --bg: #F9E1C7;
+      --ink: #152033;
+      --muted: #5e6573;
+      --card: #fff7ec;
+      --card-top: #fffdf8;
+      --card-bottom: #f2d0a9;
+      --ridge: #b78554;
+      --line: rgba(99, 73, 45, 0.24);
+      --blue: #4b7bec;
+      --cyan: #16a6b6;
+      --green: #2fa36b;
+      --orange: #e88b25;
+      --pink: #dd5d8d;
+      --violet: #8067d9;
+      --shadow: 0 18px 34px rgba(99, 65, 30, 0.18), 0 7px 0 rgba(106, 68, 28, 0.18);
+      --inner: inset 0 2px 0 rgba(255, 255, 255, 0.82), inset 0 -4px 8px rgba(123, 78, 33, 0.12);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      display: flex;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    #llm-pipeline-interactive {
+      width: 100vw;
+      height: 100vh;
+      padding: 16px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 12px;
+      background:
+        radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.62), transparent 28%),
+        radial-gradient(circle at 86% 80%, rgba(255, 190, 122, 0.24), transparent 32%),
+        var(--bg);
+    }
+
+    .top-bar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .title-plate {
+      min-width: 0;
+      padding: 14px 18px;
+      border-radius: 24px;
+      border: 2px solid rgba(76, 51, 27, 0.22);
+      background: linear-gradient(180deg, rgba(255, 253, 247, 0.86), rgba(248, 213, 173, 0.66));
+      box-shadow: var(--shadow), var(--inner);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 42px);
+      line-height: 1.02;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: clamp(12px, 1.2vw, 15px);
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .control-button,
+    .prompt-chip {
+      border: 2px solid rgba(71, 47, 24, 0.28);
+      border-radius: 999px;
+      color: #182033;
+      background: linear-gradient(180deg, #fffefa, #f2cda4);
+      box-shadow: 0 7px 0 rgba(122, 78, 35, 0.18), 0 12px 24px rgba(99, 65, 30, 0.14), var(--inner);
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      white-space: nowrap;
+    }
+
+    .control-button {
+      min-height: 44px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .control-button:hover,
+    .prompt-chip:hover,
+    .stage-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .control-button:active,
+    .prompt-chip:active,
+    .stage-card:active {
+      transform: translateY(2px);
+      box-shadow: 0 3px 0 rgba(122, 78, 35, 0.16), 0 8px 18px rgba(99, 65, 30, 0.12), var(--inner);
+    }
+
+    .content-grid {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.34fr);
+      gap: 14px;
+    }
+
+    .board-shell,
+    .side-panel {
+      min-height: 0;
+      border-radius: 28px;
+      border: 2px solid rgba(74, 48, 24, 0.24);
+      background: linear-gradient(180deg, rgba(255, 253, 247, 0.72), rgba(246, 206, 161, 0.62));
+      box-shadow: var(--shadow), inset 0 2px 0 rgba(255, 255, 255, 0.72);
+      overflow: hidden;
+    }
+
+    .board-shell {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    #pipeline-board {
+      position: relative;
+      min-height: 0;
+      display: grid;
+      align-items: center;
+      justify-items: stretch;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 32px 46px;
+      padding: 18px 20px;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.64), rgba(245, 203, 155, 0.45)),
+        repeating-linear-gradient(90deg, rgba(87, 60, 34, 0.05) 0 1px, transparent 1px 62px);
+      box-shadow: inset 0 2px 10px rgba(255, 255, 255, 0.74), inset 0 -8px 22px rgba(119, 75, 30, 0.12);
+    }
+
+    .stage-wrap {
+      min-width: 0;
+      min-height: 0;
+      display: block;
+      position: relative;
+    }
+
+    .stage-wrap:last-child {
+      display: block;
+    }
+
+    .flow-arrow {
+      position: absolute;
+      top: 50%;
+      right: -36px;
+      width: 28px;
+      height: 14px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(106, 70, 33, 0.18), rgba(106, 70, 33, 0.42));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 2px 5px rgba(91, 62, 32, 0.16);
+      transform: translateY(-50%);
+      z-index: 4;
+    }
+
+    .flow-arrow::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -7px;
+      width: 0;
+      height: 0;
+      transform: translateY(-50%);
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 14px solid rgba(106, 70, 33, 0.52);
+      filter: drop-shadow(0 1px 1px rgba(84, 52, 22, 0.18));
+    }
+
+    .flow-arrow.lit {
+      background: linear-gradient(90deg, #72d7ff, #5578ff);
+      box-shadow: 0 0 18px rgba(79, 124, 255, 0.42);
+    }
+
+    .flow-arrow.lit::after {
+      border-left-color: #5578ff;
+    }
+
+    #arrow-transformer-attention {
+      top: auto;
+      right: 50%;
+      bottom: -30px;
+      width: 14px;
+      height: 26px;
+      transform: translateX(50%);
+      background: linear-gradient(180deg, rgba(106, 70, 33, 0.18), rgba(106, 70, 33, 0.42));
+    }
+
+    #arrow-transformer-attention::after {
+      top: auto;
+      right: 50%;
+      bottom: -8px;
+      transform: translateX(50%);
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 14px solid rgba(106, 70, 33, 0.52);
+      border-bottom: 0;
+    }
+
+    #arrow-transformer-attention.lit {
+      background: linear-gradient(180deg, #72d7ff, #5578ff);
+    }
+
+    #arrow-transformer-attention.lit::after {
+      border-top-color: #5578ff;
+    }
+
+    .stage-card {
+      min-width: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 174px;
+      border: 2px solid rgba(58, 39, 20, 0.26);
+      border-radius: var(--radius);
+      padding: 12px 12px 48px;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      background:
+        linear-gradient(180deg, var(--card-top), var(--card-bottom)),
+        var(--card);
+      box-shadow: 0 11px 0 rgba(122, 78, 35, 0.18), 0 18px 28px rgba(95, 61, 27, 0.14), var(--inner);
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stage-card::before {
+      content: "";
+      position: absolute;
+      inset: 6px 6px auto;
+      height: 34%;
+      border-radius: 18px 18px 999px 999px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0));
+      pointer-events: none;
+    }
+
+    .stage-card.active {
+      border-color: rgba(51, 95, 221, 0.72);
+      box-shadow: 0 8px 0 rgba(51, 95, 221, 0.22), 0 0 0 5px rgba(75, 123, 236, 0.18), 0 20px 34px rgba(75, 123, 236, 0.20), var(--inner);
+      transform: translateY(-5px);
+    }
+
+    .stage-card.done {
+      border-color: rgba(47, 163, 107, 0.46);
+    }
+
+    .stage-number {
+      position: absolute;
+      top: 9px;
+      right: 10px;
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #fff8eb;
+      border: 2px solid rgba(71, 47, 24, 0.22);
+      box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.82), 0 4px 8px rgba(82, 53, 24, 0.16);
+      font-size: 12px;
+      font-weight: 900;
+      color: #2a3040;
+    }
+
+    .stage-icon {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      margin-bottom: 10px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(160deg, var(--accent), color-mix(in srgb, var(--accent), #111827 30%));
+      box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.36), inset 0 -5px 10px rgba(0, 0, 0, 0.16), 0 10px 16px rgba(85, 54, 20, 0.18);
+      font-size: 25px;
+      font-weight: 900;
+    }
+
+    .stage-icon::after {
+      content: "";
+      position: absolute;
+      inset: 7px 8px auto;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.32);
+    }
+
+    .stage-title {
+      position: relative;
+      margin: 0 0 7px;
+      font-size: clamp(16px, 1.45vw, 21px);
+      line-height: 1.06;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .stage-copy {
+      position: relative;
+      margin: 0;
+      color: #4d5669;
+      font-size: clamp(12px, 1.08vw, 15px);
+      line-height: 1.3;
+      font-weight: 650;
+    }
+
+    .mini-visual {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      height: 31px;
+      border-radius: 13px;
+      border: 1px solid rgba(77, 51, 26, 0.16);
+      background: rgba(255, 255, 255, 0.45);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px;
+    }
+
+    .token-pill,
+    .vector-dot,
+    .layer-slab,
+    .prob-bar,
+    .text-line {
+      display: block;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    .token-pill {
+      width: 26%;
+      height: 16px;
+      opacity: 0.82;
+    }
+
+    .vector-dot {
+      width: 16px;
+      height: 16px;
+      opacity: 0.86;
+    }
+
+    .layer-slab {
+      width: 26%;
+      height: 20px;
+      border-radius: 8px;
+      transform: skewY(-10deg);
+      opacity: 0.82;
+    }
+
+    .prob-bar {
+      height: 13px;
+      width: var(--w);
+      opacity: 0.82;
+    }
+
+    .text-line {
+      height: 8px;
+      width: var(--w);
+      opacity: 0.78;
+    }
+
+    .prompt-stage { --accent: var(--blue); }
+    .token-stage { --accent: var(--orange); }
+    .embedding-stage { --accent: var(--green); }
+    .transformer-stage { --accent: var(--violet); }
+    .attention-stage { --accent: var(--pink); }
+    .probability-stage { --accent: var(--cyan); }
+    .sampling-stage { --accent: #ad6a34; }
+    .response-stage { --accent: #315e8c; }
+
+    .sample-strip {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 22px;
+      border: 2px solid rgba(76, 51, 27, 0.16);
+      background: rgba(255, 248, 236, 0.62);
+      box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .sample-label {
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #62482f;
+    }
+
+    .prompt-list {
+      min-width: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .prompt-chip {
+      min-height: 36px;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .side-panel {
+      display: grid;
+      grid-template-rows: minmax(184px, 0.72fr) minmax(0, 1fr);
+      gap: 10px;
+      padding: 14px;
+    }
+
+    #stage-explanation {
+      min-height: 0;
+      border-radius: 24px;
+      border: 2px solid rgba(74, 48, 24, 0.20);
+      background: linear-gradient(180deg, #fffefa, #f4d5b2);
+      box-shadow: 0 10px 0 rgba(122, 78, 35, 0.13), var(--inner);
+      padding: 13px;
+      overflow: auto;
+    }
+
+    .side-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 10px;
+      color: #62482f;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .side-kicker::before {
+      content: "";
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 0 4px rgba(75, 123, 236, 0.14);
+    }
+
+    #detail-title {
+      margin: 0;
+      font-size: clamp(20px, 1.9vw, 30px);
+      line-height: 1.03;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    #detail-copy {
+      margin: 12px 0 0;
+      color: #384358;
+      font-size: clamp(13px, 1.12vw, 15px);
+      line-height: 1.38;
+      font-weight: 650;
+    }
+
+    .detail-example {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.54);
+      border: 1px solid rgba(71, 47, 24, 0.16);
+      color: #253149;
+      font-size: 12px;
+      line-height: 1.3;
+      font-weight: 750;
+    }
+
+    #live-output {
+      display: grid;
+      gap: 8px;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .readout {
+      border-radius: 22px;
+      border: 2px solid rgba(74, 48, 24, 0.16);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(250, 224, 192, 0.74));
+      box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.72), 0 8px 18px rgba(99, 65, 30, 0.10);
+      padding: 9px;
+    }
+
+    .readout-label {
+      margin: 0 0 6px;
+      color: #62482f;
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    #prompt-display,
+    #response-display {
+      margin: 0;
+      color: #243047;
+      font-size: 12px;
+      line-height: 1.28;
+      font-weight: 750;
+    }
+
+    #token-display {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .token-chip {
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #fff6e7;
+      border: 1px solid rgba(84, 55, 25, 0.18);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
+      color: #30405d;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    #probability-bars {
+      display: grid;
+      gap: 7px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr) 34px;
+      gap: 6px;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 850;
+      color: #334058;
+    }
+
+    .bar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(91, 68, 42, 0.12);
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(86, 54, 24, 0.12);
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: var(--w);
+      border-radius: inherit;
+      background: linear-gradient(90deg, #5dd7c8, #4b7bec);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+      transition: width 280ms ease;
+    }
+
+    .legend-note {
+      display: none;
+      margin: 0;
+      color: #5e6573;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .highlight-target {
+      outline: 4px solid #3b82f6;
+      outline-offset: 4px;
+      box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.14), 0 18px 34px rgba(59, 130, 246, 0.22), var(--inner) !important;
+    }
+
+    @media (max-width: 980px) {
+      #llm-pipeline-interactive {
+        padding: 10px;
+      }
+
+      .top-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        justify-content: flex-start;
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) auto;
+      }
+
+      .side-panel {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+      }
+
+      #stage-explanation {
+        max-height: 210px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      #pipeline-board {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        overflow: auto;
+        align-content: start;
+      }
+
+      .stage-wrap,
+      .stage-wrap:last-child {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .flow-arrow {
+        display: none;
+      }
+
+      .stage-card {
+        min-height: 150px;
+      }
+
+      .side-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .sample-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main id="llm-pipeline-interactive" data-id="llm-pipeline-interactive" aria-label="Interactive LLM pipeline">
+    <div class="top-bar">
+      <section class="title-plate" id="title-plate" data-id="title-plate">
+        <h1 id="lesson-title" data-id="lesson-title">The Full LLM Pipeline</h1>
+        <p class="subtitle" id="lesson-subtitle" data-id="lesson-subtitle">
+          A prompt travels through small machine-readable steps before the model writes one useful next token at a time.
+        </p>
+      </section>
+
+      <div class="controls" id="pipeline-controls" data-id="pipeline-controls">
+        <button class="control-button" id="run-pipeline-button" data-id="run-pipeline-button" type="button">
+          Run Pipeline
+        </button>
+        <button class="control-button" id="reset-pipeline-button" data-id="reset-pipeline-button" type="button">
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <section class="content-grid">
+      <section class="board-shell" aria-label="Pipeline diagram">
+        <div id="pipeline-board" data-id="pipeline-board">
+          <div class="stage-wrap">
+            <button class="stage-card prompt-stage" id="prompt-stage" data-id="prompt-stage" type="button">
+              <span class="stage-number">1</span>
+              <span class="stage-icon">?</span>
+              <h2 class="stage-title">Prompt</h2>
+              <p class="stage-copy">The user asks for something in ordinary language.</p>
+              <span class="mini-visual"><span class="text-line" style="--w:78%"></span><span class="text-line" style="--w:48%"></span></span>
+            </button>
+            <span class="flow-arrow" id="arrow-prompt-tokenization" data-id="arrow-prompt-tokenization"></span>
+          </div>
+
+          <div class="stage-wrap">
+            <button class="stage-card token-stage" id="tokenization-stage" data-id="tokenization-stage" type="button">
+              <span class="stage-number">2</span>
+              <span class="stage-icon">T</span>
+              <h2 class="stage-title">Tokenization</h2>
+              <p class="stage-copy">Text is split into tokens, like word pieces.</p>
+              <span class="mini-visual"><span class="token-pill"></span><span class="token-pill"></span><span class="token-pill"></span></span>
+            </button>
+            <span class="flow-arrow" id="arrow-tokenization-embeddings" data-id="arrow-tokenization-embeddings"></span>
+          </div>
+
+          <div class="stage-wrap">
+            <button class="stage-card embedding-stage" id="embeddings-stage" data-id="embeddings-stage" type="button">
+              <span class="stage-number">3</span>
+              <span class="stage-icon">#</span>
+              <h2 class="stage-title">Embeddings</h2>
+              <p class="stage-copy">Tokens become number vectors that carry meaning.</p>
+              <span class="mini-visual"><span class="vector-dot"></span><span class="vector-dot"></span><span class="vector-dot"></span><span class="vector-dot"></span></span>
+            </button>
+            <span class="flow-arrow" id="arrow-embeddings-transformer" data-id="arrow-embeddings-transformer"></span>
+          </div>
+
+          <div class="stage-wrap">
+            <button class="stage-card transformer-stage" id="transformer-layers-stage" data-id="transformer-layers-stage" type="button">
+              <span class="stage-number">4</span>
+              <span class="stage-icon">L</span>
+              <h2 class="stage-title">Transformer Layers</h2>
+              <p class="stage-copy">Repeated blocks refine the token meanings.</p>
+              <span class="mini-visual"><span class="layer-slab"></span><span class="layer-slab"></span><span class="layer-slab"></span></span>
+            </button>
+            <span class="flow-arrow" id="arrow-transformer-attention" data-id="arrow-transformer-attention"></span>
+          </div>
+
+          <div class="stage-wrap">
+            <button class="stage-card attention-stage" id="attention-stage" data-id="attention-stage" type="button">
+              <span class="stage-number">5</span>
+              <span class="stage-icon">*</span>
+              <h2 class="stage-title">Attention</h2>
+              <p class="stage-copy">The model checks which earlier tokens matter most.</p>
+              <span class="mini-visual"><span class="text-line" style="--w:38%"></span><span class="text-line" style="--w:64%"></span><span class="text-line" style="--w:22%"></span></span>
+            </button>
+            <span class="flow-arrow" id="arrow-attention-probabilities" data-id="arrow-attention-probabilities"></span>
+          </div>
+
+          <div class="stage-wrap">
+            <button class="stage-card probability-stage" id="probabilities-stage" data-id="probabilities-stage" type="button">
+              <span class="stage-number">6</span>
+              <span class="stage-icon">%</span>
+              <h2 class="stage-title">Next-Token Probabilities</h2>
+              <p class="stage-copy">The model scores likely next token choices.</p>
+              <span class="mini-visual"><span class="prob-bar" style="--w:54%"></span><span class="prob-bar" style="--w:30%"></span></span>
+            </button>
+            <span class="flow-arrow" id="arrow-probabilities-sampling" data-id="arrow-probabilities-sampling"></span>
+          </div>
+
+          <div class="stage-wrap">
+            <button class="stage-card sampling-stage" id="sampling-stage" data-id="sampling-stage" type="button">
+              <span class="stage-number">7</span>
+              <span class="stage-icon">S</span>
+              <h2 class="stage-title">Sampling</h2>
+              <p class="stage-copy">One token is chosen from the scored options.</p>
+              <span class="mini-visual"><span class="prob-bar" style="--w:76%"></span></span>
+            </button>
+            <span class="flow-arrow" id="arrow-sampling-response" data-id="arrow-sampling-response"></span>
+          </div>
+
+          <div class="stage-wrap">
+            <button class="stage-card response-stage" id="final-response-stage" data-id="final-response-stage" type="button">
+              <span class="stage-number">8</span>
+              <span class="stage-icon">A</span>
+              <h2 class="stage-title">Final Response</h2>
+              <p class="stage-copy">The chosen tokens join into the answer we read.</p>
+              <span class="mini-visual"><span class="text-line" style="--w:72%"></span><span class="text-line" style="--w:44%"></span></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sample-strip" id="sample-prompts" data-id="sample-prompts">
+          <div class="sample-label">Prompt examples</div>
+          <div class="prompt-list">
+            <button class="prompt-chip" id="sample-space-prompt" data-id="sample-space-prompt" data-prompt="Explain black holes simply." type="button">Explain black holes simply.</button>
+            <button class="prompt-chip" id="sample-code-prompt" data-id="sample-code-prompt" data-prompt="Write a tiny Python loop." type="button">Write a tiny Python loop.</button>
+            <button class="prompt-chip" id="sample-story-prompt" data-id="sample-story-prompt" data-prompt="Make a bedtime story about a robot." type="button">Robot bedtime story</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-panel" aria-label="Pipeline details">
+        <section id="stage-explanation" data-id="stage-explanation" aria-live="polite">
+          <p class="side-kicker" id="active-step-label" data-id="active-step-label">Step 1</p>
+          <h2 id="detail-title" data-id="detail-title">Prompt</h2>
+          <p id="detail-copy" data-id="detail-copy">
+            The prompt is the starting instruction. It may be a question, a request, code, or conversation history.
+          </p>
+          <div class="detail-example" id="detail-example" data-id="detail-example">
+            Example: "Explain black holes simply."
+          </div>
+        </section>
+
+        <section id="live-output" data-id="live-output">
+          <div class="readout" id="prompt-readout" data-id="prompt-readout">
+            <p class="readout-label">Current prompt</p>
+            <p id="prompt-display" data-id="prompt-display">Explain black holes simply.</p>
+          </div>
+
+          <div class="readout" id="token-readout" data-id="token-readout">
+            <p class="readout-label">Tokens</p>
+            <div id="token-display" data-id="token-display"></div>
+          </div>
+
+          <div class="readout" id="probability-readout" data-id="probability-readout">
+            <p class="readout-label">Next-token options</p>
+            <div id="probability-bars" data-id="probability-bars"></div>
+          </div>
+
+          <div class="readout" id="response-readout" data-id="response-readout">
+            <p class="readout-label">Response preview</p>
+            <p id="response-display" data-id="response-display">A black hole is a region where gravity is so strong that even light cannot escape.</p>
+          </div>
+        </section>
+
+        <p class="legend-note" id="loop-note" data-id="loop-note">
+          Generation loops through probabilities and sampling again for each new token until the response is complete.
+        </p>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const stages = [
+      {
+        id: "prompt-stage",
+        title: "Prompt",
+        label: "Step 1",
+        copy: "The prompt is the starting instruction. It may be a question, a request, code, or conversation history.",
+        example: "Example: \"Explain black holes simply.\""
+      },
+      {
+        id: "tokenization-stage",
+        title: "Tokenization",
+        label: "Step 2",
+        copy: "The tokenizer breaks text into small pieces called tokens. The model works with these pieces, not raw sentences.",
+        example: "Example tokens: Explain | black | holes | simply | ."
+      },
+      {
+        id: "embeddings-stage",
+        title: "Embeddings",
+        label: "Step 3",
+        copy: "Each token becomes a vector: a list of numbers that places meaning into a machine-readable space.",
+        example: "Words about space, gravity, and stars end up closer together than unrelated words."
+      },
+      {
+        id: "transformer-layers-stage",
+        title: "Transformer Layers",
+        label: "Step 4",
+        copy: "Transformer layers repeatedly update every token vector so it carries richer context from the whole prompt.",
+        example: "Layer after layer, the model sharpens what the user probably wants."
+      },
+      {
+        id: "attention-stage",
+        title: "Attention",
+        label: "Step 5",
+        copy: "Attention lets each token look back at important earlier tokens. This is how context connects across the prompt.",
+        example: "In \"black holes\", attention keeps black connected to holes as one idea."
+      },
+      {
+        id: "probabilities-stage",
+        title: "Next-Token Probabilities",
+        label: "Step 6",
+        copy: "The model produces a score for many possible next tokens. Higher probability means the token is more likely.",
+        example: "Possible next tokens: A, The, Gravity, They..."
+      },
+      {
+        id: "sampling-stage",
+        title: "Sampling",
+        label: "Step 7",
+        copy: "Sampling chooses one token from the probability list. Settings like temperature can make this safer or more creative.",
+        example: "The chosen next token gets appended, then the loop repeats."
+      },
+      {
+        id: "final-response-stage",
+        title: "Final Response",
+        label: "Step 8",
+        copy: "After many next-token choices, the tokens are joined into the answer the learner sees.",
+        example: "The final response is built one token at a time, then shown as readable text."
+      }
+    ];
+
+    const promptSamples = {
+      "Explain black holes simply.": {
+        tokens: ["Explain", "black", "holes", "simply", "."],
+        bars: [
+          ["A", 46],
+          ["They", 28],
+          ["Black", 16]
+        ],
+        response: "A black hole is a region where gravity is so strong that even light cannot escape."
+      },
+      "Write a tiny Python loop.": {
+        tokens: ["Write", "a", "tiny", "Python", "loop", "."],
+        bars: [
+          ["for", 52],
+          ["Here", 31],
+          ["Use", 12]
+        ],
+        response: "for i in range(3): print(i)"
+      },
+      "Make a bedtime story about a robot.": {
+        tokens: ["Make", "a", "bedtime", "story", "about", "a", "robot", "."],
+        bars: [
+          ["Once", 49],
+          ["The", 25],
+          ["A", 18]
+        ],
+        response: "Once there was a small robot who counted stars before sleep."
+      }
+    };
+
+    const componentIds = [
+      "llm-pipeline-interactive",
+      "title-plate",
+      "pipeline-controls",
+      "run-pipeline-button",
+      "reset-pipeline-button",
+      "pipeline-board",
+      "prompt-stage",
+      "tokenization-stage",
+      "embeddings-stage",
+      "transformer-layers-stage",
+      "attention-stage",
+      "probabilities-stage",
+      "sampling-stage",
+      "final-response-stage",
+      "arrow-prompt-tokenization",
+      "arrow-tokenization-embeddings",
+      "arrow-embeddings-transformer",
+      "arrow-transformer-attention",
+      "arrow-attention-probabilities",
+      "arrow-probabilities-sampling",
+      "arrow-sampling-response",
+      "sample-prompts",
+      "sample-space-prompt",
+      "sample-code-prompt",
+      "sample-story-prompt",
+      "stage-explanation",
+      "active-step-label",
+      "detail-title",
+      "detail-copy",
+      "detail-example",
+      "prompt-display",
+      "token-display",
+      "probability-bars",
+      "response-display",
+      "loop-note"
+    ];
+
+    const detailTitle = document.getElementById("detail-title");
+    const detailCopy = document.getElementById("detail-copy");
+    const detailExample = document.getElementById("detail-example");
+    const activeStepLabel = document.getElementById("active-step-label");
+    const promptDisplay = document.getElementById("prompt-display");
+    const tokenDisplay = document.getElementById("token-display");
+    const probabilityBars = document.getElementById("probability-bars");
+    const responseDisplay = document.getElementById("response-display");
+
+    let activeIndex = 0;
+    let playTimer = null;
+
+    function getElement(id) {
+      if (!id) return null;
+      return document.getElementById(id) || document.querySelector('[data-id="' + String(id).replace(/"/g, '\\"') + '"]');
+    }
+
+    function highlightElement(el) {
+      if (!el) return;
+      el.classList.add("highlight-target");
+      clearTimeout(el.__highlightTimer);
+      el.__highlightTimer = setTimeout(() => {
+        el.classList.remove("highlight-target");
+      }, 1400);
+    }
+
+    function setActiveStage(index, shouldHighlight = false) {
+      activeIndex = Math.max(0, Math.min(stages.length - 1, index));
+      const stage = stages[activeIndex];
+
+      stages.forEach((item, itemIndex) => {
+        const el = getElement(item.id);
+        if (!el) return;
+        el.classList.toggle("active", itemIndex === activeIndex);
+        el.classList.toggle("done", itemIndex < activeIndex);
+      });
+
+      document.querySelectorAll(".flow-arrow").forEach((arrow, arrowIndex) => {
+        arrow.classList.toggle("lit", arrowIndex < activeIndex);
+      });
+
+      activeStepLabel.textContent = stage.label;
+      detailTitle.textContent = stage.title;
+      detailCopy.textContent = stage.copy;
+      detailExample.textContent = stage.example;
+
+      if (shouldHighlight) {
+        highlightElement(getElement(stage.id));
+        highlightElement(document.getElementById("stage-explanation"));
+      }
+
+      sendComponentsMapped();
+    }
+
+    function renderTokens(sample) {
+      tokenDisplay.innerHTML = "";
+      sample.tokens.forEach((token) => {
+        const chip = document.createElement("span");
+        chip.className = "token-chip";
+        chip.textContent = token;
+        tokenDisplay.appendChild(chip);
+      });
+    }
+
+    function renderBars(sample) {
+      probabilityBars.innerHTML = "";
+      sample.bars.forEach(([token, value]) => {
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML = '<span>' + token + '</span><span class="bar-track"><span class="bar-fill" style="--w:' + value + '%"></span></span><span>' + value + '%</span>';
+        probabilityBars.appendChild(row);
+      });
+    }
+
+    function setPrompt(prompt) {
+      const sample = promptSamples[prompt] || promptSamples["Explain black holes simply."];
+      promptDisplay.textContent = prompt;
+      responseDisplay.textContent = sample.response;
+      renderTokens(sample);
+      renderBars(sample);
+      setActiveStage(0, true);
+    }
+
+    function stopRun() {
+      if (playTimer) {
+        clearInterval(playTimer);
+        playTimer = null;
+      }
+      document.getElementById("run-pipeline-button").textContent = "Run Pipeline";
+    }
+
+    function runPipeline() {
+      stopRun();
+      setActiveStage(0, true);
+      document.getElementById("run-pipeline-button").textContent = "Running...";
+      playTimer = setInterval(() => {
+        if (activeIndex >= stages.length - 1) {
+          stopRun();
+          return;
+        }
+        setActiveStage(activeIndex + 1, true);
+      }, 720);
+    }
+
+    function resetPipeline() {
+      stopRun();
+      setActiveStage(0, true);
+    }
+
+    stages.forEach((stage, index) => {
+      const el = getElement(stage.id);
+      if (!el) return;
+      el.addEventListener("click", () => {
+        stopRun();
+        setActiveStage(index, true);
+      });
+    });
+
+    document.getElementById("run-pipeline-button").addEventListener("click", runPipeline);
+    document.getElementById("reset-pipeline-button").addEventListener("click", resetPipeline);
+
+    document.querySelectorAll(".prompt-chip").forEach((button) => {
+      button.addEventListener("click", () => {
+        stopRun();
+        setPrompt(button.dataset.prompt);
+        highlightElement(button);
+      });
+    });
+
+    function sendComponentsMapped() {
+      const components = componentIds
+        .map((id) => {
+          const el = getElement(id);
+          if (!el) return null;
+          const rect = el.getBoundingClientRect();
+          return {
+            id,
+            dataId: el.getAttribute("data-id") || id,
+            center: {
+              x: rect.left + rect.width / 2,
+              y: rect.top + rect.height / 2
+            },
+            rect: {
+              left: rect.left,
+              top: rect.top,
+              width: rect.width,
+              height: rect.height
+            }
+          };
+        })
+        .filter(Boolean);
+
+      window.parent.postMessage({
+        type: "COMPONENTS_MAPPED",
+        components
+      }, "*");
+    }
+
+    window.addEventListener("message", (event) => {
+      const data = event.data || {};
+      const targetId = data.id || data.dataId || data.componentId;
+      const target = getElement(targetId);
+
+      if (data.type === "SHOW_COMPONENT") {
+        if (target) {
+          highlightElement(target);
+          const stageIndex = stages.findIndex((stage) => stage.id === targetId);
+          if (stageIndex >= 0) setActiveStage(stageIndex);
+        }
+      }
+
+      if (data.type === "CLICK_COMPONENT") {
+        if (target) {
+          highlightElement(target);
+          setTimeout(() => {
+            if (typeof target.click === "function") target.click();
+          }, 160);
+        }
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      window.requestAnimationFrame(sendComponentsMapped);
+    });
+
+    setPrompt("Explain black holes simply.");
+    setActiveStage(0);
+    window.requestAnimationFrame(sendComponentsMapped);
+  </script>
+</body>
+
+</html>

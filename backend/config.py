@@ -11,7 +11,7 @@ os.environ.setdefault("HF_HOME", os.path.join(os.getcwd(), ".hf_home"))
 os.environ.setdefault("TORCH_HOME", os.path.join(os.getcwd(), ".torch"))
 
 OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").rstrip("/")
-OPENROUTER_MODEL_ID = os.getenv("OPENROUTER_MODEL_ID", "google/gemma-4-26b-a4b-it:nitro")
+OPENROUTER_MODEL_ID = os.getenv("OPENROUTER_MODEL_ID", "google/gemma-4-31b-it:nitro")
 OPENROUTER_USE_NITRO = os.getenv("OPENROUTER_USE_NITRO", "1") != "0"
 OPENROUTER_PROVIDER_SORT = os.getenv("OPENROUTER_PROVIDER_SORT", "").strip().lower()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")

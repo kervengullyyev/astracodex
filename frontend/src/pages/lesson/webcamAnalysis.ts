@@ -71,7 +71,7 @@ export async function captureAndAnalyzeWebcamSnapshot({
     const imageData = canvas.toDataURL("image/jpeg", 0.8);
     const base64Data = imageData.split(",")[1];
 
-    console.log("Captured webcam image, sending to Ollama...");
+    console.log("Captured webcam image, sending...");
 
     const response = await fetch(OLLAMA_VISION_ENDPOINT, {
       method: "POST",

@@ -38,6 +38,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     return savedId;
   });
   const lessonStartedRef = useRef(false);
+  const [lessonHasStarted, setLessonHasStarted] = useState(false);
   const einsteinVideoRef = useRef<HTMLVideoElement | null>(null);
 
   const audioQueue = useRef<QueueEntry[]>([]);
@@ -50,6 +51,8 @@ export default function LessonPage({ onBack }: LessonPageProps) {
   const [imageSize, setImageSize] = useState<{ width: number, height: number } | null>(null);
   const [componentMap, setComponentMap] = useState<Record<string, any>>({});
   const [isEinsteinSpeaking, setIsEinsteinSpeaking] = useState(false);
+  const [currentAudioSubtitle, setCurrentAudioSubtitle] = useState("");
+  const [isWaitingForAudio, setIsWaitingForAudio] = useState(false);
   const [isWebcamActive, setIsWebcamActive] = useState(false);
   const isWebcamActiveRef = useRef(false);
   const [webcamStream, setWebcamStream] = useState<MediaStream | null>(null);
@@ -255,6 +258,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
 
     // Don't stop playback — let Einstein finish his current speech
     // The quiz event will be queued and Einstein will react after
+    setIsWaitingForAudio(true);
     beginStreamTiming('quiz event -> model -> TTS');
     const viewedSlide = currentSlideIndexRef.current + 1;
     ws.send(JSON.stringify({
@@ -270,8 +274,12 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     const handleMessage = (event: MessageEvent) => {
       const data = event.data;
       if (data.type === 'COMPONENTS_MAPPED') {
-        console.log("🗺️ RECEIVED COMPONENT MAP:", data.centersById);
-        setComponentMap(data.centersById);
+        const mappedComponents = Array.isArray(data.components) ? data.components : [];
+        const centersById = data.centersById || Object.fromEntries(
+          mappedComponents.map((component: any) => [component.id, component])
+        );
+        console.log("🗺️ RECEIVED COMPONENT MAP:", centersById);
+        setComponentMap(centersById);
       } else if (data.type === 'QUIZ_RESULT') {
         console.log("📝 QUIZ RESULT:", data);
         const resultText = data.isCorrect ? "CORRECT" : "INCORRECT";
@@ -327,7 +335,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
         stopRecording(true);
       }
     } else {
-      window.setTimeout(() => scheduleAutoListening(), 0);
+      window.setTimeout(() => armAutoVoiceNow(), 0);
     }
   }, [autoVoiceMode, courseId, lessonId]);
 
@@ -421,12 +429,18 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     console.groupEnd();
   };
 
+  const isTeacherOutputActive = () => (
+    assistantStreamingRef.current ||
+    isPlaying.current ||
+    Boolean(activeAudioRef.current) ||
+    audioQueue.current.length > 0
+  );
+
   const scheduleAutoListening = () => {
     if (!autoVoiceModeRef.current) return;
     if (!lessonStartedRef.current) return;
     if (isRecordingRef.current) return;
-    if (assistantStreamingRef.current) return;
-    if (isPlaying.current || activeAudioRef.current || audioQueue.current.length > 0) return;
+    if (isTeacherOutputActive()) return;
 
     if (autoListenTimerRef.current !== null) {
       window.clearTimeout(autoListenTimerRef.current);
@@ -438,11 +452,35 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       if (!autoVoiceModeRef.current) return;
       if (!lessonStartedRef.current) return;
       if (isRecordingRef.current) return;
-      if (assistantStreamingRef.current) return;
-      if (isPlaying.current || activeAudioRef.current || audioQueue.current.length > 0) return;
+      if (isTeacherOutputActive()) return;
 
       startRecording({ interruptAi: false });
     }, 250);
+  };
+
+  const armAutoVoiceNow = () => {
+    if (!autoVoiceModeRef.current) return;
+    if (!lessonStartedRef.current) return;
+
+    if (autoListenTimerRef.current !== null) {
+      window.clearTimeout(autoListenTimerRef.current);
+      autoListenTimerRef.current = null;
+    }
+
+    if (isRecordingRef.current || browserVadStartingRef.current) {
+      if (!isTeacherOutputActive() && micBargeInOnlyRef.current) {
+        promoteBargeInToBackendListening().catch(console.error);
+      }
+      return;
+    }
+
+    if (isTeacherOutputActive()) {
+      clearDelayedBargeInTimer();
+      startRecording({ interruptAi: false, bargeInOnly: true }).catch(console.error);
+      return;
+    }
+
+    startRecording({ interruptAi: false }).catch(console.error);
   };
 
   // Incremented every time a tool fires a highlight. Each audio chunk captures
@@ -453,9 +491,48 @@ export default function LessonPage({ onBack }: LessonPageProps) {
   const fireToolEntry = (entry: { kind: 'tool'; data: any }) => {
     const data = entry.data;
     if (data.type === 'highlight') {
+      const currentSlides = slidesRef.current;
+      const slideIndex = currentSlideIndexRef.current;
+      const currentSlide = currentSlides[slideIndex];
+
+      if (currentSlide?.type === 'interactive') {
+        const label = typeof data.label === 'string' ? data.label.trim() : '';
+        const lowerLabel = label.toLowerCase();
+        const components = Array.isArray(currentSlide.components) ? currentSlide.components : [];
+        const comp = lowerLabel
+          ? components.find((component: any) => {
+              const componentId = String(component.id || '').toLowerCase();
+              const componentName = String(component.name || '').toLowerCase();
+              return componentId === lowerLabel || componentName === lowerLabel || componentName.includes(lowerLabel);
+            })
+          : undefined;
+        const componentId = data.id || comp?.id || label;
+        const iframe = iframeRef.current || document.querySelector('iframe');
+
+        if (componentId && iframe?.contentWindow) {
+          console.warn('🎯 Converted interactive highlight into SHOW_COMPONENT:', { ...data, id: componentId });
+          iframe.contentWindow.postMessage({
+            type: 'SHOW_COMPONENT',
+            id: componentId,
+            interactionType: comp?.interactionType || 'show',
+            name: comp?.name || label,
+          }, '*');
+        } else {
+          console.warn('🎯 Ignored image-style highlight on interactive slide:', data);
+        }
+        return;
+      }
+
       console.log('🎯 HIGHLIGHT (synced):', data);
       setHighlight({ x: data.x, y: data.y, label: data.label });
       highlightTokenRef.current += 1;
+    } else if (data.type === 'lesson_started') {
+      console.log('📍 LESSON STARTED (synced):', data);
+      const sectionStr = data.section || '';
+      const sectionNum = parseInt(sectionStr.replace('Section-', ''));
+      if (!isNaN(sectionNum)) {
+        goToSlide(sectionNum - 1);
+      }
     } else if (data.type === 'show_component' || data.type === 'click_component' || data.type === 'set_slider') {
       console.log(`🎮 INTERACTIVE TOOL (synced): ${data.type}`, data);
 
@@ -524,6 +601,8 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       clearDelayedBargeInTimer();
       setParlorVadSpeakingMode(false);
       setIsEinsteinSpeaking(false);
+      setCurrentAudioSubtitle("");
+      setIsWaitingForAudio(false);
       return;
     }
 
@@ -540,6 +619,8 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       clearDelayedBargeInTimer();
       setParlorVadSpeakingMode(false);
       setIsEinsteinSpeaking(false);
+      setCurrentAudioSubtitle("");
+      setIsWaitingForAudio(false);
 
       if (autoVoiceModeRef.current && micBargeInOnlyRef.current) {
         promoteBargeInToBackendListening();
@@ -577,16 +658,17 @@ export default function LessonPage({ onBack }: LessonPageProps) {
           autoVoiceModeRef.current &&
           lessonStartedRef.current &&
           !isRecordingRef.current &&
-          (isPlaying.current || activeAudioRef.current || audioQueue.current.length > 0 || assistantStreamingRef.current);
+          isTeacherOutputActive();
 
         if (!teacherStillSpeaking) return;
 
         startRecording({ interruptAi: false, bargeInOnly: true }).catch(console.error);
       }, BARGE_IN_START_DELAY_MS);
     }
-    const entry = audioQueue.current.shift()! as { kind: 'audio'; src: string };
+    const entry = audioQueue.current.shift()! as { kind: 'audio'; src: string; text: string };
     const audio = new Audio(entry.src);
     activeAudioRef.current = audio;
+    setCurrentAudioSubtitle(entry.text);
 
     // Snapshot the highlight token at the moment this chunk starts playing.
     // The tools for this chunk have already been fired (drained above), so the
@@ -604,6 +686,8 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       }
       if (isPlaying.current && (!isRecordingRef.current || micBargeInOnlyRef.current)) {
         playNextInQueue();
+      } else {
+        setCurrentAudioSubtitle("");
       }
     };
 
@@ -612,6 +696,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     audio.play().catch(err => {
       console.error("Audio playback failed", err);
       activeAudioRef.current = null;
+      setCurrentAudioSubtitle("");
       if (highlightTokenRef.current === chunkHighlightToken && chunkHighlightToken > 0) {
         setHighlight(null);
       }
@@ -636,12 +721,14 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       console.log('🛑 Backend asked to stop microphone:', data.reason);
       stopRecording(false);
       assistantStreamingRef.current = true;
+      setIsWaitingForAudio(true);
       return;
     }
 
     if (data.type === 'cancelled') {
       console.log('⏹️ Backend stream cancelled');
       assistantStreamingRef.current = false;
+      setIsWaitingForAudio(false);
       scheduleAutoListening();
       return;
     }
@@ -650,6 +737,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       console.error('Backend error:', data);
       finishStreamTiming('error');
       assistantStreamingRef.current = false;
+      setIsWaitingForAudio(false);
       scheduleAutoListening();
       return;
     }
@@ -657,6 +745,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     if (data.type === 'done') {
       finishStreamTiming('done');
       assistantStreamingRef.current = false;
+      setIsWaitingForAudio(false);
       // Drain any tool entries left in the queue that have no audio following
       // (e.g. from a truncated stream). Fire them immediately.
       while (audioQueue.current.length > 0 && audioQueue.current[0].kind === 'tool') {
@@ -685,6 +774,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       }
       console.log(`📝 Transcript +${streamElapsedMs(timing)}ms:`, data.transcript);
       assistantStreamingRef.current = true;
+      setIsWaitingForAudio(true);
       return;
     }
 
@@ -711,6 +801,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     if (data.type === 'audio') {
       const timing = getOrCreateStreamTiming('teacher audio stream');
       timing.audioChunks += 1;
+      setIsWaitingForAudio(false);
 
       if (timing.firstAudioAt === undefined) {
         timing.firstAudioAt = performance.now();
@@ -726,19 +817,16 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       }
       const mime = data.mime || 'audio/wav';
       const audioStr = `data:${mime};base64,${data.audio_b64}`;
-      audioQueue.current.push({ kind: 'audio', src: audioStr });
+      const audioText = typeof data.text === 'string' ? data.text : '';
+      audioQueue.current.push({ kind: 'audio', src: audioStr, text: audioText });
       if (!isPlaying.current) {
         playNextInQueue();
       }
     }
 
     if (data.type === 'lesson_started') {
-      console.log('📍 LESSON STARTED EVENT:', data);
-      const sectionStr = data.section || '';
-      const sectionNum = parseInt(sectionStr.replace('Section-', ''));
-      if (!isNaN(sectionNum)) {
-        goToSlide(sectionNum - 1);
-      }
+      console.log('📍 LESSON STARTED received → queued before next audio chunk');
+      audioQueue.current.push({ kind: 'tool', data });
     }
 
     if (data.type === 'highlight') {
@@ -868,6 +956,8 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     setParlorVadSpeakingMode(false);
     assistantStreamingRef.current = false;
     setIsEinsteinSpeaking(false);
+    setCurrentAudioSubtitle("");
+    setIsWaitingForAudio(false);
   };
 
   const forceStopLesson = () => {
@@ -879,6 +969,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     }
 
     lessonStartedRef.current = false;
+    setLessonHasStarted(false);
 
     stopRecording(false);
     stopTeacherPlaybackAndStreams();
@@ -955,7 +1046,12 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     try {
       console.log("🚀 Space pressed: Starting lesson stream...");
       lessonStartedRef.current = true;
+      setLessonHasStarted(true);
       assistantStreamingRef.current = true;
+      setIsWaitingForAudio(true);
+      if (autoVoiceModeRef.current) {
+        window.setTimeout(() => armAutoVoiceNow(), 0);
+      }
       connectVoiceWebSocket().catch(console.error);
 
       // Create new abort controller for this stream
@@ -984,9 +1080,11 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       await processResponseStream(res, 'start lesson: fetch -> model -> TTS');
     } catch (e) {
       console.error('❌ Lesson stream failed', e);
+      setIsWaitingForAudio(false);
     } finally {
       assistantStreamingRef.current = false;
       abortControllerRef.current = null;
+      setIsWaitingForAudio(false);
       scheduleAutoListening();
     }
   };
@@ -1001,6 +1099,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     const audioB64 = float32ToWavBase64(audio, 16000);
 
     assistantStreamingRef.current = true;
+    setIsWaitingForAudio(true);
     beginStreamTiming('browser VAD: speech -> STT -> model -> TTS');
 
     ws.send(JSON.stringify({
@@ -1034,7 +1133,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
     if (interruptAi) {
       console.log('🎤 Interrupting AI: clearing audio queue and stopping playback...');
       stopTeacherPlaybackAndStreams();
-    } else if (!bargeInOnly && (assistantStreamingRef.current || isPlaying.current || activeAudioRef.current || audioQueue.current.length > 0)) {
+    } else if (!bargeInOnly && isTeacherOutputActive()) {
       scheduleAutoListening();
       return;
     }
@@ -1183,7 +1282,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
           startLessonStreaming();
         } else if (
           autoVoiceModeRef.current &&
-          (isEinsteinSpeaking || isPlaying.current || activeAudioRef.current || audioQueue.current.length > 0 || assistantStreamingRef.current)
+          (isEinsteinSpeaking || isTeacherOutputActive())
         ) {
           forceStopLesson();
         } else if (isRecordingRef.current && micBargeInOnlyRef.current) {
@@ -1273,6 +1372,7 @@ export default function LessonPage({ onBack }: LessonPageProps) {
   }
 
   const currentSlide = currentSlideIndex >= 0 ? slides[currentSlideIndex] : null;
+  const avatarSubtitleText = currentAudioSubtitle || (isWaitingForAudio ? "Thinking..." : "");
 
   const renderLessonSlide = (slide: any, isActive = true) => (
     <SlideContent
@@ -1451,6 +1551,13 @@ export default function LessonPage({ onBack }: LessonPageProps) {
           </div>
         </div>
 
+        {/* Space Prompt */}
+        <div className="pointer-events-none absolute bottom-4 left-1/2 z-30 max-w-[58vw] -translate-x-1/2 text-center sm:max-w-[420px]">
+          <div className="rounded-full border-2 border-black/60 bg-white/65 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-slate-600 shadow-md shadow-black/30 backdrop-blur-md sm:px-4 sm:text-sm">
+            {lessonHasStarted ? 'Press Space to ask/answer the question' : 'Press Space to start the lesson'}
+          </div>
+        </div>
+
         {/* Webcam Video */}
         {isWebcamActive && (
           <div className="absolute bottom-16 left-4 z-20 overflow-hidden rounded-2xl border-2 border-white shadow-xl bg-black w-[160px] sm:w-[240px] aspect-video">
@@ -1466,15 +1573,24 @@ export default function LessonPage({ onBack }: LessonPageProps) {
         )}
 
         {/* Avatar Video */}
-        <video
-          ref={einsteinVideoRef}
-          src="/assets/einstein_avatar1.webm"
-          loop
-          muted
-          playsInline
+        <div
           style={{ bottom: '0px', right: '0px' }}
-          className="absolute w-[180px] sm:w-[280px] z-20 pointer-events-none "
-        />
+          className="absolute z-20 flex w-[180px] flex-col items-center pointer-events-none sm:w-[280px]"
+        >
+          {avatarSubtitleText && (
+            <div className="mb-1 max-w-full rounded-lg border-2 border-black/65 bg-white/80 px-2.5 py-1.5 text-center text-[11px] font-semibold leading-snug text-slate-700 shadow-md shadow-black/30 backdrop-blur-md sm:text-sm">
+              {avatarSubtitleText}
+            </div>
+          )}
+          <video
+            ref={einsteinVideoRef}
+            src="/assets/einstein_avatar1.webm"
+            loop
+            muted
+            playsInline
+            className="w-full"
+          />
+        </div>
 
       </div>
     </div>

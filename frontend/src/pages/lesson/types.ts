@@ -27,5 +27,5 @@ export type StreamTimingState = {
 };
 
 export type QueueEntry =
-  | { kind: 'audio'; src: string }
+  | { kind: 'audio'; src: string; text: string }
   | { kind: 'tool'; data: unknown };

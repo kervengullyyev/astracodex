@@ -17,12 +17,34 @@ def build_lesson_context(
     max_allowed_text = f"\nThe maximum section you have taught so far is Section-{current_section_number}." if current_section_number is not None else ""
 
     sections = content.get("sections", [])
-    current_idx = (current_section_number or 1) - 1
+    active_section_number = viewed_slide or current_section_number or 1
+    current_idx = active_section_number - 1
     current_section_data = sections[current_idx] if 0 <= current_idx < len(sections) else {}
 
     section_focus = ""
     if current_section_data:
-        section_focus = f"\n### CURRENT FOCUS:\nYou are teaching Section-{current_section_number}: \"{current_section_data.get('title')}\" (Type: {current_section_data.get('type')})."
+        section_focus = f"\n### CURRENT FOCUS:\nYou are teaching Section-{active_section_number}: \"{current_section_data.get('title')}\" (Type: {current_section_data.get('type')})."
+
+    active_section_type = str(current_section_data.get("type") or "").lower()
+    active_tool_mode = ""
+    if active_section_type == "interactive":
+        active_tool_mode = """
+
+### ACTIVE TOOL MODE: INTERACTIVE
+- The current section is an HTML interactive, not an image.
+- For this section, NEVER use `highlight_component`; that tool is only for image slides with real x/y coordinates.
+- For visible panels, labels, chips, diagrams, and cards, use `show_component` with the component `id`.
+- For buttons, chips, and clickable controls, use `click_component` with the component `id`.
+- For range sliders, use `set_slider` with the slider `id` and numeric value.
+""".rstrip()
+    elif active_section_type == "image":
+        active_tool_mode = """
+
+### ACTIVE TOOL MODE: IMAGE
+- The current section is an image slide.
+- For this section, use `highlight_component` with the provided x/y/label from the image component metadata.
+- Do not use `show_component`, `click_component`, or `set_slider` on image slides.
+""".rstrip()
 
     replacement_notice = f"\n(Note: You are replacing the default teacher '{teacher_name}')." if "einstein" not in teacher_name.lower() else ""
     student_name_text = (
@@ -49,6 +71,7 @@ Explain Section-1 very short.
 
 # THE LESSON CURRICULUM:
 {viewed_slide_text}{max_allowed_text}{section_focus}
+{active_tool_mode}
 
 # SYNC PROTOCOL (NON-NEGOTIABLE):
 To synchronize your voice with the interactive visuals, you MUST follow this timing law:
@@ -78,6 +101,7 @@ To synchronize your voice with the interactive visuals, you MUST follow this tim
 - If the current section is `type: "interactive"`, it is a QUIZ or TASK.
 - You MUST show the main interactive component immediately:
   <tool_call>{{"name": "show_component", "arguments": {{"id": "ID_FROM_JSON"}}}}</tool_call>
+- You MUST NOT use `highlight_component` in interactive sections, even if an element has a label or appears visually important. Use `show_component`, `click_component`, or `set_slider` by id instead.
 - You MUST NOT skip the interactive. Stop and invite the student: "Give it a try, my friend! I shall wait for your results."
 - DO NOT teach the next section until the user has finished the interactive.
 
@@ -95,7 +119,7 @@ To synchronize your voice with the interactive visuals, you MUST follow this tim
 
 # INTERACTION PHILOSOPHY (PROACTIVE TEACHING):
 - You are not just a voice; you are a hands-on teacher! You have access to tool call. You can show and click components.
-- You MUST be proactive. When you begin explaining an image or a diagram, use show_component immediately.
+- You MUST be proactive. When you begin explaining an interactive diagram, use show_component immediately. When you begin explaining an image slide, use highlight_component with real image coordinates.
 - When you mention a button or an interactive element, use click_component to demonstrate it or "click it" for the student.
 - SYNC RULE: Always place the tool call on its own line IMMEDIATELY BEFORE the sentence that describes it.
 

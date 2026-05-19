@@ -118,26 +118,25 @@
           "id": 1,
           "title": "Grammar Basics",
           "description": "Nouns, verbs, adjectives.",
-          "status": "Completed"
+          "status": "Locked"
         },
         {
           "id": 2,
           "title": "Sentence Structure",
           "description": "How to build a proper sentence.",
-          "status": "Completed"
+          "status": "Locked"
         },
         {
           "id": 3,
           "title": "Reading Comprehension",
           "description": "Understanding text.",
-          "status": "Completed"
+          "status": "Locked"
         },
         {
           "id": 4,
           "title": "Creative Writing",
           "description": "Write your own story.",
-          "status": "In Progress",
-          "progress": 80
+          "status": "Locked"
         },
         {
           "id": 5,
@@ -165,14 +164,13 @@
           "id": 1,
           "title": "Geography",
           "description": "Maps and locations.",
-          "status": "Completed"
+          "status": "Locked"
         },
         {
           "id": 2,
           "title": "World History",
           "description": "Ancient civilizations.",
-          "status": "In Progress",
-          "progress": 10
+          "status": "Locked"
         },
         {
           "id": 3,
@@ -204,22 +202,22 @@
       "lessons": [
         {
           "id": 1,
-          "title": "Intro to Programming",
-          "description": "What is code?",
-          "status": "Completed"
+          "title": "LLM",
+          "description": "How LLMs work",
+          "status": "In Progress",
+          "progress": 1
         },
         {
           "id": 2,
           "title": "Variables & Data Types",
           "description": "Storing information.",
-          "status": "Completed"
+          "status": "Locked"
         },
         {
           "id": 3,
           "title": "Data Structures",
           "description": "Arrays, Lists, Maps.",
-          "status": "In Progress",
-          "progress": 70
+          "status": "Locked"
         },
         {
           "id": 4,
@@ -247,14 +245,13 @@
           "id": 1,
           "title": "Drawing Basics",
           "description": "Lines and shapes.",
-          "status": "Completed"
+          "status": "Locked"
         },
         {
           "id": 2,
           "title": "Color Theory",
           "description": "Mixing colors.",
-          "status": "In Progress",
-          "progress": 25
+          "status": "Locked"
         },
         {
           "id": 3,
@@ -288,20 +285,19 @@
           "id": 1,
           "title": "Notes and Rests",
           "description": "The basics of rhythm.",
-          "status": "Completed"
+          "status": "Locked"
         },
         {
           "id": 2,
           "title": "Scales",
           "description": "Major and minor scales.",
-          "status": "Completed"
+          "status": "Locked"
         },
         {
           "id": 3,
           "title": "Reading Sheet Music",
           "description": "Treble and bass clef.",
-          "status": "In Progress",
-          "progress": 50
+          "status": "Locked"
         },
         {
           "id": 4,

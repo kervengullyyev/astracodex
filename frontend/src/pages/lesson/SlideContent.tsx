@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { FileText, Image as ImageIcon, MonitorPlay, MousePointer2, Play } from "lucide-react";
 import { getLessonHtmlUrl, getLessonImageUrl } from "./assets";
 import { attachInteractiveBridge } from "./iframeBridge";
@@ -27,6 +27,53 @@ export function SlideContent({
   iframeRef,
   iframeKeyHandlersRef,
 }: SlideContentProps) {
+  const imageViewportRef = useRef<HTMLDivElement | null>(null);
+  const [imageViewportSize, setImageViewportSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (slide?.type !== "image") return;
+
+    const viewport = imageViewportRef.current;
+    if (!viewport) return;
+
+    let frame = 0;
+    const updateViewportSize = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        setImageViewportSize({
+          width: viewport.clientWidth,
+          height: viewport.clientHeight,
+        });
+      });
+    };
+
+    updateViewportSize();
+
+    const resizeObserver = new ResizeObserver(updateViewportSize);
+    resizeObserver.observe(viewport);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+    };
+  }, [slide?.imageSource, slide?.type]);
+
+  const displayedImageSize = useMemo(() => {
+    if (!imageSize || imageViewportSize.width <= 0 || imageViewportSize.height <= 0) {
+      return null;
+    }
+
+    const scale = Math.min(
+      imageViewportSize.width / imageSize.width,
+      imageViewportSize.height / imageSize.height,
+    );
+
+    return {
+      width: imageSize.width * scale,
+      height: imageSize.height * scale,
+    };
+  }, [imageSize, imageViewportSize.height, imageViewportSize.width]);
+
   if (!slide) return null;
 
   return (
@@ -37,23 +84,30 @@ export function SlideContent({
             <FileText size={28} />
             <h3 className="text-3xl font-bold uppercase tracking-wider">{slide.title || "Concept"}</h3>
           </div>
-          <p className="text-2xl sm:text-3xl leading-relaxed text-slate-800 font-medium text-center">
+          {/* <p className="text-2xl sm:text-3xl leading-relaxed text-slate-800 font-medium text-center">
             {slide.text}
-          </p>
+          </p> */}
         </div>
       )}
 
       {slide.type === "image" && (
-        <div className="flex flex-col items-center text-center w-full h-full pb-16">
+        <div className="flex flex-col items-center justify-center text-center w-full h-full">
           {slide.imageSource ? (
-            <div className="flex-1 min-h-0 w-full flex items-center justify-center">
-              <div className="relative inline-flex max-w-full max-h-full">
-                {isActive && highlight && (
+            <div ref={imageViewportRef} className="h-full min-h-0 w-full flex items-center justify-center overflow-hidden">
+              <div
+                className="relative flex max-h-full max-w-full items-center justify-center"
+                style={
+                  displayedImageSize
+                    ? { width: displayedImageSize.width, height: displayedImageSize.height }
+                    : { width: "100%", height: "100%" }
+                }
+              >
+                {isActive && highlight && imageSize && (
                   <div
                     className="absolute z-50 transition-all duration-500 ease-out pointer-events-none"
                     style={{
-                      left: `${(highlight.x / (imageSize?.width || 1024)) * 100}%`,
-                      top: `${(highlight.y / (imageSize?.height || 1024)) * 100}%`,
+                      left: `${(highlight.x / imageSize.width) * 100}%`,
+                      top: `${(highlight.y / imageSize.height) * 100}%`,
                     }}
                   >
                     <MousePointer2
@@ -65,10 +119,12 @@ export function SlideContent({
                 <img
                   src={getLessonImageUrl(slide.imageSource, courseId, lessonId)}
                   alt={slide.title || "Visual Example"}
-                  className="max-w-[1024px] w-auto h-auto max-h-full object-contain rounded-xl mb-2"
+                  className="h-full w-full object-contain rounded-xl"
                   onLoad={(e) => {
                     const img = e.target as HTMLImageElement;
-                    onImageSizeChange({ width: img.naturalWidth, height: img.naturalHeight });
+                    if (isActive) {
+                      onImageSizeChange({ width: img.naturalWidth, height: img.naturalHeight });
+                    }
                   }}
                 />
               </div>

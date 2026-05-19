@@ -37,7 +37,7 @@ def effective_openrouter_model_id() -> str:
     model_id = (OPENROUTER_MODEL_ID or "").strip()
 
     if not model_id:
-        model_id = "google/gemma-4-26b-a4b-it:nitro"
+        model_id = "google/gemma-4-31b-it:nitro"
 
     variant_suffixes = (
         ":nitro",
