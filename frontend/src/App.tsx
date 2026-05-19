@@ -8,76 +8,19 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import coursesData from './data/courses.json';
 import LessonPage from './pages/LessonPage.tsx';
 import AdminPage from './pages/AdminPage.tsx';
-import { VISION_ENDPOINT, VISION_MODEL } from './config';
+import {
+  groupWebcamAnalyses,
+  readSavedSummaries,
+  readWebcamAnalyses,
+  saveSummaries,
+  sortReportDates,
+  summarizeWebcamAnalyses,
+} from './pages/dashboard/reports';
+import { themeStyles } from './pages/dashboard/theme';
+import type { Course, WebcamAnalysis } from './pages/dashboard/types';
 import { getStoredLearnerName, saveStoredLearnerName } from './utils/learnerName';
 
-// Type definitions based on JSON
-interface Lesson {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  progress?: number;
-}
-
-interface Course {
-  id: string;
-  name: string;
-  icon: string;
-  heroImage: string;
-  bgColor: string;
-  btnColor: string;
-  arrowColor: string;
-  themeColor: string;
-  currentTopic: string;
-  progress: number;
-  lessonsCompleted: number;
-  totalLessons: number;
-  lessons: Lesson[];
-}
-
-type ThemeStyles = {
-  bg: string;
-  text: string;
-  fill: string;
-  track: string;
-  hover: string;
-  shadow: string;
-  circleBg: string;
-  borderHover: string;
-};
-
-type WebcamAnalysis = {
-  timestamp: string;
-  lessonTitle?: string;
-  analysis?: string;
-};
-
-type GroupedAnalyses = Record<string, Record<string, WebcamAnalysis[]>>;
-
 const subjects: Course[] = coursesData.courses;
-
-const readWebcamAnalyses = (): WebcamAnalysis[] => {
-  try {
-    const data = localStorage.getItem('astracodex_webcam_analysis');
-    const parsed = data ? JSON.parse(data) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
-// Map theme colors to Tailwind classes safely
-const themeStyles: Record<string, ThemeStyles> = {
-  indigo: { bg: 'bg-indigo-50/80', text: 'text-indigo-600', fill: 'bg-indigo-600', track: 'bg-indigo-100', hover: 'hover:bg-indigo-700', shadow: 'shadow-indigo-200', circleBg: 'bg-indigo-50', borderHover: 'hover:border-indigo-100' },
-  emerald: { bg: 'bg-emerald-50/80', text: 'text-emerald-600', fill: 'bg-emerald-600', track: 'bg-emerald-100', hover: 'hover:bg-emerald-700', shadow: 'shadow-emerald-200', circleBg: 'bg-emerald-50', borderHover: 'hover:border-emerald-100' },
-  orange: { bg: 'bg-orange-50/80', text: 'text-orange-600', fill: 'bg-orange-600', track: 'bg-orange-100', hover: 'hover:bg-orange-700', shadow: 'shadow-orange-200', circleBg: 'bg-orange-50', borderHover: 'hover:border-orange-100' },
-  purple: { bg: 'bg-purple-50/80', text: 'text-purple-600', fill: 'bg-purple-600', track: 'bg-purple-100', hover: 'hover:bg-purple-700', shadow: 'shadow-purple-200', circleBg: 'bg-purple-50', borderHover: 'hover:border-purple-100' },
-  pink: { bg: 'bg-pink-50/80', text: 'text-pink-600', fill: 'bg-pink-600', track: 'bg-pink-100', hover: 'hover:bg-pink-700', shadow: 'shadow-pink-200', circleBg: 'bg-pink-50', borderHover: 'hover:border-pink-100' },
-  cyan: { bg: 'bg-cyan-50/80', text: 'text-cyan-600', fill: 'bg-cyan-600', track: 'bg-cyan-100', hover: 'hover:bg-cyan-700', shadow: 'shadow-cyan-200', circleBg: 'bg-cyan-50', borderHover: 'hover:border-cyan-100' },
-  yellow: { bg: 'bg-yellow-50/80', text: 'text-yellow-600', fill: 'bg-yellow-600', track: 'bg-yellow-100', hover: 'hover:bg-yellow-700', shadow: 'shadow-yellow-200', circleBg: 'bg-yellow-50', borderHover: 'hover:border-yellow-100' },
-  fuchsia: { bg: 'bg-fuchsia-50/80', text: 'text-fuchsia-600', fill: 'bg-fuchsia-600', track: 'bg-fuchsia-100', hover: 'hover:bg-fuchsia-700', shadow: 'shadow-fuchsia-200', circleBg: 'bg-fuchsia-50', borderHover: 'hover:border-fuchsia-100' },
-};
 
 function Dashboard() {
   const [activeSubject, setActiveSubject] = useState<Course | null>(null);
@@ -87,31 +30,13 @@ function Dashboard() {
   const [pendingLearnerName, setPendingLearnerName] = useState('');
   const [ttsProvider, setTtsProvider] = useState(localStorage.getItem('tts_provider') || 'Kokoro');
   const [webcamAnalyses, setWebcamAnalyses] = useState<WebcamAnalysis[]>([]);
-  const [summaries, setSummaries] = useState<Record<string, string>>(() => {
-    try {
-      const saved = localStorage.getItem('astracodex_webcam_summaries');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
+  const [summaries, setSummaries] = useState<Record<string, string>>(readSavedSummaries);
   const [loadingSummaries, setLoadingSummaries] = useState<Record<string, boolean>>({});
   const profileRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Group analyses by date and then by lesson
-  const groupedAnalyses = webcamAnalyses.reduce<GroupedAnalyses>((acc, entry) => {
-    const date = new Date(entry.timestamp).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric'
-    });
-    if (!acc[date]) acc[date] = {};
-    const title = entry.lessonTitle || 'General Lesson';
-    if (!acc[date][title]) acc[date][title] = [];
-    acc[date][title].push(entry);
-    return acc;
-  }, {});
-
-  const sortedDates = Object.keys(groupedAnalyses).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  const groupedAnalyses = groupWebcamAnalyses(webcamAnalyses);
+  const sortedDates = sortReportDates(groupedAnalyses);
 
   const openReport = () => {
     setWebcamAnalyses(readWebcamAnalyses());
@@ -136,32 +61,9 @@ function Dashboard() {
     
     setLoadingSummaries(prev => ({ ...prev, [key]: true }));
     
-    const prompt = `Following are AI mentor observations of a student during a lesson titled "${title}" on ${date}. 
-    Please provide a concise, high-level summary (2-3 sentences) for a parent about the student's overall engagement and focus during this session.
-    Do not use any markdown formatting like bolding or bullet points, just plain text.
-    
-    Observations:
-    ${entries.map(e => `- ${e.analysis}`).join('\n')}`;
-
     try {
-      const response = await fetch(VISION_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: VISION_MODEL,
-          prompt: prompt,
-          stream: false
-        })
-      });
-
-      if (response.ok) {
-        const result = await response.json() as { response?: string };
-        setSummaries(prev => {
-          const updated = { ...prev, [key]: result.response || '' };
-          localStorage.setItem('astracodex_webcam_summaries', JSON.stringify(updated));
-          return updated;
-        });
-      }
+      const summary = await summarizeWebcamAnalyses(date, title, entries);
+      setSummaries(prev => saveSummaries({ ...prev, [key]: summary }));
     } catch (err) {
       console.error("Error generating summary:", err);
     } finally {
