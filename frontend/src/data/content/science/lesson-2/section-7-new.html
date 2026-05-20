@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earth's Seasons Lab</title>
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- KaTeX CSS & JS for beautiful math formulas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: '\\[', right: '\\]', display: true },
+          { left: '\\(', right: '\\)', display: false },
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false }
+        ],
+        throwOnError: false
+      });
+    });
+  </script>
+  <style>
+    body {
+      background: transparent;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    /* Custom Neo-Brutalist Shadow Utilities */
+    .neo-shadow {
+      box-shadow: 4px 4px 0px 0px #000000;
+    }
+    .neo-shadow-lg {
+      box-shadow: 8px 8px 0px 0px #000000;
+    }
+    .neo-shadow-sm {
+      box-shadow: 2px 2px 0px 0px #000000;
+    }
+    /* Hide scrollbars but keep functionality */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FFE6D9;
+      border-left: 3px solid #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #0f172a;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col p-4 bg-[#FFE6D9] text-slate-900 select-none">
+
+  <script type="application/json" id="widget-config">
+{
+  "type": "simulation",
+  "concept": "seasonal_cycles",
+  "description": "Explore how Earth's axial tilt and orbital position create the four seasons.",
+  "variables": [
+    { "name": "orbit_pos", "label": "Orbit Position", "min": 0, "max": 360, "default": 0, "unit": "°" },
+    { "name": "axis_tilt", "label": "Axial Tilt", "min": 0, "max": 45, "default": 23.5, "unit": "°" }
+  ],
+  "presets": [
+    { "name": "Summer (Northern)", "variables": { "orbit_pos": 90, "axis_tilt": 23.5 } },
+    { "name": "Winter (Northern)", "variables": { "orbit_pos": 270, "axis_tilt": 23.5 } },
+    { "name": "No Tilt (No Seasons)", "variables": { "orbit_pos": 0, "axis_tilt": 0 } }
+  ]
+}
+</script>
+
+  <!-- TOP HEADER BAR -->
+  <header id="hud" data-id="hud" class="h-14 flex justify-between items-center border-[3px] border-slate-950 bg-[#FFFDF9] rounded-xl px-4 neo-shadow mb-3 flex-shrink-0">
+    <div class="flex items-center gap-2">
+      <div class="bg-amber-400 p-1.5 border-2 border-slate-950 rounded-lg">
+        <i data-lucide="sun" class="w-6 h-6 text-slate-950 animate-spin-slow"></i>
+      </div>
+      <h1 class="text-xl font-black tracking-tight text-slate-950 uppercase">Earth's Seasons Lab</h1>
+    </div>
+    
+    <!-- Info Capsule / Myth Buster -->
+    <div class="hidden md:flex items-center gap-2 bg-[#E1F5FE] border-2 border-slate-950 py-1 px-3 rounded-lg text-xs font-bold text-slate-800">
+      <i data-lucide="info" class="w-4 h-4 text-sky-600 flex-shrink-0"></i>
+      <span><strong>Myth Buster:</strong> Distance from the Sun doesn't cause seasons! It's all about the <strong>TILT</strong>.</span>
+    </div>
+
+    <!-- Live Preset Indicators -->
+    <div class="flex gap-2 text-xs font-black uppercase" id="state-indicator" data-id="state-indicator">
+      <div id="status-text" data-id="status-text" class="bg-slate-300 border-2 border-slate-950 px-2.5 py-1 rounded-md text-slate-950">Paused</div>
+      <div id="status-month" class="bg-emerald-300 border-2 border-slate-950 px-2.5 py-1 rounded-md text-slate-950">June</div>
+      <div id="status-season" data-id="season-name" class="bg-indigo-300 border-2 border-slate-950 px-2.5 py-1 rounded-md text-slate-950">Solstice</div>
+    </div>
+  </header>
+
+  <!-- MAIN INTERACTIVE HUB -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-3 min-h-0 mb-3">
+    
+    <!-- LEFT COLUMN: UNIVERSE VIEW (Orbit Simulator) - Takes 3 cols -->
+    <section class="lg:col-span-3 border-[3px] border-slate-950 bg-[#FFFDF9] rounded-2xl neo-shadow-lg p-3 flex flex-col justify-between min-h-0">
+      <div class="flex justify-between items-start mb-1">
+        <div>
+          <span class="text-xs font-extrabold bg-amber-200 text-slate-950 border-2 border-slate-950 px-2 py-0.5 rounded-full uppercase">1. Universe View</span>
+          <h2 class="text-lg font-black uppercase tracking-tight mt-1">Orbit Sandbox</h2>
+        </div>
+        <div class="flex gap-1.5">
+          <button id="main-btn" data-id="main-btn" data-sync="main-btn" data-label="Play/Pause Simulation" class="bg-yellow-300 hover:bg-yellow-400 text-slate-950 border-2 border-slate-950 p-2 rounded-lg neo-shadow-sm transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none" title="Play / Pause Orbit">
+            <i data-lucide="play" id="play-icon" class="w-4 h-4"></i>
+          </button>
+          <button id="reset-btn" data-id="reset-btn" data-sync="reset-btn" data-label="Reset Orbit" class="bg-red-300 hover:bg-red-400 text-slate-950 border-2 border-slate-950 p-2 rounded-lg neo-shadow-sm transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none" title="Reset Simulation">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Orbital Interactive Area -->
+      <div class="flex-1 relative bg-slate-950 border-[3px] border-slate-950 rounded-xl overflow-hidden my-2">
+        <!-- Space Stars Pattern Background -->
+        <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(white 1px, transparent 0); background-size: 24px 24px;"></div>
+        
+        <!-- Constellation background art (interactive feeling) -->
+        <div class="absolute inset-x-0 top-3 text-center text-[10px] text-slate-500 font-mono tracking-widest pointer-events-none uppercase">
+          Orbit speed: ~30 km/s (Tilt remains constant!)
+        </div>
+
+        <!-- SVG Orbit Engine -->
+        <svg id="orbit-svg" data-id="simCanvas" class="w-full h-full" viewBox="0 0 600 360">
+          <defs>
+            <radialGradient id="sun-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#FFF9C4" />
+              <stop offset="40%" stop-color="#FBC02D" />
+              <stop offset="100%" stop-color="#FBC02D" stop-opacity="0" />
+            </radialGradient>
+            <!-- Earth atmosphere glow -->
+            <radialGradient id="earth-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="60%" stop-color="#40C4FF" />
+              <stop offset="100%" stop-color="#0277BD" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+
+          <!-- Orbit Ellipse Line -->
+          <ellipse cx="300" cy="180" rx="200" ry="85" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="6,6" />
+
+          <!-- Axis Alignment Guides (Solstices & Equinoxes) -->
+          <line x1="300" y1="50" x2="300" y2="310" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="4,8" />
+          <line x1="60" y1="180" x2="540" y2="180" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="4,8" />
+
+          <!-- Labels for Orbit Milestones -->
+          <g transform="translate(300, 45)" class="cursor-pointer" id="preset-spring" data-sync="preset-spring" data-label="March Equinox Milestone">
+            <rect x="-55" y="-12" width="110" height="24" rx="4" fill="#E2E8F0" stroke="#000000" stroke-width="1.5" />
+            <text class="text-[10px] font-black fill-slate-950 text-center" y="3" text-anchor="middle">MARCH EQUINOX</text>
+          </g>
+          
+          <g transform="translate(300, 315)" class="cursor-pointer" id="preset-autumn" data-sync="preset-autumn" data-label="September Equinox Milestone">
+            <rect x="-70" y="-12" width="140" height="24" rx="4" fill="#E2E8F0" stroke="#000000" stroke-width="1.5" />
+            <text class="text-[10px] font-black fill-slate-950 text-center" y="3" text-anchor="middle">SEPTEMBER EQUINOX</text>
+          </g>
+
+          <g transform="translate(65, 180)" class="cursor-pointer" id="preset-summer" data-sync="preset-summer" data-label="June Solstice Milestone">
+            <rect x="-50" y="-12" width="100" height="24" rx="4" fill="#FEF08A" stroke="#000000" stroke-width="1.5" />
+            <text class="text-[10px] font-black fill-slate-950 text-center" y="3" text-anchor="middle">JUNE SOLSTICE</text>
+          </g>
+
+          <g transform="translate(535, 180)" class="cursor-pointer" id="preset-winter" data-sync="preset-winter" data-label="December Solstice Milestone">
+            <rect x="-65" y="-12" width="130" height="24" rx="4" fill="#93C5FD" stroke="#000000" stroke-width="1.5" />
+            <text class="text-[10px] font-black fill-slate-950 text-center" y="3" text-anchor="middle">DECEMBER SOLSTICE</text>
+          </g>
+
+          <!-- Sun Node -->
+          <g transform="translate(300, 180)" id="sun-node" data-sync="sun-node" data-label="The Sun">
+            <!-- Outer dynamic glow -->
+            <circle cx="0" cy="0" r="48" fill="url(#sun-glow)" opacity="0.8" />
+            <!-- Inner hard Sun body -->
+            <circle cx="0" cy="0" r="28" fill="#FBBF24" stroke="#000000" stroke-width="3" />
+            <!-- Face features to keep it highly kid-friendly & cute -->
+            <circle cx="-8" cy="-5" r="3" fill="#000000" />
+            <circle cx="8" cy="-5" r="3" fill="#000000" />
+            <path d="M -8 8 Q 0 16 8 8" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round" />
+            <!-- Sunlight Ray indicators shooting out -->
+            <g id="rays-group"></g>
+          </g>
+
+          <!-- Ray Connections (Dynamic projection line from Sun to Earth) -->
+          <line id="ray-connector" x1="300" y1="180" x2="100" y2="180" stroke="#FBBF24" stroke-width="3" stroke-dasharray="8,4" />
+
+          <!-- Earth Node -->
+          <g id="earth-node" class="cursor-pointer" data-sync="earth-node" data-label="Earth Orbiting Node">
+            <!-- Atmosphere indicator -->
+            <circle cx="0" cy="0" r="28" fill="url(#earth-glow)" />
+            <!-- Earth Globe -->
+            <circle cx="0" cy="0" r="18" fill="#60A5FA" stroke="#000000" stroke-width="2.5" />
+            
+            <!-- Simplified continents representation inside Earth -->
+            <path d="M -12 -5 Q -8 -12 -2 -8 T 8 -12 T 12 -3 Q 6 2 -2 -2 Z" fill="#4ADE80" opacity="0.9" />
+            <path d="M -10 8 Q -3 4 5 10 T 14 5" fill="#4ADE80" opacity="0.9" />
+            
+            <!-- Equator Line -->
+            <line id="earth-equator" x1="-18" y1="0" x2="18" y2="0" stroke="#020617" stroke-width="1.5" />
+            
+            <!-- North & South Rotational Axis -->
+            <line id="earth-axis" x1="0" y1="-26" x2="0" y2="26" stroke="#EF4444" stroke-width="3" stroke-linecap="round" />
+            <!-- North Pole Flag (Red Point) -->
+            <circle id="north-pointer" cx="0" cy="-26" r="3" fill="#EF4444" />
+            <text id="pole-label-N" x="0" y="-30" class="text-[9px] font-black fill-white text-center" text-anchor="middle">N</text>
+          </g>
+        </svg>
+
+        <!-- Seasons Milestone Hint Overlay -->
+        <div id="orbit-milestone-text" class="absolute bottom-3 left-3 bg-[#FFFDF9] border-2 border-slate-950 py-1.5 px-3 rounded-lg text-xs font-bold neo-shadow-sm max-w-[280px]">
+          Dragging the slider updates Earth's position in space.
+        </div>
+      </div>
+
+      <!-- Quick Tips Legend -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] font-bold">
+        <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 border border-slate-300 rounded-lg">
+          <span class="w-3 h-3 bg-[#EF4444] rounded-full inline-block border border-slate-950"></span>
+          <span>Red Axis: Earth's Tilt</span>
+        </div>
+        <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 border border-slate-300 rounded-lg">
+          <span class="w-3.5 h-1 border-t-2 border-dashed border-[#FBBF24] inline-block"></span>
+          <span>Dashed Gold: Sun Ray</span>
+        </div>
+        <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 border border-slate-300 rounded-lg">
+          <span class="w-3 h-3 bg-[#60A5FA] rounded-md inline-block border border-slate-950"></span>
+          <span>June is Northern Summer</span>
+        </div>
+        <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 border border-slate-300 rounded-lg">
+          <span class="w-3 h-3 bg-[#93C5FD] rounded-md inline-block border border-slate-950"></span>
+          <span>December is Southern Summer</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: HEMISPHERE VIEW (Close-up of Light Intensity) - Takes 2 cols -->
+    <section class="lg:col-span-2 border-[3px] border-slate-950 bg-[#FFFDF9] rounded-2xl neo-shadow-lg p-3 flex flex-col justify-between min-h-0">
+      <div>
+        <span class="text-xs font-extrabold bg-indigo-200 text-slate-950 border-2 border-slate-950 px-2 py-0.5 rounded-full uppercase">2. Rays View</span>
+        <h2 class="text-lg font-black uppercase tracking-tight mt-1">Sun Ray Intensity Close-up</h2>
+        <p class="text-xs text-slate-500">Observe how the same width of solar energy spreads over a larger area at the poles!</p>
+      </div>
+
+      <!-- Live Close-up SVG Panel -->
+      <div class="flex-1 relative bg-gradient-to-b from-[#1E293B] to-[#0F172A] border-[3px] border-slate-950 rounded-xl overflow-hidden my-2 flex items-center justify-center">
+        <svg id="closeup-svg" class="w-full h-full" viewBox="0 0 320 200">
+          <defs>
+            <!-- Yellow glowing rays pattern -->
+            <linearGradient id="ray-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#FCD34D" stop-opacity="0.1" />
+              <stop offset="90%" stop-color="#FCD34D" stop-opacity="0.75" />
+              <stop offset="100%" stop-color="#FBBF24" />
+            </linearGradient>
+            <!-- Highlight glow for direct rays -->
+            <radialGradient id="sun-beam-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#FCD34D" stop-opacity="0.4" />
+              <stop offset="100%" stop-color="#FCD34D" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+
+          <!-- Sun Source representation on the far left -->
+          <path d="M -10 0 A 20 100 0 0 1 -10 200 Z" fill="#FBBF24" stroke="#000000" stroke-width="2" />
+          <text x="12" y="105" class="text-[9px] font-black fill-yellow-200 uppercase tracking-widest text-center" transform="rotate(-90 12 105)" text-anchor="middle">Sunlight Rays</text>
+
+          <!-- Global Ray Beams from Left to Right -->
+          <g id="closeup-rays"></g>
+
+          <!-- Tilted Earth Representation (will rotate dynamically in JS) -->
+          <g id="closeup-earth-group" transform="translate(200, 100)">
+            <!-- Earth Globe Circle -->
+            <circle cx="0" cy="0" r="50" fill="#2563EB" stroke="#000000" stroke-width="2.5" />
+            
+            <!-- Curved continents -->
+            <path d="M -30 -20 Q -10 -40 20 -30 Q 30 -10 10 10 T -30 15 Z" fill="#22C55E" opacity="0.9" />
+            <path d="M -40 10 Q -20 35 15 25 T 35 -10 Q 20 -20 -10 -5 Z" fill="#22C55E" opacity="0.9" />
+            
+            <!-- Equator dashed line -->
+            <line x1="-50" y1="0" x2="50" y2="0" stroke="#F8FAFC" stroke-width="2" stroke-dasharray="4,3" />
+            
+            <!-- Main Axis of Rotation -->
+            <line x1="0" y1="-65" x2="0" y2="65" stroke="#EF4444" stroke-width="3" stroke-linecap="round" />
+            <!-- North / South pole markers -->
+            <circle cx="0" cy="-65" r="4" fill="#EF4444" />
+            <text x="0" y="-70" class="text-[10px] font-black fill-white" text-anchor="middle">NORTH POLE</text>
+            
+            <circle cx="0" cy="65" r="4" fill="#EF4444" />
+            <text x="0" y="78" class="text-[10px] font-black fill-white" text-anchor="middle">SOUTH POLE</text>
+
+            <!-- Equator Label -->
+            <text x="55" y="3" class="text-[9px] font-extrabold fill-slate-300">EQUATOR</text>
+          </g>
+
+          <!-- Interactive Highlight Hotspots (click triggers detail modal) -->
+          <g id="north-hemisphere" data-sync="north-hemisphere" data-label="Northern Hemisphere Hotspot" class="cursor-pointer">
+            <rect x="180" y="35" width="45" height="45" rx="8" fill="none" pointer-events="all" />
+            <circle cx="210" cy="60" r="10" fill="#EF4444" class="animate-pulse" opacity="0.7" />
+            <circle cx="210" cy="60" r="4" fill="#EF4444" />
+          </g>
+
+          <g id="south-hemisphere" data-sync="south-hemisphere" data-label="Southern Hemisphere Hotspot" class="cursor-pointer">
+            <rect x="180" y="120" width="45" height="45" rx="8" fill="none" pointer-events="all" />
+            <circle cx="210" cy="140" r="10" fill="#3B82F6" class="animate-pulse" opacity="0.7" />
+            <circle cx="210" cy="140" r="4" fill="#3B82F6" />
+          </g>
+        </svg>
+
+        <!-- Small Floating Card explaining current ray strike -->
+        <div id="ray-strike-info" class="absolute bottom-2 right-2 left-2 bg-slate-950/90 border-2 border-slate-800 p-2 rounded-lg text-white text-[11px] font-bold">
+          Sunlight strike angle determines temperature, not distance!
+        </div>
+      </div>
+
+      <!-- DYNAMIC STATS / METERS -->
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Northern Hemisphere Stats -->
+        <div id="north-hemisphere-btn" data-id="north-hemisphere-btn" data-sync="north-hemisphere-btn" data-label="Northern Hemisphere Card" class="border-2 border-slate-950 p-2 rounded-xl bg-red-50 relative overflow-hidden transition-all duration-300">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-black uppercase text-red-700">North Hemisphere</span>
+            <span id="nh-temp-text" data-id="intensity-n" class="text-xs font-black text-slate-800">Warm!</span>
+          </div>
+          <div class="text-[10px] font-medium text-slate-600 mb-1 leading-tight" id="nh-descr">Receiving direct sunlight energy. High temperatures.</div>
+          <!-- Neo intensity bar -->
+          <div class="w-full h-3.5 bg-slate-200 border-2 border-slate-950 rounded-full overflow-hidden flex">
+            <div id="nh-intensity-bar" class="h-full bg-red-400 border-r-2 border-slate-950 transition-all duration-300" style="width: 70%"></div>
+          </div>
+          <div class="text-[9px] font-black text-slate-400 mt-1 uppercase">Energy Concentration</div>
+        </div>
+
+        <!-- Southern Hemisphere Stats -->
+        <div id="south-hemisphere-btn" data-id="south-hemisphere-btn" data-sync="south-hemisphere-btn" data-label="Southern Hemisphere Card" class="border-2 border-slate-950 p-2 rounded-xl bg-blue-50 relative overflow-hidden transition-all duration-300">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-black uppercase text-blue-700">South Hemisphere</span>
+            <span id="sh-temp-text" data-id="intensity-s" class="text-xs font-black text-slate-800">Cold!</span>
+          </div>
+          <div class="text-[10px] font-medium text-slate-600 mb-1 leading-tight" id="sh-descr">Rays are angled and spread out. Low temperatures.</div>
+          <!-- Neo intensity bar -->
+          <div class="w-full h-3.5 bg-slate-200 border-2 border-slate-950 rounded-full overflow-hidden flex">
+            <div id="sh-intensity-bar" class="h-full bg-blue-400 border-r-2 border-slate-950 transition-all duration-300" style="width: 30%"></div>
+          </div>
+          <div class="text-[9px] font-black text-slate-400 mt-1 uppercase">Energy Concentration</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- BOTTOM CONTROL DECK -->
+  <footer id="controls" data-id="controls" class="h-28 border-[3px] border-slate-950 bg-[#FFFDF9] rounded-2xl neo-shadow-lg p-3 flex flex-col md:flex-row justify-between items-center gap-3 flex-shrink-0">
+    
+    <!-- Presets Selector (Left block) -->
+    <div class="flex flex-col gap-1 w-full md:w-auto">
+      <span class="text-[10px] font-black uppercase text-slate-500 tracking-wider">Jump to Orbit Key Milestones</span>
+      <div class="flex gap-1.5 overflow-x-auto pb-1 md:pb-0">
+        <button id="btn-preset-june" data-sync="preset-summer" data-label="Go to June" class="bg-amber-300 hover:bg-amber-400 text-slate-950 text-xs font-bold border-2 border-slate-950 py-1 px-3 rounded-md neo-shadow-sm transition-transform active:translate-x-0.5 active:translate-y-0.5 whitespace-nowrap">
+          June Solstice
+        </button>
+        <button id="btn-preset-sept" data-sync="preset-autumn" data-label="Go to Sept" class="bg-amber-200 hover:bg-amber-300 text-slate-950 text-xs font-bold border-2 border-slate-950 py-1 px-3 rounded-md neo-shadow-sm transition-transform active:translate-x-0.5 active:translate-y-0.5 whitespace-nowrap">
+          Sept Equinox
+        </button>
+        <button id="btn-preset-dec" data-sync="preset-winter" data-label="Go to Dec" class="bg-indigo-300 hover:bg-indigo-400 text-slate-950 text-xs font-bold border-2 border-slate-950 py-1 px-3 rounded-md neo-shadow-sm transition-transform active:translate-x-0.5 active:translate-y-0.5 whitespace-nowrap">
+          Dec Solstice
+        </button>
+        <button id="btn-preset-mar" data-sync="preset-spring" data-label="Go to Mar" class="bg-indigo-200 hover:bg-indigo-300 text-slate-950 text-xs font-bold border-2 border-slate-950 py-1 px-3 rounded-md neo-shadow-sm transition-transform active:translate-x-0.5 active:translate-y-0.5 whitespace-nowrap">
+          March Equinox
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Sandbox Controls (Middle/Right Block) -->
+    <div class="flex items-center gap-4 w-full md:flex-1 md:justify-end">
+      
+      <!-- Planet Tilt Controller -->
+      <div class="flex flex-col gap-1 w-1/3 max-w-[160px]" id="tilt-container">
+        <div class="flex justify-between items-center text-[10px] font-black uppercase text-slate-700">
+          <span id="tilt-label">Axis Tilt:</span>
+          <span id="axis_tilt-display" data-id="axis_tilt-display" class="text-indigo-600 bg-indigo-100 border border-indigo-400 px-1.5 rounded">23.5°</span>
+        </div>
+        <input id="axis_tilt-slider" data-id="axis_tilt-slider" data-sync="axis_tilt-slider" data-label="Tilt Range Slider" type="range" min="0" max="45" step="0.5" value="23.5" 
+          class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 border border-slate-950">
+        <div class="flex justify-between text-[9px] font-extrabold text-slate-400">
+          <span>0° (None)</span>
+          <span>45° (Max)</span>
+        </div>
+      </div>
+
+      <!-- Simulation Speed Controller -->
+      <div class="flex flex-col gap-1 w-1/3 max-w-[130px]" id="speed-container">
+        <div class="flex justify-between items-center text-[10px] font-black uppercase text-slate-700">
+          <span>Sim Speed:</span>
+          <span id="speed-display" data-id="speed-display" class="text-emerald-600 bg-emerald-100 border border-emerald-400 px-1.5 rounded">0.5x</span>
+        </div>
+        <input id="speed-slider" data-id="speed-slider" data-sync="speed-slider" data-label="Simulation Speed Slider" type="range" min="0.1" max="2" step="0.1" value="0.5" 
+          class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500 border border-slate-950">
+        <div class="flex justify-between text-[9px] font-extrabold text-slate-400">
+          <span>0.1x</span>
+          <span>2.0x</span>
+        </div>
+      </div>
+
+      <!-- Orbital Progression Slider -->
+      <div class="flex flex-col gap-1 w-1/3 max-w-[220px]" id="orbit-container">
+        <div class="flex justify-between items-center text-[10px] font-black uppercase text-slate-700">
+          <span>Move along Orbit:</span>
+          <span id="orbit_pos-display" data-id="orbit_pos-display" class="text-amber-600 bg-amber-100 border border-amber-400 px-1.5 rounded">Day 172</span>
+        </div>
+        <input id="orbit_pos-slider" data-id="orbit_pos-slider" data-sync="orbit_pos-slider" data-label="Orbit Range Slider" type="range" min="0" max="359" step="1" value="172" 
+          class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500 border border-slate-950">
+        <div class="flex justify-between text-[9px] font-extrabold text-slate-400">
+          <span>Jan</span>
+          <span>Apr</span>
+          <span>Jul</span>
+          <span>Oct</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- INFO DETAIL MODALS (GLASSMORPHIC POPUP OVERLAYS) -->
+  <div id="detail-overlay" class="fixed inset-0 bg-slate-950/60 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-[#FFFDF9] border-[3px] border-slate-950 max-w-sm w-full rounded-2xl p-5 neo-shadow-lg relative">
+      <button id="close-overlay-btn" class="absolute top-3 right-3 bg-slate-100 hover:bg-slate-200 border-2 border-slate-950 p-1 rounded-lg">
+        <i data-lucide="x" class="w-4 h-4 text-slate-900"></i>
+      </button>
+      <div class="flex gap-2 items-center mb-3">
+        <span id="modal-tag" class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full border-2 border-slate-950 bg-amber-200">Science Insight</span>
+      </div>
+      <h3 id="modal-title" class="text-lg font-black uppercase text-slate-950 mb-2">Hemisphere Energy</h3>
+      <p id="modal-body" class="text-xs text-slate-700 leading-relaxed mb-4">Detailed simulation feedback loading...</p>
+      
+      <div class="bg-yellow-100 border-2 border-slate-950 p-3 rounded-xl flex gap-2 items-start text-xs font-bold text-slate-800">
+        <i data-lucide="help-circle" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+        <span id="modal-tip">What happens if you lower the Earth tilt slider back to zero on the dashboard? Give it a try!</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- APP STATE & ENGINE CONSTANTS ---
+    const state = {
+      orbitAngle: 172, // starts at June Solstice position (approx 172 on circular day scale 0-359)
+      tiltAngle: 23.5,
+      isPlaying: false,
+      speed: 0.5 // Orbit angle speed multiplier
+    };
+
+    const MONTHS = [
+      "January", "February", "March", "April", "May", "June", 
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    // --- ELEMENT SELECTORS ---
+    const orbitSlider = document.getElementById('orbit_pos-slider');
+    const tiltSlider = document.getElementById('axis_tilt-slider');
+    const speedSlider = document.getElementById('speed-slider');
+    const playBtn = document.getElementById('main-btn');
+    const playIcon = document.getElementById('play-icon');
+    const resetBtn = document.getElementById('reset-btn');
+    const orbitAngleLabel = document.getElementById('orbit_pos-display');
+    const tiltAngleLabel = document.getElementById('axis_tilt-display');
+    const speedDisplay = document.getElementById('speed-display');
+    const statusText = document.getElementById('status-text');
+
+    const earthNode = document.getElementById('earth-node');
+    const rayConnector = document.getElementById('ray-connector');
+    const earthAxis = document.getElementById('earth-axis');
+    const earthEquator = document.getElementById('earth-equator');
+    const northPointer = document.getElementById('north-pointer');
+    const statusMonth = document.getElementById('status-month');
+    const statusSeason = document.getElementById('status-season');
+
+    // Closeup SVGs
+    const closeupEarthGroup = document.getElementById('closeup-earth-group');
+    const closeupRays = document.getElementById('closeup-rays');
+
+    // Hemisphere displays
+    const nhIntensityBar = document.getElementById('nh-intensity-bar');
+    const shIntensityBar = document.getElementById('sh-intensity-bar');
+    const nhTempText = document.getElementById('nh-temp-text');
+    const shTempText = document.getElementById('sh-temp-text');
+    const nhDescr = document.getElementById('nh-descr');
+    const shDescr = document.getElementById('sh-descr');
+
+    // Milestone clicks
+    const presetSpring = document.getElementById('preset-spring');
+    const presetAutumn = document.getElementById('preset-autumn');
+    const presetSummer = document.getElementById('preset-summer');
+    const presetWinter = document.getElementById('preset-winter');
+    const btnJune = document.getElementById('btn-preset-june');
+    const btnSept = document.getElementById('btn-preset-sept');
+    const btnDec = document.getElementById('btn-preset-dec');
+    const btnMar = document.getElementById('btn-preset-mar');
+
+    // Modal elements
+    const detailOverlay = document.getElementById('detail-overlay');
+    const closeOverlayBtn = document.getElementById('close-overlay-btn');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalTag = document.getElementById('modal-tag');
+    const modalTip = document.getElementById('modal-tip');
+
+    // Hotspots
+    const northHemHotspot = document.getElementById('north-hemisphere');
+    const southHemHotspot = document.getElementById('south-hemisphere');
+
+    // --- MODAL DATA CONTROLLER ---
+    function openModal(type) {
+      if (type === 'north') {
+        modalTag.innerText = "NORTHERN HEMISPHERE";
+        modalTag.className = "text-[10px] font-black uppercase px-2 py-0.5 rounded-full border-2 border-slate-950 bg-red-200 text-red-800";
+        modalTitle.innerText = "Suns Rays on the North";
+        
+        const isWinter = state.orbitAngle > 280 || state.orbitAngle < 80;
+        const isEquinox = Math.abs(state.orbitAngle - 80) < 15 || Math.abs(state.orbitAngle - 260) < 15;
+        
+        if (state.tiltAngle < 2) {
+          modalBody.innerText = "With 0° Tilt, the Northern Hemisphere gets exact even sunlight and mild spring-like temperatures all year. No seasonal changes here!";
+          modalTip.innerText = "Tilt is the vital key to creating seasons! Without it, we wouldn't have summers or winters.";
+        } else if (isEquinox) {
+          modalBody.innerText = "During Equinoxes, the North and South get perfectly equal rays. Light strikes straight at the equator, creating beautiful, mild, uniform spring or autumn days.";
+          modalTip.innerText = "Notice how the Red axis lines up perfectly relative to the incoming sunlight rays.";
+        } else if (!isWinter) {
+          modalBody.innerText = "The North pole is pointing directly towards the Sun! Sunlight hits from straight overhead, concentrating heat into a tight, warm zone. This is Summer!";
+          modalTip.innerText = "Notice that the days are also longer here because more of the North is exposed to daylight.";
+        } else {
+          modalBody.innerText = "The North pole is pointing away from the Sun! Sunlight strikes the ground at a shallow slant. The energy spreads over a massive surface area, causing weak heat. This is Winter!";
+          modalTip.innerText = "Notice how North Pole remains in continuous shade (polar night) during the winter solstice orbit position.";
+        }
+      } else {
+        modalTag.innerText = "SOUTHERN HEMISPHERE";
+        modalTag.className = "text-[10px] font-black uppercase px-2 py-0.5 rounded-full border-2 border-slate-950 bg-blue-200 text-blue-800";
+        modalTitle.innerText = "Suns Rays on the South";
+        
+        const isWinter = state.orbitAngle > 100 && state.orbitAngle < 240;
+        const isEquinox = Math.abs(state.orbitAngle - 80) < 15 || Math.abs(state.orbitAngle - 260) < 15;
+
+        if (state.tiltAngle < 2) {
+          modalBody.innerText = "With 0° Tilt, the Southern Hemisphere receives steady, predictable sunlight rays. No winters, summers, or changing climates occur here!";
+          modalTip.innerText = "If you want extreme Southern seasons, slide the Earth Axis Tilt setting all the way up to 45°!";
+        } else if (isEquinox) {
+          modalBody.innerText = "During Equinoxes, both halves of our planet get equivalent, shared sun rays. Direct light is focused on the middle line (Equator).";
+          modalTip.innerText = "This occurs in both March and September every single year.";
+        } else if (!isWinter) {
+          modalBody.innerText = "The South pole is pointing straight toward the Sun. Solar energy strikes directly from high in the sky. Concentrated energy produces hot, sunny Summer days!";
+          modalTip.innerText = "While the Southern hemisphere is experiencing hot summer, the Northern hemisphere is cold in winter!";
+        } else {
+          modalBody.innerText = "The South pole tilts backwards, away from the Sun's main focus. Sunlight hits at sharp angles, stretching energy thin across the continent. This is Winter!";
+          modalTip.innerText = "Spreading light rays mean fewer energy watts per square meter, bringing colder temperatures.";
+        }
+      }
+      detailOverlay.classList.remove('hidden');
+    }
+
+    if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', () => detailOverlay.classList.add('hidden'));
+    if (northHemHotspot) northHemHotspot.addEventListener('click', () => openModal('north'));
+    if (southHemHotspot) southHemHotspot.addEventListener('click', () => openModal('south'));
+
+    // --- SIMULATION CALCULATIONS & DRAWING ENGINE ---
+    function updateSimulation() {
+      // Sync numerical labels
+      if (orbitSlider) orbitSlider.value = state.orbitAngle;
+      if (tiltSlider) tiltSlider.value = state.tiltAngle;
+      if (speedSlider) speedSlider.value = state.speed;
+      
+      if (orbitAngleLabel) orbitAngleLabel.innerText = `Day ${Math.round((state.orbitAngle / 360) * 365)}`;
+      if (tiltAngleLabel) tiltAngleLabel.innerText = `${state.tiltAngle.toFixed(1)}°`;
+      if (speedDisplay) speedDisplay.innerText = `${state.speed.toFixed(1)}x`;
+
+      // 1. Calculate Earth Node Position on Elliptical Orbit
+      const rads = (state.orbitAngle * Math.PI) / 180;
+      
+      const earthX = 300 + 200 * Math.cos(rads);
+      const earthY = 180 + 85 * Math.sin(rads);
+      
+      if (earthNode) earthNode.setAttribute('transform', `translate(${earthX}, ${earthY})`);
+
+      // Update Universe View Ray Connector Line
+      if (rayConnector) {
+        rayConnector.setAttribute('x2', earthX);
+        rayConnector.setAttribute('y2', earthY);
+      }
+
+      // Rotate Earth's tilt axis (Tilt orientation must remain constant in SPACE!).
+      const rawTilt = state.tiltAngle;
+      if (earthAxis) earthAxis.setAttribute('transform', `rotate(${rawTilt})`);
+      if (earthEquator) earthEquator.setAttribute('transform', `rotate(${rawTilt})`);
+      if (northPointer) northPointer.setAttribute('transform', `rotate(${rawTilt})`);
+      
+      // Update North label placement relative to the axis
+      const radTilt = (rawTilt * Math.PI) / 180;
+      const labelDist = 34;
+      const labelX = labelDist * Math.sin(radTilt);
+      const labelY = -labelDist * Math.cos(radTilt);
+      const poleLabelN = document.getElementById('pole-label-N');
+      if (poleLabelN) {
+        poleLabelN.setAttribute('x', labelX);
+        poleLabelN.setAttribute('y', labelY);
+      }
+
+      // 2. Identify Current Month and Season label
+      const monthIdx = Math.floor(state.orbitAngle / 30);
+      if (statusMonth) statusMonth.innerText = MONTHS[monthIdx];
+      
+      let seasonName = "Equinox";
+      if (state.orbitAngle >= 60 && state.orbitAngle <= 120) {
+        seasonName = "March Equinox";
+        if (statusSeason) statusSeason.className = "bg-emerald-300 border-2 border-slate-950 px-2.5 py-1 rounded-md text-slate-950 font-black";
+      } else if (state.orbitAngle > 120 && state.orbitAngle < 240) {
+        seasonName = "June Solstice";
+        if (statusSeason) statusSeason.className = "bg-yellow-300 border-2 border-slate-950 px-2.5 py-1 rounded-md text-slate-950 font-black";
+      } else if (state.orbitAngle >= 240 && state.orbitAngle <= 300) {
+        seasonName = "September Equinox";
+        if (statusSeason) statusSeason.className = "bg-amber-300 border-2 border-slate-950 px-2.5 py-1 rounded-md text-slate-950 font-black";
+      } else {
+        seasonName = "December Solstice";
+        if (statusSeason) statusSeason.className = "bg-indigo-300 border-2 border-slate-950 px-2.5 py-1 rounded-md text-slate-950 font-black";
+      }
+      if (statusSeason) statusSeason.innerText = seasonName;
+
+      // 3. Render Close-up Ray Calculations
+      const effTiltFactor = Math.cos(rads + Math.PI); // at 180 deg (June), this equals 1.0
+      const effectiveCloseupTilt = state.tiltAngle * effTiltFactor;
+
+      if (closeupEarthGroup) {
+        closeupEarthGroup.setAttribute('transform', `translate(200, 100) rotate(${effectiveCloseupTilt})`);
+      }
+
+      // 4. Draw Closeup Sunlight rays hitting the planet
+      drawCloseupRays(effectiveCloseupTilt);
+
+      // 5. Update Temperature Dashboard Meters based on Light Intensity
+      const tiltIntensityOffset = (effectiveCloseupTilt / 45) * 50;
+      
+      const nhIntensity = Math.min(100, Math.max(0, 50 + tiltIntensityOffset));
+      const shIntensity = Math.min(100, Math.max(0, 50 - tiltIntensityOffset));
+
+      if (nhIntensityBar) nhIntensityBar.style.width = `${nhIntensity}%`;
+      if (shIntensityBar) shIntensityBar.style.width = `${shIntensity}%`;
+
+      // Update text descriptions
+      if (state.tiltAngle < 2) {
+        if (nhTempText) nhTempText.innerText = "MILD (50%)";
+        if (shTempText) shTempText.innerText = "MILD (50%)";
+        if (nhDescr) nhDescr.innerText = "Steady spring-like temperature all year due to 0° axis tilt.";
+        if (shDescr) shDescr.innerText = "Steady spring-like temperature all year due to 0° axis tilt.";
+      } else {
+        // Northern Hemisphere texts
+        if (nhIntensity > 65) {
+          if (nhTempText) nhTempText.innerText = `HOT! (${Math.round(nhIntensity)}%)`;
+          if (nhDescr) nhDescr.innerText = "SUMMER: Axis tilts TOWARDS the Sun! Light rays strike directly, generating extreme heat.";
+        } else if (nhIntensity < 35) {
+          if (nhTempText) nhTempText.innerText = `COLD! (${Math.round(nhIntensity)}%)`;
+          if (nhDescr) nhDescr.innerText = "WINTER: Axis tilts AWAY from Sun! Light is spread super thin and shallow, making it chilly.";
+        } else {
+          if (nhTempText) nhTempText.innerText = `MILD (${Math.round(nhIntensity)}%)`;
+          if (nhDescr) nhDescr.innerText = "SPRING / AUTUMN: Sun shines evenly on the equator. Mild temperatures everywhere.";
+        }
+
+        // Southern Hemisphere texts
+        if (shIntensity > 65) {
+          if (shTempText) shTempText.innerText = `HOT! (${Math.round(shIntensity)}%)`;
+          if (shDescr) shDescr.innerText = "SUMMER: Southern axis tilts TOWARDS the Sun! Direct rays pack massive energy.";
+        } else if (shIntensity < 35) {
+          if (shTempText) shTempText.innerText = `COLD! (${Math.round(shIntensity)}%)`;
+          if (shDescr) shDescr.innerText = "WINTER: Southern axis tilts AWAY! Sunlight bounces off at a soft angle with weak heat.";
+        } else {
+          if (shTempText) shTempText.innerText = `MILD (${Math.round(shIntensity)}%)`;
+          if (shDescr) shDescr.innerText = "SPRING / AUTUMN: Perfect balance of daylight. Temperate and pleasant climate.";
+        }
+      }
+
+      // Synchronize component map positions to Dr. Einstein
+      sendComponentMap();
+    }
+
+    // Dynamic rendering of rays striking Earth in closeup panel
+    function drawCloseupRays(tiltAngle) {
+      if (!closeupRays) return;
+      let html = '';
+      
+      const rayYCoordinates = [30, 55, 80, 100, 120, 145, 170];
+      
+      rayYCoordinates.forEach((y, i) => {
+        const diffY = y - 100;
+        const radSqr = 50*50 - diffY*diffY;
+        
+        if (radSqr >= 0) {
+          const targetX = 200 - Math.sqrt(radSqr);
+          
+          html += `<line x1="15" y1="${y}" x2="${targetX}" y2="${y}" stroke="url(#ray-grad)" stroke-width="4.5" stroke-linecap="round" />`;
+          html += `<circle cx="${targetX}" cy="${y}" r="3.5" fill="#FBBF24" />`;
+
+          if (Math.abs(diffY) < 15) {
+            html += `<circle cx="${targetX}" cy="${y}" r="8" fill="url(#sun-beam-glow)" />`;
+          }
+        } else {
+          html += `<line x1="15" y1="${y}" x2="310" y2="${y}" stroke="url(#ray-grad)" stroke-width="1.5" stroke-dasharray="4,6" opacity="0.3" />`;
+        }
+      });
+
+      closeupRays.innerHTML = html;
+    }
+
+    // Render little decorative animated sunburst indicators
+    function createSunbursts() {
+      const parent = document.getElementById('rays-group');
+      if (!parent) return;
+      let html = '';
+      const totalRays = 12;
+      for (let i = 0; i < totalRays; i++) {
+        const angle = (360 / totalRays) * i;
+        const rad = (angle * Math.PI) / 180;
+        const x1 = 34 * Math.cos(rad);
+        const y1 = 34 * Math.sin(rad);
+        const x2 = 42 * Math.cos(rad);
+        const y2 = 42 * Math.sin(rad);
+        html += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" class="animate-pulse" />`;
+      }
+      parent.innerHTML = html;
+    }
+
+    // --- INTERACTIVE EVENT LISTENERS ---
+
+    // Sliders input
+    if (orbitSlider) {
+      orbitSlider.addEventListener('input', (e) => {
+        state.orbitAngle = parseFloat(e.target.value);
+        updateSimulation();
+      });
+    }
+
+    if (tiltSlider) {
+      tiltSlider.addEventListener('input', (e) => {
+        state.tiltAngle = parseFloat(e.target.value);
+        updateSimulation();
+      });
+    }
+
+    if (speedSlider) {
+      speedSlider.addEventListener('input', (e) => {
+        state.speed = parseFloat(e.target.value);
+        updateSimulation();
+      });
+    }
+
+    // Preset Buttons
+    if (btnJune) btnJune.addEventListener('click', () => { state.orbitAngle = 180; updateSimulation(); });
+    if (btnSept) btnSept.addEventListener('click', () => { state.orbitAngle = 270; updateSimulation(); });
+    if (btnDec) btnDec.addEventListener('click', () => { state.orbitAngle = 0; updateSimulation(); });
+    if (btnMar) btnMar.addEventListener('click', () => { state.orbitAngle = 90; updateSimulation(); });
+
+    // Node Hotspots on orbit itself
+    if (presetSpring) presetSpring.addEventListener('click', () => { state.orbitAngle = 90; updateSimulation(); });
+    if (presetAutumn) presetAutumn.addEventListener('click', () => { state.orbitAngle = 270; updateSimulation(); });
+    if (presetSummer) presetSummer.addEventListener('click', () => { state.orbitAngle = 180; updateSimulation(); });
+    if (presetWinter) presetWinter.addEventListener('click', () => { state.orbitAngle = 0; updateSimulation(); });
+
+    // Drag-along tracking directly on SVG Earth Node
+    let isDraggingEarth = false;
+    if (earthNode) {
+      earthNode.addEventListener('mousedown', () => isDraggingEarth = true);
+      window.addEventListener('mouseup', () => isDraggingEarth = false);
+      
+      const orbitSvg = document.getElementById('orbit-svg');
+      if (orbitSvg) {
+        orbitSvg.addEventListener('mousemove', (e) => {
+          if (!isDraggingEarth) return;
+          const rect = orbitSvg.getBoundingClientRect();
+          const x = e.clientX - rect.left - 300; 
+          const y = e.clientY - rect.top - 180;
+          
+          let angleDegrees = Math.round((Math.atan2(y, x) * 180) / Math.PI);
+          if (angleDegrees < 0) angleDegrees += 360;
+          
+          state.orbitAngle = angleDegrees;
+          updateSimulation();
+        });
+      }
+    }
+
+    // Touch Support for direct Earth dragging on Orbit
+    if (earthNode) {
+      earthNode.addEventListener('touchstart', () => isDraggingEarth = true);
+      window.addEventListener('touchend', () => isDraggingEarth = false);
+      
+      const orbitSvg = document.getElementById('orbit-svg');
+      if (orbitSvg) {
+        orbitSvg.addEventListener('touchmove', (e) => {
+          if (!isDraggingEarth) return;
+          const touch = e.touches[0];
+          const rect = orbitSvg.getBoundingClientRect();
+          const x = touch.clientX - rect.left - 300;
+          const y = touch.clientY - rect.top - 180;
+          
+          let angleDegrees = Math.round((Math.atan2(y, x) * 180) / Math.PI);
+          if (angleDegrees < 0) angleDegrees += 360;
+          
+          state.orbitAngle = angleDegrees;
+          updateSimulation();
+        });
+      }
+    }
+
+    // Animation Loop
+    let animationFrameId = null;
+    function animate() {
+      if (!state.isPlaying) return;
+      state.orbitAngle = (state.orbitAngle + state.speed) % 360;
+      updateSimulation();
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    function updatePlayPauseUI() {
+      if (state.isPlaying) {
+        if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
+        if (statusText) {
+          statusText.innerText = "Running";
+          statusText.className = "bg-yellow-300 border-2 border-slate-950 px-2.5 py-1 rounded-md text-slate-950 font-black";
+        }
+      } else {
+        if (playIcon) playIcon.setAttribute('data-lucide', 'play');
+        if (statusText) {
+          statusText.innerText = "Paused";
+          statusText.className = "bg-slate-300 border-2 border-slate-950 px-2.5 py-1 rounded-md text-slate-950 font-black";
+        }
+      }
+      lucide.createIcons();
+    }
+
+    if (playBtn) {
+      playBtn.addEventListener('click', () => {
+        state.isPlaying = !state.isPlaying;
+        if (state.isPlaying) {
+          animate();
+        } else {
+          cancelAnimationFrame(animationFrameId);
+        }
+        updatePlayPauseUI();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        state.isPlaying = false;
+        state.orbitAngle = 172; // June solstice start
+        state.tiltAngle = 23.5;
+        state.speed = 0.5;
+        cancelAnimationFrame(animationFrameId);
+        updateSimulation();
+        updatePlayPauseUI();
+      });
+    }
+
+    // --- COORDINATION & INTEGRATION PROTOCOLS ---
+
+    const componentIds = [
+      "widget-config",
+      "controls",
+      "orbit_pos-display",
+      "orbit_pos-slider",
+      "tilt-label",
+      "axis_tilt-display",
+      "axis_tilt-slider",
+      "speed-slider",
+      "main-btn",
+      "reset-btn",
+      "simCanvas",
+      "hud",
+      "season-name",
+      "intensity-n",
+      "intensity-s",
+      "state-indicator",
+      "status-text"
+    ];
+
+    function getElementByIdOrDataId(id) {
+      if (!id) return null;
+      return document.getElementById(id) || 
+             document.querySelector(`[data-id="${CSS.escape(id)}"]`) || 
+             document.querySelector(`[data-sync="${CSS.escape(id)}"]`);
+    }
+
+    function highlightElement(target) {
+      const el = typeof target === 'string' ? getElementByIdOrDataId(target) : target;
+      if (!el) return;
+      el.classList.add('ring-4', 'ring-indigo-500', 'animate-pulse');
+      clearTimeout(el.__highlightTimer);
+      el.__highlightTimer = setTimeout(() => {
+        el.classList.remove('ring-4', 'ring-indigo-500', 'animate-pulse');
+      }, 2000);
+    }
+
+    function sendComponentMap() {
+      const centersById = {};
+      const components = [];
+
+      componentIds.forEach(id => {
+        const el = getElementByIdOrDataId(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            const entry = {
+              id: id,
+              dataId: el.getAttribute('data-id') || id,
+              center: {
+                x: Math.round(rect.left + rect.width / 2),
+                y: Math.round(rect.top + rect.height / 2)
+              },
+              rect: {
+                left: Math.round(rect.left),
+                top: Math.round(rect.top),
+                width: Math.round(rect.width),
+                height: Math.round(rect.height)
+              },
+              x: Math.round(rect.left + rect.width / 2),
+              y: Math.round(rect.top + rect.height / 2),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height),
+              label: el.getAttribute('data-label') || el.getAttribute('aria-label') || id
+            };
+            centersById[id] = entry;
+            components.push(entry);
+          }
+        }
+      });
+
+      // Send both formats for seamless compatibility!
+      window.parent.postMessage({
+        type: 'COMPONENTS_MAPPED',
+        components,
+        centersById
+      }, '*');
+    }
+
+    window.addEventListener('message', (e) => {
+      const payload = e.data;
+      if (!payload) return;
+
+      const type = payload.type;
+      const targetId = payload.id || payload.dataId || payload.componentId || payload.target;
+      const el = getElementByIdOrDataId(targetId);
+
+      if (type === 'SHOW_COMPONENT' || type === 'HIGHLIGHT_ELEMENT') {
+        if (el) {
+          highlightElement(el);
+          if (typeof el.scrollIntoView === 'function') {
+            el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+          }
+        }
+      } else if (type === 'CLICK_COMPONENT') {
+        if (el) {
+          highlightElement(el);
+          setTimeout(() => {
+            if (typeof el.click === 'function') el.click();
+          }, 180);
+        }
+      } else if (type === 'SET_SLIDER' || type === 'SET_COMPONENT_VALUE') {
+        if (el) {
+          el.value = payload.value;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      } else if (type === 'SET_WIDGET_STATE') {
+        const newState = payload.state;
+        if (newState) {
+          if (newState.orbit_pos !== undefined) {
+            state.orbitAngle = Number(newState.orbit_pos);
+          }
+          if (newState.axis_tilt !== undefined) {
+            state.tiltAngle = Number(newState.axis_tilt);
+          }
+          if (newState.speed !== undefined) {
+            state.speed = Number(newState.speed);
+          }
+          updateSimulation();
+          sendComponentMap();
+        }
+      }
+    });
+
+    window.addEventListener('resize', sendComponentMap);
+    
+    // Add change listeners to sliders to keep coordinates live
+    [orbitSlider, tiltSlider, speedSlider].forEach(input => {
+      if (input) input.addEventListener('change', sendComponentMap);
+    });
+
+    [playBtn, resetBtn].forEach(button => {
+      if (button) button.addEventListener('click', () => setTimeout(sendComponentMap, 0));
+    });
+
+    // Initialize application on load
+    window.addEventListener('load', () => {
+      createSunbursts();
+      updateSimulation();
+      lucide.createIcons();
+      updatePlayPauseUI();
+      
+      sendComponentMap();
+      setTimeout(sendComponentMap, 300);
+    });
+  </script>
+</body>
+</html>

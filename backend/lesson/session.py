@@ -54,21 +54,9 @@ def lesson_context_messages(
     student_name = sanitize_student_name(student_name) or remember_student_name(thread_id)
     return [
         {
-            "role": "user",
+            "role": "system",
             "content": [{"type": "text", "text": build_lesson_context(current_section, viewed_slide, quiz_scores, student_name)}],
-        },
-        {
-            "role": "assistant",
-            "content": [
-                {
-                    "type": "text",
-                    "text": (
-                        "I understand. I will teach the lesson section by section, "
-                        "use only the provided lesson content, and manage progress from the conversation."
-                    ),
-                }
-            ],
-        },
+        }
     ]
 
 
@@ -169,23 +157,11 @@ def build_teach_section_messages(thread_id: str, section_number: int, student_na
 
     messages = [
         {
-            "role": "user",
+            "role": "system",
             "content": [
                 {
                     "type": "text",
                     "text": build_lesson_context(section_number, student_name=student_name),
-                }
-            ],
-        },
-        {
-            "role": "assistant",
-            "content": [
-                {
-                    "type": "text",
-                    "text": (
-                        f"I understand. I may use Section-1 through Section-{section_number}. "
-                        f"I will now teach only Section-{section_number}."
-                    ),
                 }
             ],
         },

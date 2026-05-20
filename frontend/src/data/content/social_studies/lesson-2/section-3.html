@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WW2 Tactical Command Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet.js CSS & JS API for Interactive Map Integration -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: transparent;
+    }
+    .font-header {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    /* Neo-Brutalist custom offset shadows */
+    .brutal-card {
+      background-color: #FFE6D9;
+      border: 3px solid #0f172a;
+      box-shadow: 4px 4px 0px #000000;
+      transition: all 0.15s ease-in-out;
+    }
+    .brutal-card:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px #000000;
+    }
+    .brutal-btn {
+      border: 3px solid #0f172a;
+      box-shadow: 4px 4px 0px #000000;
+      transition: all 0.1s ease-in-out;
+    }
+    .brutal-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px #000000;
+    }
+    .brutal-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px #000000;
+    }
+    /* Pulse glow effect for tactical dots */
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+    .tactical-pulse {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+    .custom-leaflet-marker {
+      background: transparent !important;
+      border: none !important;
+    }
+    .vintage-map-filter .leaflet-tile-container {
+      filter: sepia(0.55) hue-rotate(-15deg) saturate(1.2) contrast(0.95) brightness(1.02);
+    }
+    /* Custom scrollbar for Neo-Brutalist design */
+    ::-webkit-scrollbar {
+      width: 12px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FFE6D9;
+      border-left: 3px solid #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #0f172a;
+      border-radius: 6px;
+      border: 3px solid #FFE6D9;
+    }
+  </style>
+</head>
+<body class="h-full p-4 md:p-6 overflow-x-hidden">
+
+  <!-- Main Wrapper -->
+  <div class="max-w-6xl mx-auto border-[4px] border-slate-950 bg-[#FFF7F2] rounded-[24px] shadow-[8px_8px_0px_#000000] overflow-hidden flex flex-col min-h-[600px]">
+    
+    <!-- Top Header Bar -->
+    <header class="bg-[#FFCCB3] border-b-[4px] border-slate-950 p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-[#FF9966] border-[3px] border-slate-950 p-2 rounded-[12px] shadow-[3px_3px_0px_#000000]">
+          <i data-lucide="shield-alert" class="w-8 h-8 text-slate-950"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-black font-header text-slate-950 tracking-tight flex items-center gap-2">
+            TACTICAL COMMAND CENTER
+          </h1>
+          <p class="text-sm font-bold text-slate-700 tracking-wide uppercase">Grade 8 • Turning Points of World War II</p>
+        </div>
+      </div>
+      
+      <!-- Audio & Reset Control Panel -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleAudio()" id="sound-btn" class="brutal-btn bg-[#FFF] p-2 rounded-lg text-slate-950 hover:bg-[#FFCC99] flex items-center gap-2 font-bold text-sm" data-sync="sound-toggle" data-label="Toggle Sound">
+          <i data-lucide="volume-2" class="w-5 h-5" id="sound-icon"></i>
+          <span>SFX: ON</span>
+        </button>
+        <div class="bg-slate-950 text-white font-mono text-xs py-2 px-3 rounded-lg font-bold shadow-[2px_2px_0px_#FF9966] border border-slate-800">
+          LOG LEVEL: ALPHA-1
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-[#FFE6D9] border-b-[3px] border-slate-950 p-3 flex flex-wrap gap-2 md:gap-4">
+      <button onclick="switchTab('map')" id="map-tab" class="brutal-btn active-tab bg-[#FF9966] text-slate-950 font-black px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm md:text-base cursor-pointer" data-sync="map-tab" data-label="War Map Tab">
+        <i data-lucide="map" class="w-5 h-5"></i>
+        <span>🗺️ Tactical Map</span>
+      </button>
+      <button onclick="switchTab('cipher')" id="cipher-tab" class="brutal-btn bg-white text-slate-950 font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm md:text-base cursor-pointer" data-sync="cipher-tab" data-label="Enigma Decoder Tab">
+        <i data-lucide="binary" class="w-5 h-5"></i>
+        <span>📟 Enigma Cipher</span>
+      </button>
+      <button onclick="switchTab('sorting')" id="sorting-tab" class="brutal-btn bg-white text-slate-950 font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm md:text-base cursor-pointer" data-sync="sorting-tab" data-label="Theater Sorting Tab">
+        <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
+        <span>🧩 Theater Sorting</span>
+      </button>
+    </nav>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 p-4 md:p-6 flex flex-col lg:flex-row gap-6">
+      
+      <!-- Left Screen: Action Panel -->
+      <section class="flex-1 min-w-0">
+        
+        <!-- SECTION 1: WAR MAP -->
+        <div id="section-map" class="space-y-4">
+          <div class="bg-amber-100 border-[3px] border-slate-950 rounded-2xl p-4 shadow-[4px_4px_0px_#000000]">
+            <h2 class="text-xl font-black font-header text-slate-950 mb-1">🌍 Interactive Global Battle Map</h2>
+            <p class="text-sm text-slate-700 font-medium">Click any flashing command point below to deploy intelligence briefings and tactical insights.</p>
+          </div>
+
+          <!-- Real Interactive OpenStreetMap Canvas -->
+          <div class="relative bg-sky-200 border-[3px] border-slate-950 rounded-2xl overflow-hidden shadow-[4px_4px_0px_#000000] aspect-[16/9] w-full min-h-[350px] md:min-h-[420px] z-10">
+            <!-- Leaflet Container -->
+            <div id="map-canvas" class="w-full h-full vintage-map-filter" style="background-color: #93c5fd;"></div>
+
+            <!-- Map Overlay UI Legend -->
+            <div class="absolute bottom-3 left-3 bg-[#FFE6D9] border-2 border-slate-950 p-2.5 rounded-lg text-[10px] font-bold shadow-[2px_2px_0px_#000000] space-y-1 z-[1000] pointer-events-auto">
+              <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-red-600 rounded-full border border-slate-950 inline-block"></span> Axis Attack / Crucial Defense</div>
+              <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-yellow-500 rounded-full border border-slate-950 inline-block"></span> Allied Offensives</div>
+              <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-blue-500 rounded-full border border-slate-950 inline-block"></span> Naval Clashes (Pacific)</div>
+            </div>
+
+            <!-- Custom Styled Floating Map Filter Controls -->
+            <div class="absolute top-3 right-3 flex flex-col gap-1.5 z-[1000] pointer-events-auto">
+              <button onclick="toggleMapTheme()" class="brutal-btn bg-white text-slate-950 text-[10px] font-extrabold px-3 py-2 rounded-lg border-2 border-slate-950 shadow-[2px_2px_0px_#000000] hover:bg-[#FFCCB3] transition-all" data-sync="toggle-theme-btn" data-label="Toggle Radar Visuals">
+                📡 RADAR THEME
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Briefing Panel -->
+          <div id="briefing-box" class="brutal-card p-5 rounded-2xl relative min-h-[160px] bg-[#FFF]">
+            <div class="flex items-start gap-3">
+              <span id="briefing-emoji" class="text-4xl">⚓</span>
+              <div class="space-y-2 flex-1">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-slate-950 pb-2">
+                  <h3 id="briefing-title" class="text-xl font-black font-header text-slate-950">Select a Battle Point</h3>
+                  <span id="briefing-date" class="bg-indigo-200 border-2 border-slate-950 text-xs px-2 py-1 rounded-md font-bold text-slate-950 shadow-[2px_2px_0px_#000000]">Active Range</span>
+                </div>
+                <p id="briefing-desc" class="text-sm md:text-base text-slate-800 font-semibold leading-relaxed">
+                  Click on one of the strategic beacons on the operational military map to access tactical intelligence, battle details, and why it marked a major shift in World War II history.
+                </p>
+                <!-- Simulated interactive parameter dialer for simulation -->
+                <div id="briefing-simulator" class="hidden mt-4 pt-4 border-t-2 border-dashed border-slate-400">
+                  <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" id="sim-parameter-title">Tactical Variables Simulator</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                      <label class="flex justify-between text-xs font-bold text-slate-700">
+                        <span id="slider-1-label">Force Size Allocation</span>
+                        <span id="slider-1-val" class="text-indigo-600">50%</span>
+                      </label>
+                      <input id="tactical-slider-1" type="range" min="10" max="100" value="50" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer border-2 border-slate-950 accent-indigo-600" oninput="updateSimulation()">
+                    </div>
+                    <div class="space-y-1">
+                      <label class="flex justify-between text-xs font-bold text-slate-700">
+                        <span id="slider-2-label">Air Superiority Control</span>
+                        <span id="slider-2-val" class="text-indigo-600">50%</span>
+                      </label>
+                      <input id="tactical-slider-2" type="range" min="10" max="100" value="50" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer border-2 border-slate-950 accent-indigo-600" oninput="updateSimulation()">
+                    </div>
+                  </div>
+                  <div class="mt-4 p-3 bg-slate-100 border-2 border-slate-950 rounded-xl flex items-center gap-3">
+                    <span id="sim-result-icon" class="text-2xl">⚡</span>
+                    <div>
+                      <p class="text-xs font-bold text-slate-500">TACTICAL FORECAST OUTCOME</p>
+                      <p id="sim-result-text" class="text-sm font-bold text-slate-950">Awaiting tactical allocation calibrations...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: ENIGMA DECODER -->
+        <div id="section-cipher" class="space-y-4 hidden">
+          <div class="bg-teal-100 border-[3px] border-slate-950 rounded-2xl p-4 shadow-[4px_4px_0px_#000000]">
+            <h2 class="text-xl font-black font-header text-slate-950 mb-1">📟 Allied Intelligence Cryptanalysis</h2>
+            <p class="text-sm text-slate-700 font-medium">Step into Bletchley Park! Configure the three Enigma rotors to intercept and decode German naval communications.</p>
+          </div>
+
+          <!-- The Enigma Machine Box -->
+          <div class="brutal-card bg-[#2D3748] border-[4px] border-slate-950 p-6 rounded-3xl shadow-[6px_6px_0px_#000000] text-slate-100 space-y-6">
+            
+            <!-- Intercept Library Selector -->
+            <div class="bg-slate-900 p-3 rounded-xl border-2 border-slate-700 flex flex-col md:flex-row justify-between items-center gap-3">
+              <div>
+                <span class="bg-red-500 text-white text-[10px] font-black tracking-widest px-2 py-0.5 rounded mr-2 uppercase">RAW SIGNAL INTERCEPTED</span>
+                <span class="font-mono text-sm font-bold text-teal-400">German Navy U-Boat Transmissions</span>
+              </div>
+              <div class="flex gap-2 w-full md:w-auto">
+                <button onclick="loadIntercept(1)" class="flex-1 md:flex-initial brutal-btn bg-[#FF9966] text-slate-950 text-xs font-bold py-1.5 px-3 rounded-lg" data-sync="enigma-intercept-1" data-label="Load Intercept One">Intercept #1</button>
+                <button onclick="loadIntercept(2)" class="flex-1 md:flex-initial brutal-btn bg-[#99FF99] text-slate-950 text-xs font-bold py-1.5 px-3 rounded-lg" data-sync="enigma-intercept-2" data-label="Load Intercept Two">Intercept #2</button>
+              </div>
+            </div>
+
+            <!-- Intercept Cipher text display -->
+            <div class="bg-black p-4 rounded-xl border-2 border-slate-700 font-mono text-center">
+              <div class="text-[10px] text-slate-400 tracking-wider">ENCRYPTED RADIO WAVEFORM</div>
+              <div id="cipher-display" class="text-2xl font-bold tracking-[0.2em] text-amber-500 my-1">SELECT INTERCEPT</div>
+              <div id="cipher-translation-clue" class="text-[11px] text-teal-400 font-bold">Recommended Rotor Config: Key Code Provided</div>
+            </div>
+
+            <!-- Rotor Interface -->
+            <div class="flex justify-center items-center gap-6 py-2">
+              <!-- Rotor 1 -->
+              <div class="flex flex-col items-center">
+                <span class="text-xs font-bold text-slate-400 mb-1">ROTOR I</span>
+                <button onclick="adjustRotor(0, 1)" class="brutal-btn bg-[#FFCC99] text-slate-950 px-2 py-1 rounded font-black text-sm hover:bg-[#FFB366]" data-sync="enigma-rotor-1-up" data-label="Rotor 1 Up">▲</button>
+                <div id="rotor-0-display" class="bg-slate-950 border-2 border-slate-700 w-12 h-14 rounded-lg my-2 flex items-center justify-center font-mono text-2xl font-black text-white" data-sync="enigma-rotor-1" data-label="Rotor 1 Value">A</div>
+                <button onclick="adjustRotor(0, -1)" class="brutal-btn bg-[#FFCC99] text-slate-950 px-2 py-1 rounded font-black text-sm hover:bg-[#FFB366]" data-sync="enigma-rotor-1-down" data-label="Rotor 1 Down">▼</button>
+              </div>
+              <!-- Rotor 2 -->
+              <div class="flex flex-col items-center">
+                <span class="text-xs font-bold text-slate-400 mb-1">ROTOR II</span>
+                <button onclick="adjustRotor(1, 1)" class="brutal-btn bg-[#FFCC99] text-slate-950 px-2 py-1 rounded font-black text-sm hover:bg-[#FFB366]" data-sync="enigma-rotor-2-up" data-label="Rotor 2 Up">▲</button>
+                <div id="rotor-1-display" class="bg-slate-950 border-2 border-slate-700 w-12 h-14 rounded-lg my-2 flex items-center justify-center font-mono text-2xl font-black text-white" data-sync="enigma-rotor-2" data-label="Rotor 2 Value">A</div>
+                <button onclick="adjustRotor(1, -1)" class="brutal-btn bg-[#FFCC99] text-slate-950 px-2 py-1 rounded font-black text-sm hover:bg-[#FFB366]" data-sync="enigma-rotor-2-down" data-label="Rotor 2 Down">▼</button>
+              </div>
+              <!-- Rotor 3 -->
+              <div class="flex flex-col items-center">
+                <span class="text-xs font-bold text-slate-400 mb-1">ROTOR III</span>
+                <button onclick="adjustRotor(2, 1)" class="brutal-btn bg-[#FFCC99] text-slate-950 px-2 py-1 rounded font-black text-sm hover:bg-[#FFB366]" data-sync="enigma-rotor-3-up" data-label="Rotor 3 Up">▲</button>
+                <div id="rotor-2-display" class="bg-slate-950 border-2 border-slate-700 w-12 h-14 rounded-lg my-2 flex items-center justify-center font-mono text-2xl font-black text-white" data-sync="enigma-rotor-3" data-label="Rotor 3 Value">A</div>
+                <button onclick="adjustRotor(2, -1)" class="brutal-btn bg-[#FFCC99] text-slate-950 px-2 py-1 rounded font-black text-sm hover:bg-[#FFB366]" data-sync="enigma-rotor-3-down" data-label="Rotor 3 Down">▼</button>
+              </div>
+            </div>
+
+            <!-- Decoding Panel -->
+            <div class="space-y-3">
+              <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="triggerDecrypt()" id="enigma-decrypt-btn" class="brutal-btn bg-[#FF9966] text-slate-950 font-black flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#FF884D]" data-sync="enigma-decrypt-btn" data-label="Enigma Decrypt Button">
+                  <i data-lucide="scan-eye" class="w-5 h-5"></i>
+                  <span>ENGAGE DECRYPTION CYCLES</span>
+                </button>
+                <button onclick="resetEnigma()" class="brutal-btn bg-slate-700 text-white font-bold py-3 px-4 rounded-xl hover:bg-slate-600">
+                  Reset Machine
+                </button>
+              </div>
+
+              <!-- Decryption output log -->
+              <div id="enigma-output-box" class="bg-[#1A202C] border-2 border-slate-700 rounded-xl p-4 font-mono text-sm flex items-start gap-3">
+                <span class="text-emerald-400">🖥️</span>
+                <div class="space-y-1 flex-1">
+                  <span class="text-xs text-slate-400 font-bold tracking-widest block">DECRYPTION TELETYPE OUTPUT</span>
+                  <p id="enigma-output-text" class="text-white font-bold leading-relaxed">
+                    Awaiting Rotor Alignment settings... Match the target settings to sync decryption frequencies.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: THEATER SORTING MISSION -->
+        <div id="section-sorting" class="space-y-4 hidden">
+          <div class="bg-emerald-100 border-[3px] border-slate-950 rounded-2xl p-4 shadow-[4px_4px_0px_#000000]">
+            <h2 class="text-xl font-black font-header text-slate-950 mb-1">🗺️ Global Conflict Theater Division</h2>
+            <p class="text-sm text-slate-700 font-medium">Classify key events by clicking the correct geographical theater zone below. Empty the tactical deck to win!</p>
+          </div>
+
+          <!-- Sorting Workspace Dashboard -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- European / African Theater Bucket -->
+            <div id="bucket-europe" class="bg-[#E6F3FF] border-[3px] border-slate-950 rounded-2xl p-4 shadow-[4px_4px_0px_#000000] flex flex-col min-h-[160px] cursor-pointer hover:bg-[#D4EAFF] transition-colors relative" onclick="assignTheater('Europe')" data-sync="bucket-europe" data-label="European Theater Target">
+              <span class="absolute top-2 right-2 text-2xl">🇪🇺</span>
+              <h3 class="text-md font-black font-header text-slate-950 flex items-center gap-1">
+                <i data-lucide="shield" class="w-4 h-4"></i> European / African Theater
+              </h3>
+              <p class="text-xs font-bold text-slate-500 mb-3">Western Front, Eastern Front, Battle of Atlantic, North Africa</p>
+              <div id="europe-slots" class="flex-1 flex flex-wrap gap-2 items-start justify-start content-start">
+                <!-- Drop slots go here dynamically -->
+                <span class="text-xs font-bold text-slate-400 italic">No events assigned...</span>
+              </div>
+            </div>
+
+            <!-- Pacific Theater Bucket -->
+            <div id="bucket-pacific" class="bg-[#FFF0D4] border-[3px] border-slate-950 rounded-2xl p-4 shadow-[4px_4px_0px_#000000] flex flex-col min-h-[160px] cursor-pointer hover:bg-[#FFEAD4] transition-colors relative" onclick="assignTheater('Pacific')" data-sync="bucket-pacific" data-label="Pacific Theater Target">
+              <span class="absolute top-2 right-2 text-2xl">🌊</span>
+              <h3 class="text-md font-black font-header text-slate-950 flex items-center gap-1">
+                <i data-lucide="anchor" class="w-4 h-4"></i> Pacific / Asian Theater
+              </h3>
+              <p class="text-xs font-bold text-slate-500 mb-3">Island-Hopping, Naval carriers, China, East Asia campaigns</p>
+              <div id="pacific-slots" class="flex-1 flex flex-wrap gap-2 items-start justify-start content-start">
+                <!-- Drop slots go here dynamically -->
+                <span class="text-xs font-bold text-slate-400 italic">No events assigned...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Deck Card for Sorting -->
+          <div class="bg-white border-[3px] border-slate-950 rounded-2xl p-6 shadow-[6px_6px_0px_#000000] relative overflow-hidden flex flex-col items-center text-center space-y-4 max-w-lg mx-auto mt-4">
+            <span class="bg-amber-200 border-2 border-slate-950 font-black text-xs py-1 px-3 rounded-full uppercase" id="sort-card-tag">WW2 Turning Point Deck</span>
+            
+            <div id="active-sort-card" class="space-y-2 py-4">
+              <h3 id="sort-card-title" class="text-2xl font-black font-header text-slate-950">Battle of Midway</h3>
+              <p id="sort-card-desc" class="text-sm text-slate-600 font-bold max-w-sm">Crucial naval battle fought almost entirely with aircraft carriers, shifting the balance of power in the oceans.</p>
+            </div>
+
+            <div class="flex gap-4 w-full justify-center">
+              <button onclick="assignTheater('Europe')" class="brutal-btn bg-[#FFB3B3] text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center gap-1.5" data-sync="sort-action-europe" data-label="Assign to Europe">
+                🇪🇺 European Theater
+              </button>
+              <button onclick="assignTheater('Pacific')" class="brutal-btn bg-[#B3F0FF] text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center gap-1.5" data-sync="sort-action-pacific" data-label="Assign to Pacific">
+                🌊 Pacific Theater
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right Screen: Command Log & Objectives -->
+      <section class="w-full lg:w-80 flex-shrink-0 flex flex-col gap-6">
+        
+        <!-- Objective Progress Card -->
+        <div class="brutal-card p-5 rounded-2xl bg-[#FFFFCC]">
+          <h2 class="text-md font-black font-header text-slate-950 mb-3 flex items-center gap-1.5">
+            <i data-lucide="target" class="w-5 h-5 text-indigo-600"></i>
+            <span>MISSION OBJECTIVES</span>
+          </h2>
+          <div class="space-y-3.5">
+            <!-- Objective 1 -->
+            <div class="flex items-start gap-2.5">
+              <input type="checkbox" id="obj-map" disabled class="mt-1 w-4.5 h-4.5 border-2 border-slate-950 rounded accent-emerald-500 checked:bg-emerald-500">
+              <div class="text-xs leading-tight font-bold text-slate-700">
+                <span class="block text-slate-950 font-extrabold text-sm">Deploy Battle Beacons</span>
+                Inspect at least 3 historical battlepoints.
+              </div>
+            </div>
+            <!-- Objective 2 -->
+            <div class="flex items-start gap-2.5">
+              <input type="checkbox" id="obj-enigma" disabled class="mt-1 w-4.5 h-4.5 border-2 border-slate-950 rounded accent-emerald-500 checked:bg-emerald-500">
+              <div class="text-xs leading-tight font-bold text-slate-700">
+                <span class="block text-slate-950 font-extrabold text-sm">Crack Enigma Intercepts</span>
+                Successfully translate encoded military frequencies.
+              </div>
+            </div>
+            <!-- Objective 3 -->
+            <div class="flex items-start gap-2.5">
+              <input type="checkbox" id="obj-sort" disabled class="mt-1 w-4.5 h-4.5 border-2 border-slate-950 rounded accent-emerald-500 checked:bg-emerald-500">
+              <div class="text-xs leading-tight font-bold text-slate-700">
+                <span class="block text-slate-950 font-extrabold text-sm">Assign Strategic Theaters</span>
+                Correctly sort operations into geographic buckets.
+              </div>
+            </div>
+          </div>
+          
+          <!-- Master Progress Slider Bar -->
+          <div class="mt-5 pt-4 border-t-2 border-slate-950">
+            <div class="flex justify-between items-center text-xs font-black mb-1.5">
+              <span>OVERALL COMPLETED</span>
+              <span id="master-progress-pct">0%</span>
+            </div>
+            <div class="w-full bg-slate-900 h-4 border-2 border-slate-950 rounded-full overflow-hidden">
+              <div id="master-progress-bar" class="bg-emerald-400 h-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Command Logs Box -->
+        <div class="brutal-card p-5 rounded-2xl flex-1 bg-slate-900 border-2 border-slate-950 text-emerald-400 font-mono text-xs flex flex-col justify-between min-h-[180px]">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-700 pb-2 mb-3">
+              <span class="font-extrabold text-slate-200 uppercase tracking-widest text-[10px] flex items-center gap-1">
+                <span class="w-2.5 h-2.5 bg-red-500 rounded-full inline-block animate-pulse"></span>
+                COMBAT COMMAND STREAM
+              </span>
+              <button onclick="clearConsole()" class="text-[9px] hover:text-white border border-slate-700 rounded px-1.5 py-0.5">Clear</button>
+            </div>
+            <div id="command-console-text" class="space-y-2 h-44 overflow-y-auto pr-1">
+              <p class="text-slate-400">&gt; Command center initiated...</p>
+              <p class="text-slate-400">&gt; Allied headquarters radio waves connected...</p>
+              <p class="text-slate-400">&gt; Awaiting commander tactical directions...</p>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-slate-800 text-[10px] text-slate-400 text-right">
+            SECURE LINK 1945 // ACTIVE
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Footer Bar -->
+    <footer class="bg-slate-950 text-white p-3.5 text-center text-xs font-bold font-mono tracking-wide">
+      WW2 INTERACTIVE SIMULATOR • CREATED FOR CLASSROOM EXCELLENCE • SECURE TRANSMISSION ONLY
+    </footer>
+
+  </div>
+
+  <script>
+    /* Global Application State Settings */
+    const state = {
+      audioEnabled: true,
+      currentTab: 'map',
+      hotspotsInspected: new Set(),
+      enigmaDecrypted: false,
+      sortingDone: false,
+      activeHotspot: null,
+      sliderVals: [50, 50],
+      activeInterceptIdx: 1,
+      selectedRotorPositions: [0, 0, 0],
+      sortingDeck: [
+        { id: 'midway', title: 'Battle of Midway', desc: 'Fought strictly in the air and sea. The US Navy sank four major Japanese aircraft carriers in a surprise defense.', theater: 'Pacific', emoji: '⚓' },
+        { id: 'stalingrad', title: 'Battle of Stalingrad', desc: 'Fierce house-by-house combat in Russia. The German surrender here broke the offensive momentum on the Eastern front.', theater: 'Europe', emoji: '❄️' },
+        { id: 'dday', title: 'D-Day Landings', desc: 'Over 150,000 Allied soldiers stormed the beaches of Normandy, France, starting the liberation of Western Europe.', theater: 'Europe', emoji: '🛡️' },
+        { id: 'pearlharbor', title: 'Attack on Pearl Harbor', desc: 'Surprise military strike by the Imperial Japanese Navy Air Service upon the United States against the naval base.', theater: 'Pacific', emoji: '✈️' },
+        { id: 'elalamein', title: 'Battle of El Alamein', desc: 'Allied forces broke the German-Italian defensive lines in Egypt, turning the tide of the campaign in North Africa.', theater: 'Europe', emoji: '🏜️' },
+        { id: 'guadalcanal', title: 'Guadalcanal Campaign', desc: 'Allied force landing in the Solomon Islands, marking the transition from defensive operations to offensive campaigns.', theater: 'Pacific', emoji: '🏝️' }
+      ],
+      sortingIndex: 0,
+      sortedItems: []
+    };
+
+    // Geographic Coordinates for Real Map Integration
+    const hotspotCoords = {
+      britain: { lat: 51.5074, lng: -0.1278, label: 'UK', bg: 'bg-red-600', pulse: 'bg-red-500' },
+      stalingrad: { lat: 48.7080, lng: 44.5133, label: 'SU', bg: 'bg-red-600', pulse: 'bg-red-500' },
+      dday: { lat: 49.3513, lng: -0.8543, label: 'DD', bg: 'bg-yellow-600', pulse: 'bg-yellow-500' },
+      elalamein: { lat: 30.8328, lng: 28.9535, label: 'EA', bg: 'bg-red-600', pulse: 'bg-red-500' },
+      midway: { lat: 28.2014, lng: -177.3780, label: 'MW', bg: 'bg-blue-600', pulse: 'bg-blue-500' }
+    };
+
+    let mapInstance = null;
+    const markersMap = {};
+
+    function initLeafletMap() {
+      // Centered globally to cover Pacific, Americas, Europe, and Africa
+      mapInstance = L.map('map-canvas', {
+        zoomControl: true,
+        scrollWheelZoom: false,
+        attributionControl: false
+      }).setView([35, -30], 2);
+
+      // standard OpenStreetMap tiles loaded over safe API
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 10,
+        minZoom: 1
+      }).addTo(mapInstance);
+
+      // Generate customized Neo-Brutalist markers dynamically on real coordinates
+      Object.keys(hotspotCoords).forEach(key => {
+        const data = hotspotCoords[key];
+        
+        const customIcon = L.divIcon({
+          className: 'custom-leaflet-marker',
+          html: `
+            <button id="hotspot-${key}" data-sync="hotspot-${key}" data-label="Hotspot ${key.toUpperCase()}" class="relative group cursor-pointer focus:outline-none flex items-center justify-center" style="width: 32px; height: 32px;">
+              <span class="absolute inline-flex h-8 w-8 rounded-full ${data.pulse} opacity-75 tactical-pulse"></span>
+              <span class="relative inline-flex rounded-full h-6 w-6 ${data.bg} border-2 border-slate-950 flex items-center justify-center text-[9px] text-white font-black group-hover:scale-125 transition-transform">${data.label}</span>
+            </button>
+          `,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
+        });
+
+        const marker = L.marker([data.lat, data.lng], { icon: customIcon }).addTo(mapInstance);
+        
+        marker.on('click', () => {
+          selectHotspot(key);
+        });
+
+        markersMap[key] = marker;
+      });
+
+      // Recalculate coordinates mapping on any pan or zoom action to keep external trackers synced
+      mapInstance.on('move', sendComponentMap);
+      mapInstance.on('zoomend', sendComponentMap);
+      mapInstance.on('moveend', sendComponentMap);
+    }
+
+    function toggleMapTheme() {
+      playTone('click');
+      const canvas = document.getElementById('map-canvas');
+      if (canvas.classList.contains('vintage-map-filter')) {
+        canvas.classList.remove('vintage-map-filter');
+        logToConsole("Map Radar Display: <b class='text-white'>STANDARD MODE</b>");
+      } else {
+        canvas.classList.add('vintage-map-filter');
+        logToConsole("Map Radar Display: <b class='text-white'>TACTICAL VINTAGE FILTERS ENGAGED</b>");
+      }
+    }
+
+    const enigmaInterceptKeys = {
+      1: {
+        raw: 'HXLKPVZRYOMQ',
+        solutionRotors: [3, 1, 4],
+        solutionText: 'MIDWAY ATTACK CARRIERS INCOMING DETECTED - CODES DECRYPTION CONFIRMED',
+        clue: 'Rotors required: III-I-IV (3 - 1 - 4)'
+      },
+      2: {
+        raw: 'OWYTZXPUVRMK',
+        solutionRotors: [1, 9, 4],
+        solutionText: 'NORMANDY BEACH INVASION SET FOR D-DAY JUNE SIX - STANDBY SIGNAL',
+        clue: 'Rotors required: I-IX-IV (1 - 9 - 4)'
+      }
+    };
+
+    /* Audio Context Tone Synthesizer for Retro bleep sound effects */
+    function playTone(type) {
+      if (!state.audioEnabled) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'click') {
+          osc.frequency.setValueAtTime(440, ctx.currentTime);
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.1);
+        } else if (type === 'success') {
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); // E5
+          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16); // G5
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        } else if (type === 'fail') {
+          osc.frequency.setValueAtTime(180, ctx.currentTime);
+          gain.gain.setValueAtTime(0.12, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        } else if (type === 'type') {
+          osc.frequency.setValueAtTime(700 + Math.random() * 200, ctx.currentTime);
+          gain.gain.setValueAtTime(0.03, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.05);
+        }
+      } catch (err) {
+        console.warn('Web Audio API not supported on this browser context', err);
+      }
+    }
+
+    function toggleAudio() {
+      state.audioEnabled = !state.audioEnabled;
+      const btn = document.getElementById('sound-btn');
+      const icon = document.getElementById('sound-icon');
+      if (state.audioEnabled) {
+        btn.innerHTML = '<i data-lucide="volume-2" class="w-5 h-5"></i> <span>SFX: ON</span>';
+        btn.classList.replace('bg-slate-300', 'bg-white');
+      } else {
+        btn.innerHTML = '<i data-lucide="volume-x" class="w-5 h-5"></i> <span>SFX: OFF</span>';
+        btn.classList.add('bg-slate-300');
+      }
+      lucide.createIcons();
+      playTone('click');
+    }
+
+    /* Tab Switching Core Interface System */
+    function switchTab(tabId) {
+      playTone('click');
+      state.currentTab = tabId;
+      
+      // Toggle CSS selectors on buttons
+      ['map', 'cipher', 'sorting'].forEach(t => {
+        const tabEl = document.getElementById(`${t}-tab`);
+        const secEl = document.getElementById(`section-${t}`);
+        if (t === tabId) {
+          tabEl.classList.add('bg-[#FF9966]');
+          tabEl.classList.remove('bg-white');
+          secEl.classList.remove('hidden');
+        } else {
+          tabEl.classList.remove('bg-[#FF9966]');
+          tabEl.classList.add('bg-white');
+          secEl.classList.add('hidden');
+        }
+      });
+
+      // Force Leaflet to recompute sizes correctly when returning to the map tab
+      if (tabId === 'map' && mapInstance) {
+        setTimeout(() => {
+          mapInstance.invalidateSize();
+        }, 50);
+      }
+
+      logToConsole(`Switched primary screen to: ${tabId.toUpperCase()} MODE.`);
+      sendComponentMap();
+    }
+
+    /* Logger outputs to UI stream container */
+    function logToConsole(message) {
+      const consoleText = document.getElementById('command-console-text');
+      const timeStamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const p = document.createElement('p');
+      p.className = 'text-slate-300';
+      p.innerHTML = `<span class="text-emerald-500 font-bold">[${timeStamp}]</span> ${message}`;
+      consoleText.appendChild(p);
+      consoleText.scrollTop = consoleText.scrollHeight;
+    }
+
+    function clearConsole() {
+      playTone('click');
+      document.getElementById('command-console-text').innerHTML = `<p class="text-slate-500">&gt; Command console refreshed...</p>`;
+    }
+
+    const hotspotsData = {
+      britain: {
+        title: "Battle of Britain",
+        date: "July - October 1940",
+        emoji: "✈️",
+        desc: "The Royal Air Force (RAF) defended Britain against massive German air force raids. Royal codebreakers and advanced RADAR technology gave Britain the vital advantage, proving Nazi forces could be held off.",
+        slider1: "Air Defense Readiness",
+        slider2: "RADAR Warning Time",
+        resultFunc: (s1, s2) => {
+          if (s1 > 70 && s2 > 60) return "British RAF fighter planes successfully intercept waves of enemy forces. Defense stands strong!";
+          return "Low defense grid lets bombers slip through. British forces forced into heavy shelter under siege.";
+        }
+      },
+      stalingrad: {
+        title: "Battle of Stalingrad",
+        date: "Aug 1942 - Feb 1943",
+        emoji: "❄️",
+        desc: "One of history's largest battles. The Red Army surrounded and cut off German attackers in freezing winter weather, destroying their army. It forced the Axis into permanent strategic retreat in Europe.",
+        slider1: "Allied Supply Line Strength",
+        slider2: "Winter Defensive Fortification",
+        resultFunc: (s1, s2) => {
+          if (s1 > 60 && s2 > 50) return "Encirclement of Axis forces holds firm. Winter forces German army into total surrender!";
+          return "Supplies fail. Counter-attacks falter, resulting in a prolonged attrition battle at severe cost.";
+        }
+      },
+      dday: {
+        title: "D-Day Landings (Normandy)",
+        date: "June 6, 1944",
+        emoji: "🛡️",
+        desc: "Codename 'Operation Overlord', the massive beach landing marked the opening of a major second front in Europe, turning Western momentum against Nazi occupation on an unprecedented scale.",
+        slider1: "Deception Plan Effectiveness",
+        slider2: "Landing Troop Waves Size",
+        resultFunc: (s1, s2) => {
+          if (s1 > 70 && s2 > 50) return "German armies fooled into expecting invasion elsewhere. Allied beachheads established firmly.";
+          return "Poor deception levels cause massive defensive fortifications on beaches. Troops endure heavy resistance.";
+        }
+      },
+      elalamein: {
+        title: "Battle of El Alamein",
+        date: "October - November 1942",
+        emoji: "🏜️",
+        desc: "Allies battled Field Marshal Rommel's forces in North Africa. Victory prevented Axis forces from seizing the critical Suez Canal and accessing vast oil supplies in the Middle East.",
+        slider1: "Armored Division Strength",
+        slider2: "Deciphered Supply Intelligences",
+        resultFunc: (s1, s2) => {
+          if (s1 > 50 && s2 > 60) return "Decoded communications allow air units to sink Axis fuel ships. Rommel retreats from Egypt!";
+          return "Lacking armor and intelligence, Allied defenses bend under mobile tank divisions. Suez stays threatened.";
+        }
+      },
+      midway: {
+        title: "Battle of Midway",
+        date: "June 4 - 7, 1942",
+        emoji: "⚓",
+        desc: "Fought in the Pacific, codebreakers figured out the location of an impending Japanese trap. American carriers ambushed and sank four Imperial carriers, halting Japan's expansion permanently.",
+        slider1: "Allied Navy Ambush Precision",
+        slider2: "Codebreaker Decrypt Precision",
+        resultFunc: (s1, s2) => {
+          if (s1 > 60 && s2 > 70) return "Perfect cryptographic insights catch Japanese naval forces with bomb racks exposed. Complete carrier victory!";
+          return "Inaccurate decoding leaves US carrier wings uncoordinated. Midway airstrip suffers critical damage.";
+        }
+      }
+    };
+
+    function selectHotspot(id) {
+      playTone('click');
+      state.activeHotspot = id;
+      state.hotspotsInspected.add(id);
+
+      const data = hotspotsData[id];
+      document.getElementById('briefing-emoji').innerText = data.emoji;
+      document.getElementById('briefing-title').innerText = data.title;
+      document.getElementById('briefing-date').innerText = data.date;
+      document.getElementById('briefing-desc').innerText = data.desc;
+
+      // Smoothly pan map camera to focal point coordinate on selection
+      if (mapInstance && hotspotCoords[id]) {
+        mapInstance.setView([hotspotCoords[id].lat, hotspotCoords[id].lng], 4, { animate: true, duration: 1.2 });
+      }
+
+      // Unhide and configure the Simulator parameters
+      document.getElementById('briefing-simulator').classList.remove('hidden');
+      document.getElementById('sim-parameter-title').innerText = `${data.title} - Operational Variable Simulator`;
+      document.getElementById('slider-1-label').innerText = data.slider1;
+      document.getElementById('slider-2-label').innerText = data.slider2;
+
+      // Update slide controls
+      document.getElementById('tactical-slider-1').value = state.sliderVals[0];
+      document.getElementById('tactical-slider-2').value = state.sliderVals[1];
+      
+      updateSimulation();
+      logToConsole(`Inspected Battle Point: <b class="text-white">${data.title}</b>.`);
+      
+      // Update objectives
+      checkObjectives();
+    }
+
+    function updateSimulation() {
+      const s1 = parseInt(document.getElementById('tactical-slider-1').value);
+      const s2 = parseInt(document.getElementById('tactical-slider-2').value);
+      state.sliderVals = [s1, s2];
+
+      document.getElementById('slider-1-val').innerText = `${s1}%`;
+      document.getElementById('slider-2-val').innerText = `${s2}%`;
+
+      if (state.activeHotspot) {
+        const data = hotspotsData[state.activeHotspot];
+        const text = data.resultFunc(s1, s2);
+        document.getElementById('sim-result-text').innerText = text;
+        
+        const isSuccess = text.includes("successfully") || text.includes("surrender") || text.includes("established") || text.includes("retreats") || text.includes("victory");
+        document.getElementById('sim-result-icon').innerText = isSuccess ? "🏆" : "⚠️";
+      }
+    }
+
+    function loadIntercept(idx) {
+      playTone('click');
+      state.activeInterceptIdx = idx;
+      const data = enigmaInterceptKeys[idx];
+
+      document.getElementById('cipher-display').innerText = data.raw;
+      document.getElementById('cipher-translation-clue').innerText = `ENCRYPTION KEY KEYPAD INDEX CLUE: ${data.clue}`;
+      document.getElementById('enigma-output-text').innerText = `Intercept #${idx} loaded. Dial rotor configurations and press "ENGAGE DECRYPTION CYCLES".`;
+      logToConsole(`Loaded Encrypted Intercept Wire #${idx}.`);
+    }
+
+    function adjustRotor(rotorIdx, dir) {
+      playTone('type');
+      let val = state.selectedRotorPositions[rotorIdx];
+      val = (val + dir + 10) % 10; // Numbers 0-9 for simpler kid matching
+      state.selectedRotorPositions[rotorIdx] = val;
+      document.getElementById(`rotor-${rotorIdx}-display`).innerText = val;
+    }
+
+    function triggerDecrypt() {
+      const activeData = enigmaInterceptKeys[state.activeInterceptIdx];
+      if (!activeData) {
+        playTone('fail');
+        document.getElementById('enigma-output-text').innerText = "ALERT! No wireless radio signal loaded. Choose Intercept #1 or #2 above first.";
+        return;
+      }
+
+      // Check for alignment match
+      const rot = state.selectedRotorPositions;
+      const sol = activeData.solutionRotors;
+
+      if (rot[0] === sol[0] && rot[1] === sol[1] && rot[2] === sol[2]) {
+        playTone('success');
+        document.getElementById('enigma-output-text').innerText = `SUCCESS! DECIPHER COMPLETED: "${activeData.solutionText}"`;
+        state.enigmaDecrypted = true;
+        logToConsole(`Enigma decrypted successfully for Intercept #${state.activeInterceptIdx}! Secret plans revealed.`);
+      } else {
+        playTone('fail');
+        document.getElementById('enigma-output-text').innerText = `DECRYPTION ERROR: Rotors misaligned. Interference scrambles intelligence signal to noise. Try matching the Key Code clue!`;
+        logToConsole(`Enigma decoding attempt failed. Wrong rotor calibration.`);
+      }
+
+      checkObjectives();
+    }
+
+    function resetEnigma() {
+      playTone('click');
+      state.selectedRotorPositions = [0, 0, 0];
+      for (let i = 0; i < 3; i++) {
+        document.getElementById(`rotor-${i}-display`).innerText = 0;
+      }
+      document.getElementById('enigma-output-text').innerText = "Enigma machine rotors reset to zero alignment.";
+      logToConsole(`Enigma machine rotor alignment reset.`);
+    }
+
+    function renderSortingBuckets() {
+      const europeBox = document.getElementById('europe-slots');
+      const pacificBox = document.getElementById('pacific-slots');
+
+      europeBox.innerHTML = '';
+      pacificBox.innerHTML = '';
+
+      let hasEurope = false;
+      let hasPacific = false;
+
+      state.sortedItems.forEach(item => {
+        const badge = document.createElement('span');
+        badge.className = 'bg-slate-900 text-white text-[11px] font-bold px-2 py-1 rounded-md border border-slate-700 flex items-center gap-1 shadow-[1px_1px_0px_#000000]';
+        badge.innerHTML = `<span>${item.emoji}</span> <span>${item.title}</span>`;
+        
+        if (item.theater === 'Europe') {
+          europeBox.appendChild(badge);
+          hasEurope = true;
+        } else {
+          pacificBox.appendChild(badge);
+          hasPacific = true;
+        }
+      });
+
+      if (!hasEurope) europeBox.innerHTML = '<span class="text-xs font-bold text-slate-400 italic">No operations sorted...</span>';
+      if (!hasPacific) pacificBox.innerHTML = '<span class="text-xs font-bold text-slate-400 italic">No operations sorted...</span>';
+    }
+
+    function assignTheater(theaterChoice) {
+      if (state.sortingIndex >= state.sortingDeck.length) {
+        playTone('fail');
+        logToConsole(`Sorting complete already! Refresh deck to play again.`);
+        return;
+      }
+
+      const activeCard = state.sortingDeck[state.sortingIndex];
+      if (activeCard.theater === theaterChoice) {
+        playTone('success');
+        state.sortedItems.push(activeCard);
+        renderSortingBuckets();
+        logToConsole(`Sorted correctly: <b class="text-white">${activeCard.title}</b> placed in ${theaterChoice} theater.`);
+        
+        state.sortingIndex++;
+        advanceSortingDeck();
+      } else {
+        playTone('fail');
+        logToConsole(`Tactical sorting error: <b class="text-rose-400">${activeCard.title}</b> belongs in the other geographical theater.`);
+      }
+
+      checkObjectives();
+    }
+
+    function advanceSortingDeck() {
+      if (state.sortingIndex < state.sortingDeck.length) {
+        const nextCard = state.sortingDeck[state.sortingIndex];
+        document.getElementById('sort-card-title').innerText = nextCard.title;
+        document.getElementById('sort-card-desc').innerText = nextCard.desc;
+        document.getElementById('sort-card-tag').innerText = `Deck card ${state.sortingIndex + 1} of ${state.sortingDeck.length}`;
+      } else {
+        document.getElementById('active-sort-card').innerHTML = `
+          <h3 class="text-2xl font-black font-header text-emerald-600">MISSION COMPLETE! 🎖️</h3>
+          <p class="text-sm font-bold text-slate-700 max-w-sm">Every historical battle and operation has been accurately sorted into its theater of command. Exceptional work, Commander!</p>
+        `;
+        state.sortingDone = true;
+        checkObjectives();
+      }
+    }
+
+    function checkObjectives() {
+      // Map check (inspect at least 3 points)
+      const mapCheck = state.hotspotsInspected.size >= 3;
+      document.getElementById('obj-map').checked = mapCheck;
+
+      // Enigma check
+      document.getElementById('obj-enigma').checked = state.enigmaDecrypted;
+
+      // Sorting check
+      document.getElementById('obj-sort').checked = state.sortingDone;
+
+      // Compute general progress
+      let completeCount = 0;
+      if (mapCheck) completeCount++;
+      if (state.enigmaDecrypted) completeCount++;
+      if (state.sortingDone) completeCount++;
+
+      const progressPct = Math.round((completeCount / 3) * 100);
+      document.getElementById('master-progress-pct').innerText = `${progressPct}%`;
+      document.getElementById('master-progress-bar').style.width = `${progressPct}%`;
+    }
+
+    window.addEventListener('message', (e) => {
+      const payload = e.data;
+      if (!payload) return;
+      if (payload.type === 'SHOW_COMPONENT') {
+        const el = document.getElementById(payload.id) || document.querySelector(`[data-sync="${payload.id}"]`);
+        if (el) {
+          el.classList.add('ring-4', 'ring-indigo-500', 'animate-pulse');
+          setTimeout(() => el.classList.remove('ring-4', 'ring-indigo-500', 'animate-pulse'), 2000);
+        }
+      } else if (payload.type === 'CLICK_COMPONENT') {
+        const el = document.getElementById(payload.id) || document.querySelector(`[data-sync="${payload.id}"]`);
+        if (el) { el.click(); }
+      } else if (payload.type === 'SET_COMPONENT_VALUE') {
+        const el = document.getElementById(payload.id) || document.querySelector(`[data-sync="${payload.id}"]`);
+        if (el) {
+          el.value = payload.value;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+    });
+
+    function sendComponentMap() {
+      const centersById = {};
+      const elements = document.querySelectorAll('[data-sync]');
+      elements.forEach(el => {
+        const id = el.getAttribute('id') || el.getAttribute('data-sync');
+        if (el.getBoundingClientRect().width > 0) {
+          const rect = el.getBoundingClientRect();
+          centersById[id] = {
+            id: id,
+            x: Math.round(rect.left + rect.width / 2),
+            y: Math.round(rect.top + rect.height / 2),
+            width: Math.round(rect.width),
+            height: Math.round(rect.height),
+            label: el.getAttribute('data-label') || id
+          };
+        }
+      });
+      window.parent.postMessage({ type: 'COMPONENTS_MAPPED', centersById }, '*');
+    }
+
+    // Initialize systems on load
+    window.addEventListener('load', () => {
+      lucide.createIcons();
+      initLeafletMap(); // Start map system
+      advanceSortingDeck();
+      renderSortingBuckets();
+      
+      sendComponentMap();
+      setTimeout(sendComponentMap, 300);
+    });
+    window.addEventListener('resize', sendComponentMap);
+  </script>
+</body>
+</html>

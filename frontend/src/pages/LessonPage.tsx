@@ -1301,6 +1301,13 @@ export default function LessonPage({ onBack }: LessonPageProps) {
       } else if (e.code === 'ArrowUp' || e.code === 'ArrowLeft') {
         e.preventDefault();
         goToSlide(prev => prev - 1);
+      } else if (e.code === 'KeyF') {
+        e.preventDefault();
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(console.error);
+        } else {
+          document.exitFullscreen().catch(console.error);
+        }
       }
     };
 

@@ -175,6 +175,7 @@ def teach_section_stream_generator(
 
                 clean_full = clean_response(full_answer)
                 output_queue.put(("FULL_ANSWER", clean_full))
+                output_queue.put(("RAW_ANSWER", full_answer))
 
             except Exception as e:
                 output_queue.put(ndjson({"type": "error", "error": "MODEL_FAILED", "details": str(e)}))
@@ -215,6 +216,7 @@ def teach_section_stream_generator(
         t_tts.start()
 
         full_answer_final = ""
+        full_answer_raw = ""
 
         while True:
             if llm_finished.is_set() and not t_tts.is_alive() and output_queue.empty():
@@ -223,9 +225,13 @@ def teach_section_stream_generator(
                 event = output_queue.get(timeout=0.1)
                 if event == "TTS_DONE":
                     continue
-                if isinstance(event, tuple) and event[0] == "FULL_ANSWER":
-                    full_answer_final = event[1]
-                    continue
+                if isinstance(event, tuple):
+                    if event[0] == "FULL_ANSWER":
+                        full_answer_final = event[1]
+                        continue
+                    if event[0] == "RAW_ANSWER":
+                        full_answer_raw = event[1]
+                        continue
                 yield event
             except queue.Empty:
                 pass
@@ -240,7 +246,7 @@ def teach_section_stream_generator(
             THREADS[thread_id].append(
                 {
                     "role": "assistant",
-                    "content": full_answer_final,
+                    "content": full_answer_raw,
                 }
             )
             THREADS[thread_id] = THREADS[thread_id][-MAX_THREAD_MESSAGES:]
@@ -462,18 +468,10 @@ def message_stream_generator(
         if stop_event is not None and stop_event.is_set():
             return
 
-        # Check if the AI used change_section, or if we proactively switched, and inject the transition
-        # We must use the RAW answer here because full_answer_final was already stripped of tags.
+        # Extract tool events from raw response to inspect transitions
         _, tool_events = _extract_tool_events(full_answer_raw)
         
-        # Collect all section transitions (proactive + AI-initiated)
-        seen_sections = set()
-        
-        # 1. Check if we proactively switched
-        if target_section and target_section > 0:
-            seen_sections.add(int(target_section))
-            
-        # 2. Check if the AI also used the tool
+        ai_section_transitions = set()
         for te in tool_events:
             try:
                 obj = json.loads(te)
@@ -481,7 +479,7 @@ def message_stream_generator(
                     raw_val = str(obj.get("section", ""))
                     clean_num = raw_val.lower().replace("section-", "").replace("section", "").strip()
                     try:
-                        seen_sections.add(int(clean_num))
+                        ai_section_transitions.add(int(clean_num))
                     except ValueError:
                         pass
             except Exception:
@@ -490,10 +488,20 @@ def message_stream_generator(
         with thread_lock:
             # Append user message to thread history
             THREADS[thread_id].append({"role": "user", "content": message})
-            # Save each transition as a proper tool_call marker
-            for sec_num in sorted(seen_sections):
-                THREADS[thread_id].append({"role": "assistant", "content": f'<tool_call>{{"name": "change_section", "arguments": {{"section": {sec_num}}}}}</tool_call>'})
-            THREADS[thread_id].append({"role": "assistant", "content": full_answer_final})
+            
+            # If proactive transition exists but not inside the AI's own output, save it
+            if target_section and target_section > 0 and int(target_section) not in ai_section_transitions:
+                THREADS[thread_id].append({
+                    "role": "assistant",
+                    "content": f'<tool_call>{{"name": "change_section", "arguments": {{"section": {int(target_section)}}}}}</tool_call>'
+                })
+            
+            # Save the raw assistant response containing all its tool calls
+            THREADS[thread_id].append({
+                "role": "assistant",
+                "content": full_answer_raw,
+            })
+            
             THREADS[thread_id] = THREADS[thread_id][-MAX_THREAD_MESSAGES:]
             save_threads()
 

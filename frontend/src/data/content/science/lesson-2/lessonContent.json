@@ -714,7 +714,7 @@
       "type": "interactive",
       "title": "Earth Tilt and Seasons Lab",
       "htmlDescription": "An interactive Earth tilt and seasons lab on a #F7F8FB background. The interactive explains how Earth's tilted axis and yearly orbit cause seasons. It contains a position slider for Earth's place around the Sun, a tilt slider for axis angle, sunlight rays, Northern and Southern Hemisphere labels, and season labels for both hemispheres. The explanation card updates as Earth moves, showing which hemisphere receives more direct sunlight. Soft colors, thin orbital paths, and rounded control panels support a calm science-lab layout.",
-      "htmlSource": "section-7.html",
+      "htmlSource": "section-7-new.html",
       "components": [
         {
           "id": "widget-config",

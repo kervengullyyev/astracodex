@@ -53,10 +53,41 @@ def build_lesson_context(
         else ""
     )
 
+    active_components_guidance = ""
+    if current_section_data:
+        sec_type = current_section_data.get("type")
+        components = current_section_data.get("components", [])
+        if components:
+            active_components_guidance = f"\n### AVAILABLE COMPONENTS & TOOL SYNTAX FOR SECTION-{active_section_number}:\n"
+            if sec_type == "image":
+                active_components_guidance += "For this image section, use ONLY highlight_component. Here are the EXACT valid tool call templates you can use for this section:\n"
+                for comp in components:
+                    comp_id = comp.get("id")
+                    label = comp.get("label", "")
+                    x = comp.get("x")
+                    y = comp.get("y")
+                    if x is not None and y is not None:
+                        active_components_guidance += f"- To highlight '{label}' (ID: {comp_id}):\n  <tool_call>{{\"name\": \"highlight_component\", \"arguments\": {{\"x\": {x}, \"y\": {y}, \"label\": \"{label}\"}}}}</tool_call>\n"
+            elif sec_type == "interactive":
+                active_components_guidance += "For this HTML interactive section, use ONLY show_component, click_component, or set_slider (NEVER use highlight_component!). Here are the EXACT components available in this section:\n"
+                for comp in components:
+                    comp_id = comp.get("id")
+                    comp_name = comp.get("name", comp_id)
+                    interaction_type = comp.get("interactionType", "show")
+                    if interaction_type == "slider":
+                        active_components_guidance += f"- For slider '{comp_name}' (ID: {comp_id}):\n  <tool_call>{{\"name\": \"set_slider\", \"arguments\": {{\"id\": \"{comp_id}\", \"value\": VALUE}}}}</tool_call>\n"
+                    elif interaction_type == "clickable":
+                        active_components_guidance += f"- To click '{comp_name}' (ID: {comp_id}):\n  <tool_call>{{\"name\": \"click_component\", \"arguments\": {{\"id\": \"{comp_id}\"}}}}</tool_call>\n"
+                    else:
+                        active_components_guidance += f"- To show '{comp_name}' (ID: {comp_id}):\n  <tool_call>{{\"name\": \"show_component\", \"arguments\": {{\"id\": \"{comp_id}\"}}}}</tool_call>\n"
+
     return f"""
 # IDENTITY: Albert Einstein
 You are the whimsical, empathetic, and brilliant physics tutor, Albert Einstein. Your goal is to make the mysteries of the universe feel like a beautiful game of discovery. {replacement_notice}
-Don't use markdown. Just plain text. Don't use quotation mark, double quote, apostrophe, etc.
+- Don't use markdown. Just plain text.
+- SPEECH CONSTRAINTS (FOR TTS): In your spoken/written explanations (normal sentences), NEVER use quotation marks, apostrophes, single quotes, or double quotes (e.g., write my friend instead of my friend's, or write that is instead of that's). This keeps the text simple and clean for the text-to-speech engine.
+- TOOL CALL CONSTRAINTS: The speech rule DOES NOT apply to <tool_call>...</tool_call> blocks. Tool calls MUST contain strictly valid, well-formed JSON, which requires double quotes around keys and string values (e.g., {{"name": "highlight_component", ...}}). Always use standard double quotes inside tool call blocks.
+
 You have access to TOOL CALLS. USE THEM PROACTIVELY!
 NEVER FORGET TO CHANGE SECTION!!!
 IMPORTANT: WHILE EXPLAINING THE LESSON, YOU HAVE TO USE TOOL CALLS!!!
@@ -72,6 +103,7 @@ Explain Section-1 very short.
 # THE LESSON CURRICULUM:
 {viewed_slide_text}{max_allowed_text}{section_focus}
 {active_tool_mode}
+{active_components_guidance}
 
 # SYNC PROTOCOL (NON-NEGOTIABLE):
 To synchronize your voice with the interactive visuals, you MUST follow this timing law:

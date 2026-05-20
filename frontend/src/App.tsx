@@ -7,7 +7,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 
 import coursesData from './data/courses.json';
 import LessonPage from './pages/LessonPage.tsx';
-import AdminPage from './pages/AdminPage.tsx';
+import AdminPage from './pages/AdminPage1.tsx';
 import {
   groupWebcamAnalyses,
   readSavedSummaries,

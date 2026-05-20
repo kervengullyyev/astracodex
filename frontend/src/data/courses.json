@@ -101,6 +101,47 @@
       ]
     },
     {
+      "id": "computer_science",
+      "name": "Computer Science",
+      "icon": "/assets/computer_science_icon.png",
+      "heroImage": "/assets/computer_science_icon.png",
+      "bgColor": "bg-cyan-50",
+      "btnColor": "bg-cyan-500",
+      "arrowColor": "text-white",
+      "themeColor": "cyan",
+      "currentTopic": "Data Structures",
+      "progress": 70,
+      "lessonsCompleted": 7,
+      "totalLessons": 10,
+      "lessons": [
+        {
+          "id": 1,
+          "title": "LLM",
+          "description": "How LLMs work",
+          "status": "In Progress",
+          "progress": 1
+        },
+        {
+          "id": 2,
+          "title": "Variables & Data Types",
+          "description": "Storing information.",
+          "status": "Locked"
+        },
+        {
+          "id": 3,
+          "title": "Data Structures",
+          "description": "Arrays, Lists, Maps.",
+          "status": "Locked"
+        },
+        {
+          "id": 4,
+          "title": "Algorithms",
+          "description": "Sorting and searching.",
+          "status": "Locked"
+        }
+      ]
+    },
+    {
       "id": "english",
       "name": "English",
       "icon": "/assets/english_icon.png",
@@ -164,13 +205,13 @@
           "id": 1,
           "title": "Geography",
           "description": "Maps and locations.",
-          "status": "Locked"
+          "status": "Completed"
         },
         {
           "id": 2,
           "title": "World History",
           "description": "Ancient civilizations.",
-          "status": "Locked"
+          "status": "In Progress"
         },
         {
           "id": 3,
@@ -182,47 +223,6 @@
           "id": 4,
           "title": "Civics",
           "description": "Government and rights.",
-          "status": "Locked"
-        }
-      ]
-    },
-    {
-      "id": "computer_science",
-      "name": "Computer Science",
-      "icon": "/assets/computer_science_icon.png",
-      "heroImage": "/assets/computer_science_icon.png",
-      "bgColor": "bg-cyan-50",
-      "btnColor": "bg-cyan-500",
-      "arrowColor": "text-white",
-      "themeColor": "cyan",
-      "currentTopic": "Data Structures",
-      "progress": 70,
-      "lessonsCompleted": 7,
-      "totalLessons": 10,
-      "lessons": [
-        {
-          "id": 1,
-          "title": "LLM",
-          "description": "How LLMs work",
-          "status": "In Progress",
-          "progress": 1
-        },
-        {
-          "id": 2,
-          "title": "Variables & Data Types",
-          "description": "Storing information.",
-          "status": "Locked"
-        },
-        {
-          "id": 3,
-          "title": "Data Structures",
-          "description": "Arrays, Lists, Maps.",
-          "status": "Locked"
-        },
-        {
-          "id": 4,
-          "title": "Algorithms",
-          "description": "Sorting and searching.",
           "status": "Locked"
         }
       ]
